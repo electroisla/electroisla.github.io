@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=3">
+<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=4">
 <style>
 .photo-picker{border:1px dashed #b9c2cc;border-radius:14px;padding:14px;margin-top:6px}
 .photo-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
@@ -362,7 +362,13 @@
   </div>
   <div class="sales-filters">
     <label>Período
-      <select id="salesRange">
+      <div class="ei-fancy-picker" id="salesRangePicker">
+        <button type="button" class="ei-fancy-trigger" id="salesRangePickerTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span id="salesRangePickerValue">Últimos 7 días</span><span class="ei-fancy-chevron">⌄</span>
+        </button>
+        <div class="ei-fancy-options" id="salesRangePickerOptions" role="listbox"></div>
+      </div>
+      <select id="salesRange" class="ei-fancy-native" aria-hidden="true" tabindex="-1">
         <option value="today">Hoy</option>
         <option value="7d" selected>Últimos 7 días</option>
         <option value="30d">Últimos 30 días</option>
@@ -391,5 +397,5 @@
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="admin.js?v=17"></script>
+<script src="admin.js?v=18"></script>
 </body></html>
