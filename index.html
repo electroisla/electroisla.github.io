@@ -6,7 +6,7 @@
   <meta name="electroisla-version" content="9.8.44">
   <title>ElectroIsla | Alimentos y Electrodomésticos</title>
   <meta name="description" content="ElectroIsla: alimentos y electrodomésticos. Compra y solicita tu pedido por WhatsApp.">
-  <link rel="stylesheet" href="styles.css?v=9.8.125">
+  <link rel="stylesheet" href="styles.css?v=9.8.126">
 <style>
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
 .zelle-logo-icon svg{display:block;width:18px;height:18px}
@@ -156,6 +156,30 @@
   </div>
 </div>
 
+<div id="reviewModal" class="modal hidden review-modal" aria-hidden="true">
+  <div class="modal-card review-card" role="dialog" aria-modal="true" aria-labelledby="reviewProductName">
+    <button type="button" class="review-close" id="reviewClose" aria-label="Cerrar">×</button>
+    <p class="eyebrow">RESEÑA DEL PRODUCTO</p>
+    <h2 id="reviewProductName">Producto</h2>
+    <p class="review-help">Cuéntanos qué te pareció tu experiencia.</p>
+    <div id="reviewExisting" class="review-existing"></div>
+    <div class="review-star-picker" aria-label="Valoración de 1 a 5 estrellas">
+      <button type="button" class="review-star-input active" data-rating="1" aria-label="1 estrella">★</button>
+      <button type="button" class="review-star-input active" data-rating="2" aria-label="2 estrellas">★</button>
+      <button type="button" class="review-star-input active" data-rating="3" aria-label="3 estrellas">★</button>
+      <button type="button" class="review-star-input active" data-rating="4" aria-label="4 estrellas">★</button>
+      <button type="button" class="review-star-input active" data-rating="5" aria-label="5 estrellas">★</button>
+    </div>
+    <input type="hidden" id="reviewRating" value="5">
+    <label>Nombre <input id="reviewerName" type="text" maxlength="80" placeholder="Tu nombre"></label>
+    <label>Comentario <textarea id="reviewComment" rows="4" maxlength="500" placeholder="Escribe tu opinión..."></textarea></label>
+    <div class="review-actions">
+      <button type="button" class="btn secondary" id="reviewCancel">Cancelar</button>
+      <button type="button" class="btn primary" id="submitReview">Publicar reseña</button>
+    </div>
+  </div>
+</div>
+
 <div id="thankYouModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card thank-you-card">
     <div class="thank-you-icon" aria-hidden="true">✓</div>
@@ -169,7 +193,7 @@
 <footer><strong>ElectroIsla</strong><span>Alimentos + Electrodomésticos</span><span>WhatsApp: +53 52017110</span></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=122"></script>
+<script src="app.js?v=123"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
 </html>

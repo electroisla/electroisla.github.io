@@ -444,6 +444,7 @@ async function show(){
    render();
    if(status) status.textContent=source==="cloud"?`☁️ Sincronizado con Supabase · ${products.length} productos`:source==="migrated"?`☁️ Catálogo local enviado a Supabase · ${products.length} productos`:"☁️ Supabase conectado · catálogo vacío";
    await loadSalesReport();
+   await loadAdminReviews();
  }catch(err){
    console.error(err);
    render();
@@ -537,6 +538,21 @@ function salesMoney(v,currency){
   const n=Number(v)||0;
   return new Intl.NumberFormat("en-US",{style:"currency",currency:currency||"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 }
+let reviewRows=[];
+function reviewAdminStars(n){return Array.from({length:5},(_,i)=>i<Number(n)?"★":"☆").join("")}
+function reviewProductName(id){const p=products.find(x=>String(x.id)===String(id));return p?.name||`Producto ${id}`;}
+function renderAdminReviews(){
+ const box=document.getElementById("reviewsList"); if(!box)return;
+ if(!reviewRows.length){box.innerHTML='<p class="sales-empty">No hay reseñas todavía.</p>';return}
+ const sorted=[...reviewRows].sort((a,b)=>Number(a.approved)-Number(b.approved)||new Date(b.created_at)-new Date(a.created_at));
+ box.innerHTML=sorted.map(r=>`<article class="review-admin-item ${r.approved?"approved":"pending"}"><div class="review-admin-top"><div><strong>${salesEscape(reviewProductName(r.product_id))}</strong><div class="review-admin-stars">${reviewAdminStars(r.rating)}</div></div><span class="review-admin-state">${r.approved?"Publicada":"Pendiente"}</span></div><p class="review-admin-comment">${salesEscape(r.comment)}</p><div class="review-admin-meta"><span>${salesEscape(r.reviewer_name||"Cliente")}</span><span>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</span></div><div class="review-admin-actions">${r.approved?`<button type="button" class="btn secondary" onclick="setReviewApproved('${salesEscape(r.id)}',false)">🙈 Ocultar</button>`:`<button type="button" class="btn primary" onclick="setReviewApproved('${salesEscape(r.id)}',true)">✓ Aprobar</button>`}<button type="button" class="btn secondary" onclick="deleteReview('${salesEscape(r.id)}')">🗑️ Eliminar</button></div></article>`).join("");
+}
+async function loadAdminReviews(){
+ const status=document.getElementById("reviewsStatus"); if(status)status.textContent="☁️ Cargando reseñas…";
+ try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
+async function setReviewApproved(id,approved){try{const {error}=await supabaseClient.from("reviews").update({approved}).eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo actualizar la reseña: "+(err.message||err))}}
+async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acción no se puede deshacer."))return;try{const {error}=await supabaseClient.from("reviews").delete().eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo eliminar la reseña: "+(err.message||err))}}
+
 function salesEscape(v){
   return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
@@ -609,10 +625,13 @@ function exportSalesCsv(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
+const reviewsRefreshEl=document.getElementById("reviewsRefresh");
+if(reviewsRefreshEl)reviewsRefreshEl.addEventListener("click",loadAdminReviews);
 const salesRangeEl=document.getElementById("salesRange");
 if(salesRangeEl)salesRangeEl.addEventListener("change",loadSalesReport);
 const salesRefreshEl=document.getElementById("salesRefresh");
 if(salesRefreshEl)salesRefreshEl.addEventListener("click",loadSalesReport);
 const salesExportEl=document.getElementById("salesExport");
 if(salesExportEl)salesExportEl.addEventListener("click",exportSalesCsv);
+supabaseClient.channel("reviews-admin").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},()=>loadAdminReviews()).subscribe();
 supabaseClient.channel("orders-admin").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>loadSalesReport()).subscribe();

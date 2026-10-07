@@ -1,0 +1,19 @@
+ELECTROISLA — SISTEMA DE RESEÑAS
+
+1. En Supabase abre SQL Editor y ejecuta TODO el contenido de reviews.sql.
+2. Reemplaza en el repositorio electroisla/electroisla.github.io SOLO estos archivos:
+   - index.html
+   - app.js
+   - styles.css
+   - admin.html
+   - admin.js
+3. No reemplaces supabase-config.js ni ningún otro archivo.
+
+Funcionamiento:
+- La tienda muestra estrellas y cantidad de reseñas aprobadas por producto.
+- El cliente puede escribir nombre, valoración y comentario.
+- Las reseñas nuevas quedan PENDIENTES y no aparecen públicamente hasta aprobarlas.
+- En admin.html aparece “⭐ Reseñas de productos” para aprobar, ocultar o eliminar.
+- Las reseñas aprobadas se actualizan automáticamente en la tienda.
+
+Importante: esta primera versión NO modifica carrito, pagos, delivery, categorías, pedidos ni WhatsApp.

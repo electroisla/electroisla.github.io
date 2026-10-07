@@ -3720,42 +3720,46 @@ button:active{
 @media(max-width:420px){.category-item{grid-template-columns:22px minmax(0,1fr) auto!important;gap:5px!important}.category-drag{width:22px!important}.category-move{width:28px!important;min-width:28px!important;height:28px!important}.category-actions{justify-content:flex-start!important}}
 
 
-/* ElectroIsla — selector de Período del reporte de ventas */
-.sales-filters label{
-  display:block!important;
-  color:#68482f!important;
-  font-weight:700!important;
-  font-size:15px!important;
-  min-width:180px!important;
-}
-.sales-filters select#salesRange{
-  -webkit-appearance:none!important;
-  appearance:none!important;
-  display:block!important;
-  width:100%!important;
-  min-height:54px!important;
-  margin-top:7px!important;
-  padding:12px 42px 12px 14px!important;
-  border:1px solid #c9d8eb!important;
-  border-radius:14px!important;
-  background-color:#fff!important;
-  color:#072b79!important;
-  font-size:15px!important;
-  font-weight:600!important;
-  line-height:1.2!important;
-  box-shadow:0 2px 8px rgba(7,43,121,.04)!important;
-  outline:none!important;
-  cursor:pointer!important;
-  background-image:
-    linear-gradient(45deg,transparent 50%,#f58220 50%),
-    linear-gradient(135deg,#f58220 50%,transparent 50%)!important;
-  background-position:
-    calc(100% - 19px) 23px,
-    calc(100% - 13px) 23px!important;
-  background-size:6px 6px,6px 6px!important;
-  background-repeat:no-repeat!important;
-}
-.sales-filters select#salesRange:focus{
-  border-color:#074899!important;
-  box-shadow:0 0 0 3px rgba(7,72,153,.10)!important;
-}
+/* ElectroIsla — reseñas de productos */
+.product-review-link,.product-review-summary{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;padding:0;border:0;background:transparent;color:#f58220;font:inherit;font-size:12px;line-height:1.2;cursor:pointer;text-align:left}
+.product-review-link:hover,.product-review-summary:hover{text-decoration:underline}
+.review-stars{letter-spacing:1px;font-size:13px;color:#f58220}
+.review-modal{z-index:120}
+.review-card{position:relative;max-width:430px;width:calc(100% - 28px);padding:24px}
+.review-card h2{margin:4px 0 4px;color:#0757a6;font-size:22px}
+.review-help{margin:0 0 12px;color:#64748b;font-size:13px}
+.review-close{position:absolute;right:12px;top:10px;width:34px;height:34px;border:0;border-radius:50%;background:#fff1e8;color:#f58220;font-size:25px;line-height:1;cursor:pointer}
+.review-star-picker{display:flex;gap:4px;margin:8px 0 18px}
+.review-star-input{border:0;background:transparent;padding:2px;font-size:30px;line-height:1;color:#d7dee7;cursor:pointer}
+.review-star-input.active{color:#f58220}
+.review-card label{display:block;margin:10px 0;color:#17324d;font-weight:600;font-size:13px}
+.review-card input,.review-card textarea{width:100%;margin-top:5px;border:1px solid #d9e3ee;border-radius:12px;padding:11px 12px;background:#fff;color:#17324d;font:inherit;box-sizing:border-box}
+.review-card input:focus,.review-card textarea:focus{outline:none;border-color:#0757a6;box-shadow:0 0 0 3px rgba(7,87,166,.10)}
+.review-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.review-actions .btn{margin:0}
+@media(max-width:520px){.review-card{padding:21px}.review-actions{display:grid;grid-template-columns:1fr 1fr}.review-actions .btn{width:100%}}
+
+
+/* ElectroIsla — panel de reseñas */
+.reviews-admin{margin-top:16px;border-top:3px solid var(--admin-orange,#F28C28)}
+.reviews-admin-list{display:grid;gap:10px;margin-top:12px}
+.review-admin-item{padding:14px;border:1px solid var(--admin-border,#E5E7EB);border-radius:14px;background:#fff}
+.review-admin-item.pending{border-color:#f4c58f;background:#fffaf5}
+.review-admin-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.review-admin-top strong{color:var(--admin-blue,#1261A0)}
+.review-admin-stars{margin-top:4px;color:#F28C28;letter-spacing:1px}
+.review-admin-state{font-size:.75rem;font-weight:700;padding:5px 9px;border-radius:999px;background:#eef6ff;color:#1261A0;white-space:nowrap}
+.review-admin-item.pending .review-admin-state{background:#fff0df;color:#F28C28}
+.review-admin-comment{margin:10px 0 7px;color:#334155;line-height:1.45}
+.review-admin-meta{display:flex;gap:12px;flex-wrap:wrap;color:#6B7280;font-size:.78rem}
+.review-admin-actions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin-top:11px}
+.review-admin-actions .btn{margin:0}
+@media(max-width:520px){.review-admin-actions{justify-content:flex-start}.review-admin-actions .btn{flex:1}}
+
+.review-existing{margin:8px 0 14px;padding:10px 12px;border-radius:12px;background:#f7faff;border:1px solid #e1ebf5}
+.review-existing-title{font-size:12px;font-weight:800;color:#17324d;margin-bottom:6px}
+.review-existing-item{padding:7px 0;border-bottom:1px solid #e6edf4}
+.review-existing-item:last-child{border-bottom:0}
+.review-existing-item>div{display:flex;align-items:center;gap:8px;font-size:11px;color:#17324d}
+.review-existing-item p{margin:4px 0 0;font-size:12px;line-height:1.35;color:#475569}
+.review-existing-empty{font-size:12px;color:#64748b}

@@ -114,8 +114,38 @@ function saveCategories(){localStorage.setItem("electroisla_categories",JSON.str
 function save(){localStorage.setItem("electroisla_products",JSON.stringify(products));localStorage.setItem("electroisla_cart",JSON.stringify(cart))}
 function fromRow(r){return{id:String(r.id),name:r.name||"",category:r.category||"Alimentos",price:Number(r.price)||0,currency:r.currency||"USD",discountPrice:r.discount_price===null||r.discount_price===undefined||Number(r.discount_price)<=0?null:Number(r.discount_price),unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false}}
 async function loadCloudProducts(){const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(error)throw error;if(data&&data.length){products=data.map(fromRow);save();return true}return false}
-async function startCloud(){try{await loadStoreSettings();await loadCloudCategories();await loadCloudProducts();renderCategoryTabs();renderCategoryMenu();render();renderCart()}catch(err){console.warn("Supabase no disponible; usando catálogo local.",err);renderCategoryTabs();renderCategoryMenu();render();renderCart()}}
+async function loadApprovedReviews(){
+ try{
+  const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,created_at").eq("approved",true).order("created_at",{ascending:false});
+  if(error)throw error;
+  reviewsByProduct={};
+  (data||[]).forEach(r=>{const key=String(r.product_id);(reviewsByProduct[key]||(reviewsByProduct[key]=[])).push(r)});
+  reviewsLoaded=true;
+ }catch(err){
+  reviewsByProduct={};
+  reviewsLoaded=false;
+  console.warn("Reseñas no disponibles; la tienda continúa normalmente.",err);
+ }
+}
+function reviewSummary(productId){
+ const list=reviewsByProduct[String(productId)]||[];
+ if(!list.length)return {count:0,avg:0};
+ const avg=list.reduce((s,r)=>s+Number(r.rating||0),0)/list.length;
+ return {count:list.length,avg};
+}
+function reviewStars(value){
+ const rounded=Math.round(Number(value)||0);
+ return Array.from({length:5},(_,i)=>i<rounded?"★":"☆").join("");
+}
+function renderReviewBadge(p){
+ const r=reviewSummary(p.id);
+ if(!r.count)return '<button type="button" class="product-review-link" data-review-product="'+esc(p.id)+'">☆ Sé el primero en reseñar</button>';
+ return '<button type="button" class="product-review-summary" data-review-product="'+esc(p.id)+'" aria-label="Ver reseñas de '+esc(p.name)+'"><span class="review-stars">'+reviewStars(r.avg)+'</span><span>'+r.avg.toFixed(1)+' · '+r.count+' reseña'+(r.count===1?'':'s')+'</span></button>';
+}
+async function startCloud(){try{await loadStoreSettings();await loadCloudCategories();await loadCloudProducts();await loadApprovedReviews();renderCategoryTabs();renderCategoryMenu();render();renderCart()}catch(err){console.warn("Supabase no disponible; usando catálogo local.",err);renderCategoryTabs();renderCategoryMenu();render();renderCart()}}
 let currentFilter="Todos";
+let reviewsByProduct={};
+let reviewsLoaded=false;
 function renderCategoryTabs(){
  const tabs=document.getElementById("categoryTabs");
  if(!tabs)return;
@@ -268,7 +298,7 @@ function closeCategoryMenu(){
  document.body.classList.remove("category-menu-open");
 }
 function updateStickyOrder(animate=false){const bar=document.getElementById("stickyOrder");if(!bar)return;const count=cart.reduce((s,i)=>s+i.qty,0);let total=0;cart.forEach(i=>{const p=products.find(x=>x.id===i.id);if(p)total+=effectivePrice(p)*i.qty});bar.classList.toggle("visible",count>0);const c=bar.querySelector("[data-sticky-count]");const n=bar.querySelector("[data-sticky-count-number]");const w=bar.querySelector("[data-sticky-count-word]");const t=bar.querySelector("[data-sticky-total]");if(n)n.textContent=count;if(w)w.textContent=count===1?"producto":"productos";if(c&&!n&&!w)c.textContent=`${count} producto${count===1?"":"s"}`;if(t)t.textContent=money(total,"USD");if(animate){bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce");void bar.offsetWidth;if(n)n.classList.add("electroisla-product-count-bounce");bar.classList.add("electroisla-order-update");setTimeout(()=>{bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce")},450)}}
-function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>c.name));const list=products.filter(p=>p.available&&activeCategoryNames.has(p.category)&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q)));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p><div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><div class="product-img">${p.image?`<img src="${p.image}" alt="${esc(p.name)}">`:(p.category==="Alimentos"?"🥩":"🏠")}</div><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||'<p class="empty-products">No hay productos disponibles.</p>';updateStickyOrder()}
+function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>c.name));const list=products.filter(p=>p.available&&activeCategoryNames.has(p.category)&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q)));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><div class="product-img">${p.image?`<img src="${p.image}" alt="${esc(p.name)}">`:(p.category==="Alimentos"?"🥩":"🏠")}</div><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||'<p class="empty-products">No hay productos disponibles.</p>';box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));updateStickyOrder()}
 function electroislaAnimate(selector,className="electroisla-pop"){const el=document.querySelector(selector);if(!el)return;el.classList.remove(className);void el.offsetWidth;el.classList.add(className);setTimeout(()=>el.classList.remove(className),350)}
 function electroislaAnimateAdd(id){const product=products.find(p=>String(p.id)===String(id));const btn=product?[...document.querySelectorAll(".add-circle")].find(b=>b.getAttribute("aria-label")===`Agregar ${product.name}`):null;if(btn){btn.classList.remove("electroisla-bounce");void btn.offsetWidth;btn.classList.add("electroisla-bounce");setTimeout(()=>btn.classList.remove("electroisla-bounce"),400)}electroislaAnimate("#cartCount","electroisla-cart-bounce");electroislaAnimate("#cartTopTotal");electroislaAnimate("#cartTotal");electroislaAnimate(".cart-head-total strong");updateStickyOrder(true)}
 function updateCategoryHighlight(name){
@@ -451,6 +481,43 @@ window.addEventListener("scroll",scheduleCategoryScrollSync,{passive:true});
 window.addEventListener("resize",scheduleCategoryScrollSync);
 window.addEventListener("load",scheduleCategoryScrollSync);
 document.getElementById("cartBtn")?.addEventListener("click",openCart);document.getElementById("closeCart").onclick=closeCart;document.getElementById("cartOverlay").onclick=closeCart;document.getElementById("checkoutBtn").onclick=openCheckout;document.getElementById("closeModal").onclick=()=>document.getElementById("checkoutModal").classList.add("hidden");
+function openReviewModal(productId){
+ const p=products.find(x=>String(x.id)===String(productId));
+ if(!p)return;
+ const modal=document.getElementById("reviewModal");
+ if(!modal)return;
+ modal.dataset.productId=String(productId);
+ const title=document.getElementById("reviewProductName");
+ if(title)title.textContent=p.name;
+ const existing=document.getElementById("reviewExisting");
+ const existingReviews=reviewsByProduct[String(productId)]||[];
+ if(existing){existing.innerHTML=existingReviews.length?`<div class="review-existing-title">Opiniones de clientes</div>`+existingReviews.slice(0,4).map(r=>`<div class="review-existing-item"><div><span class="review-stars">${reviewStars(r.rating)}</span><strong>${esc(r.reviewer_name||"Cliente")}</strong></div><p>${esc(r.comment)}</p></div>`).join(""):`<div class="review-existing-empty">Todavía no hay reseñas publicadas.</div>`;}
+ const name=document.getElementById("reviewerName");
+ const comment=document.getElementById("reviewComment");
+ if(name)name.value=""; if(comment)comment.value="";
+ modal.querySelectorAll(".review-star-input").forEach(b=>b.classList.toggle("active",Number(b.dataset.rating)===5));
+ const rating=document.getElementById("reviewRating"); if(rating)rating.value="5";
+ modal.classList.remove("hidden"); modal.setAttribute("aria-hidden","false");
+}
+function closeReviewModal(){const modal=document.getElementById("reviewModal");if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true")}}
+async function submitReview(){
+ const modal=document.getElementById("reviewModal"); if(!modal)return;
+ const productId=modal.dataset.productId||"";
+ const rating=Number(document.getElementById("reviewRating")?.value||0);
+ const name=(document.getElementById("reviewerName")?.value||"").trim().slice(0,80)||"Cliente";
+ const comment=(document.getElementById("reviewComment")?.value||"").trim();
+ if(!productId||rating<1||rating>5){alert("Selecciona una valoración de 1 a 5 estrellas.");return}
+ if(comment.length<5){alert("Escribe un comentario un poco más detallado.");return}
+ if(comment.length>500){alert("El comentario no puede superar 500 caracteres.");return}
+ const btn=document.getElementById("submitReview"); if(btn)btn.disabled=true;
+ try{
+  const {error}=await supabaseClient.from("reviews").insert({product_id:productId,rating,reviewer_name:name,comment,approved:false});
+  if(error)throw error;
+  closeReviewModal();
+  alert("¡Gracias! Tu reseña quedó pendiente de aprobación.");
+ }catch(err){alert("No se pudo enviar la reseña. Inténtalo nuevamente.");console.warn(err)}
+ finally{if(btn)btn.disabled=false}
+}
 function showThankYou(){
  const modal=document.getElementById("thankYouModal");
  if(!modal)return;
@@ -534,6 +601,11 @@ async function recordOrderForReport({name,phone,zoneName,note,method,totals}){
 document.getElementById("orderForm").addEventListener("submit",e=>{e.preventDefault();const totals=getOrderTotals();const method=document.querySelector('input[name="paymentMethod"]:checked')?.value;if(!method){alert("Selecciona un método de pago.");return}if((method==="USD"||method==="ZELLE")&&!totals.usdAvailable){alert("El pago en USD/Zelle no está disponible para este pedido.");return}if((method==="CUP"||method==="TRANSFERENCIA")&&!totals.cupAvailable){alert("CUP y Transferencia solo están disponibles para pedidos de electrodomésticos.");return}const zone=document.getElementById("municipality").value,other=document.getElementById("otherZone").value.trim();if(!zone){alert("Selecciona la zona de entrega.");return}if(zone==="Otro"&&!other){alert("Escribe cuál es tu zona de entrega.");return}const lines=cart.map(i=>{const p=products.find(x=>x.id===i.id);if(!p)return"";const cur=p.currency||"USD",unitPrice=effectivePrice(p),lineTotal=unitPrice*i.qty,cash=cashCup(p),transfer=transferCup(p);let selectedLine="";if(method==="USD"||method==="ZELLE")selectedLine=money(lineTotal,"USD");else if(method==="CUP")selectedLine=money(cash*i.qty,"CUP");else selectedLine=money(transfer*i.qty,"CUP");return `• ${p.name} — ${i.qty} ${p.unit||"unidad"} — ${selectedLine}`}).join("\n");const name=document.getElementById("customerName").value.trim(),phone=document.getElementById("customerPhone").value.trim(),zoneName=zone==="Otro"?other:zone,note=document.getElementById("note").value.trim();const paymentLabel=method==="USD"?"USD":method==="ZELLE"?"ZELLE":method==="CUP"?"CUP (efectivo)":"TRANSFERENCIA";const subtotalSelected=(method==="USD"||method==="ZELLE")?money(totals.usdTotal-totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.cashTotal-totals.deliveryFeeCUP,"CUP"):money(totals.transferTotal-totals.deliveryFeeTransfer,"CUP");const paymentTotal=(method==="USD"||method==="ZELLE")?money(totals.usdTotal,"USD"):method==="CUP"?money(totals.cashTotal,"CUP"):money(totals.transferTotal,"CUP");const deliverySelected=(method==="USD"||method==="ZELLE")?money(totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.deliveryFeeCUP,"CUP"):money(totals.deliveryFeeTransfer,"CUP");const deliveryText=totals.deliveryFeeUSD>0?deliverySelected:"Gratis";const msg=`🛒 NUEVO PEDIDO\n\n👤 Cliente: ${name}\n📱 Teléfono: ${phone}\n\n🛍️ PRODUCTOS:\n${lines}\n\n📍 Zona de entrega: ${zoneName}\n\n💳 MÉTODO DE PAGO: ${paymentLabel}\n🧾 Subtotal: ${subtotalSelected}\n🚚 Domicilio: ${deliveryText}\n💰 TOTAL A PAGAR: ${paymentTotal}${note?`\n📝 Nota: ${note}`:""}`;recordOrderForReport({name,phone,zoneName,note,method,totals});markWhatsAppPending();window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,"_blank")});
 
 document.getElementById("thankYouAccept")?.addEventListener("click",finishPurchase);
+document.getElementById("reviewClose")?.addEventListener("click",closeReviewModal);
+document.getElementById("reviewCancel")?.addEventListener("click",closeReviewModal);
+document.getElementById("submitReview")?.addEventListener("click",submitReview);
+document.querySelectorAll(".review-star-input").forEach(btn=>btn.addEventListener("click",()=>{const n=Number(btn.dataset.rating);const r=document.getElementById("reviewRating");if(r)r.value=String(n);document.querySelectorAll(".review-star-input").forEach(x=>x.classList.toggle("active",Number(x.dataset.rating)<=n))}));
+document.getElementById("reviewModal")?.addEventListener("click",e=>{if(e.target.id==="reviewModal")closeReviewModal()});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(checkWhatsAppReturn,250)});
 window.addEventListener("focus",()=>setTimeout(checkWhatsAppReturn,250));
 window.addEventListener("pageshow",()=>setTimeout(checkWhatsAppReturn,250));
@@ -552,6 +624,7 @@ startCloud();
 supabaseClient.channel("settings-store").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadStoreSettings();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
 
 supabaseClient.channel("products-store").on("postgres_changes",{event:"*",schema:"public",table:"products"},async()=>{try{await loadCloudProducts();renderCategoryMenu();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
+supabaseClient.channel("reviews-store").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},async()=>{try{await loadApprovedReviews();render()}catch(e){console.warn(e)}}).subscribe();
 
 supabaseClient.channel("categories-store").on("postgres_changes",{event:"*",schema:"public",table:"categories"},async()=>{
  try{
