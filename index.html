@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="electroisla-version" content="9.8.44">
+  <title>ElectroIsla | Alimentos y Electrodomésticos</title>
+  <meta name="description" content="ElectroIsla: alimentos y electrodomésticos. Compra y solicita tu pedido por WhatsApp.">
+  <link rel="stylesheet" href="styles.css?v=9.8.125">
+<style>
+.zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
+.zelle-logo-icon svg{display:block;width:18px;height:18px}
+</style>
+</head>
+<body>
+<header class="reference-topbar shop-topbar" aria-label="ElectroIsla 360">
+</header>
+<main>
+  <section class="store-hero reference-store-hero">
+    <div class="reference-visual">
+      <div class="reference-composite"><img src="electroisla-header-final.png?v=16" alt="ElectroIsla 360 - Todo para tu hogar en un solo lugar"></div>
+    </div>
+    <div class="store-info"><strong>Compra fácil, directo a tu puerta</strong><span>Selecciona tus productos y arma tu pedido.</span></div>
+  </section>
+
+  <section id="ofertas" class="shop-catalog">
+    <div class="shop-toolbar">
+      <button id="shopSearchBtn" class="icon-btn" aria-label="Buscar">⌕</button>
+      <button id="shopMenuBtn" class="icon-btn" aria-label="Categorías">☰</button>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="filter active" data-filter="Todos">Ofertas</button>
+        <button class="filter" data-filter="Alimentos">Alimentos</button>
+        <button class="filter" data-filter="Electrodomésticos">Electrodomésticos</button>
+      </div>
+    </div>
+    <div id="searchWrap" class="shop-search hidden"><input id="productSearch" type="search" placeholder="Buscar productos..."></div>
+    <div class="catalog-heading"><h2>Ofertas</h2><span id="resultCount"></span></div>
+    <div id="products" class="product-list"></div>
+  </section>
+
+  <section id="contacto" class="contact section">
+    <div><p class="eyebrow">¿NECESITAS AYUDA?</p><h2>Habla directamente con ElectroIsla</h2><p>Los pedidos se preparan y envían por WhatsApp con todos los detalles.</p></div>
+    <a class="btn primary" href="https://wa.me/5352017110" target="_blank">💬 Escribir por WhatsApp</a>
+  </section>
+</main>
+<div id="stickyOrder" class="sticky-order">
+  <div class="sticky-order-info"><span data-sticky-count><span data-sticky-count-number>0</span> <span data-sticky-count-word>productos</span></span><strong data-sticky-total>$0.00 USD</strong></div>
+  <button class="sticky-order-btn" onclick="openCart()">Ver mi Pedido</button>
+</div>
+
+<div id="cartOverlay" class="overlay hidden"></div>
+<aside id="cart" class="cart-panel">
+  <div class="cart-brand-header" aria-label="ElectroIsla 360 - Cabecera del pedido">
+    <img src="cart-header-reference.png?v=1" alt="ElectroIsla 360 - Tu hogar, nuestra prioridad">
+  </div>
+  <div class="cart-head">
+    <div class="cart-head-main">
+      <button id="closeCart" class="cart-back" aria-label="Regresar">
+        <span class="cart-back-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false"><path transform="translate(-4 0)" d="M30 9 15 24l15 15M16 24h25"/></svg>
+        </span>
+        <span>Regresar</span>
+      </button>
+      <div class="cart-title-block">
+        <h1>Tu pedido</h1>
+        <p>Revisa los productos de tu carrito antes de continuar.</p>
+      </div>
+    </div>
+
+    <div class="cart-head-summary" aria-label="Resumen del pedido">
+      <div class="cart-summary-products">
+        <span class="cart-summary-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false"><path d="M8 12h8l5 30h31l6-22H19"/><path d="M25 51a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm27 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M24 29h27"/></svg>
+        </span>
+        <div>
+          <span class="cart-summary-label">Total de productos</span>
+          <strong id="cartTopCount">0 artículos</strong>
+        </div>
+      </div>
+      <div class="cart-summary-divider"></div>
+      <div class="cart-summary-total">
+        <span>Total</span>
+        <strong id="cartTopTotal">USD 0.00</strong>
+      </div>
+    </div>
+  </div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="cart-delivery-note" role="note" aria-label="Información sobre el precio de entrega">
+    <span class="cart-delivery-note-icon" aria-hidden="true">
+      <img src="delivery-truck-electroisla.png" alt="" />
+    </span>
+    <div class="cart-delivery-note-copy">
+      <strong>Los precios pueden variar según la zona de entrega.</strong>
+      <span>Puedes ver el costo final en el siguiente paso.</span>
+    </div>
+  </div>
+  <div class="cart-service-bar">
+    <div class="cart-bottom-total" aria-label="Total del pedido">
+      <span>Total</span>
+      <strong id="cartBottomTotal">$0.00 USD</strong>
+    </div>
+    <button id="checkoutBtn" class="btn primary cart-previous-btn" aria-label="Continuar con el pedido">Continuar con el pedido <span class="cart-previous-arrow" aria-hidden="true">→</span></button>
+  </div>
+</aside>
+
+<div id="checkoutModal" class="modal hidden">
+  <div class="modal-card">
+    <button id="closeModal" class="modal-close">✕</button>
+    <p class="eyebrow">DATOS DEL PEDIDO</p><h2>Completa tu pedido</h2>
+    <form id="orderForm">
+      <label>Nombre<input required id="customerName" placeholder="Tu nombre"></label>
+      <label>Teléfono<input required id="customerPhone" placeholder="Tu teléfono"></label>
+      <label class="delivery-field">Zona de entrega<select required id="municipality" class="delivery-native-select">
+        <option value="">Selecciona...</option>
+        <option value="Nueva Gerona" data-fee="0">Nueva Gerona — Gratis</option>
+        <option value="Micro 70" data-fee="0">Micro 70 — Gratis</option>
+        <option value="Micro 2" data-fee="0">Micro 2 — Gratis</option>
+        <option value="Abel Santa María" data-fee="0">Abel Santa María — Gratis</option>
+        <option value="Pueblo Nuevo" data-fee="0">Pueblo Nuevo — Gratis</option>
+        <option value="Francoi" data-fee="0">Francoi — Gratis</option>
+        <option value="Sierra Caballos" data-fee="0">Sierra Caballos — Gratis</option>
+        <option value="Nazareno" data-fee="0">Nazareno — Gratis</option>
+        <option value="Chacón" data-fee="5">Chacón — 5 USD</option>
+        <option value="Patria" data-fee="5">Patria — 5 USD</option>
+        <option value="Los Colonos" data-fee="5">Los Colonos — 5 USD</option>
+        <option value="Los Bejeranos" data-fee="5">Los Bejeranos — 5 USD</option>
+        <option value="La Fe" data-fee="10">La Fe — 10 USD</option>
+        <option value="Demajagua" data-fee="10">Demajagua — 10 USD</option>
+        <option value="La Victoria" data-fee="10">La Victoria — 10 USD</option>
+        <option value="Atanagildo" data-fee="10">Atanagildo — 10 USD</option>
+        <option value="Mella" data-fee="10">Mella — 10 USD</option>
+        <option value="Ciro Redondo" data-fee="10">Ciro Redondo — 10 USD</option>
+        <option value="Otro" data-fee="10">Otro — 10 USD</option>
+      </select>
+      <div class="delivery-picker" id="deliveryPicker">
+        <button type="button" class="delivery-trigger" id="deliveryTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="delivery-trigger-main"><span class="delivery-pin">⌖</span><span id="deliverySelectedText">Selecciona tu zona</span></span>
+          <span class="delivery-trigger-side"><span class="delivery-fee" id="deliverySelectedFee">—</span><span class="delivery-chevron">⌄</span></span>
+        </button>
+        <div class="delivery-menu" id="deliveryMenu" role="listbox" aria-label="Zona de entrega"></div>
+      </div>
+      </label>
+      <label id="otherZoneWrap" class="hidden">Especifique la zona<input id="otherZone" placeholder="Escriba cuál es su zona de entrega"></label>
+      <div class="payment-box">
+        <div class="payment-title">💳 Método de pago</div>
+        <p class="payment-help">Alimentos: solo USD o Zelle. Electrodomésticos: USD, Zelle, CUP o Transferencia.</p>
+        <label class="payment-option"><input type="radio" name="paymentMethod" value="USD" checked> <span>💵 USD</span></label>
+        <label class="payment-option"><input type="radio" name="paymentMethod" value="ZELLE"> <span class="zelle-payment-label"><span class="zelle-logo-icon" aria-hidden="true"><svg viewBox="0 0 32 32" width="18" height="18" focusable="false"><rect width="32" height="32" rx="7" fill="#6d1ed4"/><path d="M9 8h14v4.1l-8.1 8.4H23V24H9v-4.1l8.1-8.4H9V8Z" fill="#fff"/></svg></span><span>Zelle</span></span></label>
+        <label class="payment-option"><input type="radio" name="paymentMethod" value="CUP"> <span>🇨🇺 CUP</span></label>
+        <label class="payment-option"><input type="radio" name="paymentMethod" value="TRANSFERENCIA"> <span>💳 Transferencia</span></label>
+        <div id="paymentSummary" class="payment-summary"></div>
+      </div>
+      <label>Nota adicional<textarea id="note" rows="3" placeholder="Horario, dirección o indicaciones..."></textarea></label>
+      <button class="btn primary full" type="submit">📲 Enviar pedido por WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+<div id="thankYouModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card thank-you-card">
+    <div class="thank-you-icon" aria-hidden="true">✓</div>
+    <p class="eyebrow">PEDIDO ENVIADO</p>
+    <h2>¡Gracias por tu compra!</h2>
+    <p class="thank-you-text">Tu pedido fue enviado a ElectroIsla 360 por WhatsApp. Gracias por confiar en nosotros.</p>
+    <button id="thankYouAccept" class="btn primary full" type="button">Aceptar</button>
+  </div>
+</div>
+
+<footer><strong>ElectroIsla</strong><span>Alimentos + Electrodomésticos</span><span>WhatsApp: +53 52017110</span></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js?v=4"></script>
+<script src="app.js?v=122"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
+</body>
+</html>
