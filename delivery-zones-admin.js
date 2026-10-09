@@ -58,9 +58,9 @@
    list.innerHTML=zones.map((z,i)=>'<article class="delivery-zone-row '+(z.available?'':'is-hidden-zone')+'"><div class="delivery-zone-main"><strong>'+esc(z.name)+'</strong><span>'+money(z.fee_usd)+' · Orden '+(Number(z.sort_order)||0)+'</span><small>'+(z.available?'Visible en la tienda':'Oculta en la tienda')+'</small></div><div class="delivery-zone-actions"><button class="btn secondary" type="button" data-zone-edit="'+esc(z.id)+'">Editar</button><button class="btn secondary" type="button" data-zone-toggle="'+esc(z.id)+'">'+(z.available?'Ocultar':'Mostrar')+'</button><button class="btn secondary" type="button" data-zone-up="'+esc(z.id)+'" '+(i===0?'disabled':'')+' aria-label="Subir zona">↑</button><button class="btn secondary" type="button" data-zone-down="'+esc(z.id)+'" '+(i===zones.length-1?'disabled':'')+' aria-label="Bajar zona">↓</button></div></article>').join("");
  }
  async function load(force=false){
-   if(!window.supabaseClient||(busy&&!force))return;
+   if(!supabaseClient||(busy&&!force))return;
    busy=true;status("☁️ Cargando zonas desde Supabase…");
-   try{const {data,error}=await window.supabaseClient.from("delivery_zones").select("id,name,fee_usd,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;zones=data||[];render();status("☁️ "+zones.length+" zonas cargadas. Los cambios se guardan en Supabase.");if(!editingId)$("deliveryZoneOrder").value=String(zones.length+1)}
+   try{const {data,error}=await supabaseClient.from("delivery_zones").select("id,name,fee_usd,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;zones=data||[];render();status("☁️ "+zones.length+" zonas cargadas. Los cambios se guardan en Supabase.");if(!editingId)$("deliveryZoneOrder").value=String(zones.length+1)}
    catch(err){status("⚠️ No se pudieron cargar las zonas: "+(err.message||err));console.error("Zonas de domicilio:",err)}
    finally{busy=false}
  }
@@ -69,20 +69,20 @@
    const name=$("deliveryZoneName").value.trim(),fee=Number($("deliveryZoneFee").value),order=Number.parseInt($("deliveryZoneOrder").value,10);
    if(!name){alert("Escribe el nombre de la zona.");return}if(!Number.isFinite(fee)||fee<0){alert("El costo debe ser 0 o mayor.");return}if(!Number.isInteger(order)||order<1){alert("El orden debe ser un número entero mayor que 0.");return}
    const payload={name,fee_usd:fee,sort_order:order,available:$("deliveryZoneAvailable").checked};busy=true;$("deliveryZoneSave").disabled=true;status("Guardando zona…");
-   try{const result=editingId?await window.supabaseClient.from("delivery_zones").update(payload).eq("id",editingId):await window.supabaseClient.from("delivery_zones").insert(payload);if(result.error)throw result.error;editingId=null;busy=false;await load(true);reset();status("✅ Zona guardada en Supabase.")}
+   try{const result=editingId?await supabaseClient.from("delivery_zones").update(payload).eq("id",editingId):await supabaseClient.from("delivery_zones").insert(payload);if(result.error)throw result.error;editingId=null;busy=false;await load(true);reset();status("✅ Zona guardada en Supabase.")}
    catch(err){status("⚠️ No se guardó la zona: "+(err.message||err));alert("No se pudo guardar la zona. Comprueba que el nombre no esté repetido.\n\n"+(err.message||err))}
    finally{busy=false;$("deliveryZoneSave").disabled=false}
  }
  async function updateZone(id,changes){
    if(busy)return;const z=zones.find(x=>String(x.id)===String(id));if(!z)return;busy=true;status("Guardando cambio…");
-   try{const {error}=await window.supabaseClient.from("delivery_zones").update(changes).eq("id",z.id);if(error)throw error;busy=false;await load(true);status("✅ Cambio guardado en Supabase.")}
+   try{const {error}=await supabaseClient.from("delivery_zones").update(changes).eq("id",z.id);if(error)throw error;busy=false;await load(true);status("✅ Cambio guardado en Supabase.")}
    catch(err){status("⚠️ No se pudo guardar: "+(err.message||err));alert("No se pudo guardar el cambio.\n\n"+(err.message||err))}
    finally{busy=false}
  }
  async function move(id,d){
    const i=zones.findIndex(z=>String(z.id)===String(id)),n=i+d;if(i<0||n<0||n>=zones.length||busy)return;
    const a=zones[i],b=zones[n],ao=a.sort_order,bo=b.sort_order;busy=true;status("Actualizando orden…");
-   try{let r=await window.supabaseClient.from("delivery_zones").update({sort_order:bo}).eq("id",a.id);if(r.error)throw r.error;r=await window.supabaseClient.from("delivery_zones").update({sort_order:ao}).eq("id",b.id);if(r.error)throw r.error;busy=false;await load(true);status("✅ Orden actualizado.")}
+   try{let r=await supabaseClient.from("delivery_zones").update({sort_order:bo}).eq("id",a.id);if(r.error)throw r.error;r=await supabaseClient.from("delivery_zones").update({sort_order:ao}).eq("id",b.id);if(r.error)throw r.error;busy=false;await load(true);status("✅ Orden actualizado.")}
    catch(err){status("⚠️ No se pudo cambiar el orden: "+(err.message||err));busy=false;await load(true)}
    finally{busy=false}
  }
@@ -94,7 +94,7 @@
    installUI();$("deliveryZoneForm").addEventListener("submit",save);$("deliveryZoneCancel").addEventListener("click",reset);$("deliveryZonesRefresh").addEventListener("click",()=>load(true));
    $("deliveryZonesList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.zoneEdit)edit(b.dataset.zoneEdit);else if(b.dataset.zoneToggle){const z=zones.find(x=>String(x.id)===b.dataset.zoneToggle);if(z)updateZone(z.id,{available:!z.available})}else if(b.dataset.zoneUp)move(b.dataset.zoneUp,-1);else if(b.dataset.zoneDown)move(b.dataset.zoneDown,1)});
    reset();const dash=$("dashboard");const obs=new MutationObserver(()=>{if(dash&&!dash.classList.contains("hidden"))load(true)});obs.observe(dash,{attributes:true,attributeFilter:["class"]});
-   window.supabaseClient?.auth?.getSession().then(({data})=>{if(data?.session&&!dash.classList.contains("hidden"))load(true)});
+   supabaseClient?.auth?.getSession().then(({data})=>{if(data?.session&&!dash.classList.contains("hidden"))load(true)});
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setup);else setup();
 })();
