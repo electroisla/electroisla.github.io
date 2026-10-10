@@ -125,7 +125,21 @@ function save(){
 }
 
 function fromRow(r){return{id:String(r.id),name:r.name||"",category:r.category||"Alimentos",price:Number(r.price)||0,currency:r.currency||"USD",discountPrice:r.discount_price===null||r.discount_price===undefined||Number(r.discount_price)<=0?null:Number(r.discount_price),unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false}}
-async function loadCloudProducts(){const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(error)throw error;if(data&&data.length){products=data.map(fromRow);save();return true}return false}
+async function loadCloudProducts(){
+  const {data,error}=await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at",{ascending:true});
+
+  if(error) throw error;
+
+  // Supabase es la fuente oficial del catálogo.
+  // No conservar productos antiguos si la tabla está vacía.
+  products=(data||[]).map(fromRow);
+  save();
+
+  return true;
+}
 async function loadApprovedReviews(){
  try{
   const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,created_at").eq("approved",true).order("created_at",{ascending:false});
