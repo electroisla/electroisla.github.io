@@ -111,7 +111,19 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 async function loadStoreSettings(){const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent").eq("id",1).maybeSingle();if(error)throw error;if(data){storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0}}}
 async function loadCloudCategories(){const {data,error}=await supabaseClient.from("categories").select("id,name,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;categories=(data||[]).filter(c=>c.available!==false&&String(c.name||"").trim()).map(c=>({id:c.id,name:String(c.name).trim(),sort_order:Number(c.sort_order)||0,available:true}));saveCategories();return true}
 function saveCategories(){localStorage.setItem("electroisla_categories",JSON.stringify(categories))}
-function save(){localStorage.setItem("electroisla_products",JSON.stringify(products));localStorage.setItem("electroisla_cart",JSON.stringify(cart))}
+function save(){
+  try{
+    localStorage.setItem("electroisla_products",JSON.stringify(products));
+  }catch(err){
+    console.warn("Catálogo no guardado localmente; se conserva en Supabase.",err);
+  }
+  try{
+    localStorage.setItem("electroisla_cart",JSON.stringify(cart));
+  }catch(err){
+    console.warn("No se pudo guardar el carrito localmente.",err);
+  }
+}
+
 function fromRow(r){return{id:String(r.id),name:r.name||"",category:r.category||"Alimentos",price:Number(r.price)||0,currency:r.currency||"USD",discountPrice:r.discount_price===null||r.discount_price===undefined||Number(r.discount_price)<=0?null:Number(r.discount_price),unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false}}
 async function loadCloudProducts(){const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(error)throw error;if(data&&data.length){products=data.map(fromRow);save();return true}return false}
 async function loadApprovedReviews(){
