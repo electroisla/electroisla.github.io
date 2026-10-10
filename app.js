@@ -154,7 +154,26 @@ function renderReviewBadge(p){
  if(!r.count)return '<button type="button" class="product-review-link" data-review-product="'+esc(p.id)+'">☆ Sé el primero en reseñar</button>';
  return '<button type="button" class="product-review-summary" data-review-product="'+esc(p.id)+'" aria-label="Ver reseñas de '+esc(p.name)+'"><span class="review-stars">'+reviewStars(r.avg)+'</span><span>'+r.avg.toFixed(1)+' · '+r.count+' reseña'+(r.count===1?'':'s')+'</span></button>';
 }
-async function startCloud(){try{await loadStoreSettings();await loadCloudCategories();await loadCloudProducts();await loadApprovedReviews();renderCategoryTabs();renderCategoryMenu();render();renderCart()}catch(err){console.warn("Supabase no disponible; usando catálogo local.",err);renderCategoryTabs();renderCategoryMenu();render();renderCart()}}
+async function startCloud(){
+  const results = await Promise.allSettled([
+    loadStoreSettings(),
+    loadCloudCategories(),
+    loadCloudProducts(),
+    loadApprovedReviews()
+  ]);
+
+  results.forEach((result) => {
+    if (result.status === "rejected") {
+      console.warn("Error al cargar datos de Supabase:", result.reason);
+    }
+  });
+
+  renderCategoryTabs();
+  renderCategoryMenu();
+  render();
+  renderCart();
+}
+
 let currentFilter="Todos";
 let reviewsByProduct={};
 let reviewsLoaded=false;
