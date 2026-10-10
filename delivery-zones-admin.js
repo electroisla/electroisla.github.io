@@ -79,7 +79,28 @@
    catch(err){status("⚠️ No se pudo guardar: "+(err.message||err));alert("No se pudo guardar el cambio.\n\n"+(err.message||err))}
    finally{busy=false}
  }
- async function move(id,d){
+   
+ async function removeZone(id){
+   if(busy)return;
+   const z=zones.find(x=>String(x.id)===String(id));
+   if(!z)return;
+   if(!confirm('¿Seguro que deseas eliminar la zona "'+z.name+'"? Esta acción no se puede deshacer.'))return;
+   busy=true;
+   status("Eliminando zona…");
+   try{
+     const {error}=await supabaseClient.from("delivery_zones").delete().eq("id",z.id);
+     if(error)throw error;
+     if(String(editingId)===String(z.id))reset();
+     busy=false;
+     await load(true);
+     status("✅ Zona eliminada correctamente.");
+   }catch(err){
+     status("⚠️ No se pudo eliminar la zona: "+(err.message||err));
+     alert("No se pudo eliminar la zona.\n\n"+(err.message||err));
+   }finally{
+     busy=false;
+ }
+   async function move(id,d){
    const i=zones.findIndex(z=>String(z.id)===String(id)),n=i+d;if(i<0||n<0||n>=zones.length||busy)return;
    const a=zones[i],b=zones[n],ao=a.sort_order,bo=b.sort_order;busy=true;status("Actualizando orden…");
    try{let r=await supabaseClient.from("delivery_zones").update({sort_order:bo}).eq("id",a.id);if(r.error)throw r.error;r=await supabaseClient.from("delivery_zones").update({sort_order:ao}).eq("id",b.id);if(r.error)throw r.error;busy=false;await load(true);status("✅ Orden actualizado.")}
