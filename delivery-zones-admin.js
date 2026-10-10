@@ -113,7 +113,18 @@
  function setup(){
    if(!$("dashboard")||$("deliveryZonesList"))return;
    installUI();$("deliveryZoneForm").addEventListener("submit",save);$("deliveryZoneCancel").addEventListener("click",reset);$("deliveryZonesRefresh").addEventListener("click",()=>load(true));
-   $("deliveryZonesList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.zoneEdit)edit(b.dataset.zoneEdit);else if(b.dataset.zoneToggle){const z=zones.find(x=>String(x.id)===b.dataset.zoneToggle);if(z)updateZone(z.id,{available:!z.available})}else if(b.dataset.zoneUp)move(b.dataset.zoneUp,-1);else if(b.dataset.zoneDown)move(b.dataset.zoneDown,1)});
+   
+   $("deliveryZonesList").addEventListener("click",e=>{
+     const b=e.target.closest("button");
+     if(!b)return;
+     if(b.dataset.zoneEdit)edit(b.dataset.zoneEdit);
+     else if(b.dataset.zoneToggle){
+       const z=zones.find(x=>String(x.id)===b.dataset.zoneToggle);
+       if(z)updateZone(z.id,{available:!z.available});
+     }else if(b.dataset.zoneUp)move(b.dataset.zoneUp,-1);
+     else if(b.dataset.zoneDown)move(b.dataset.zoneDown,1);
+     else if(b.dataset.zoneDelete)removeZone(b.dataset.zoneDelete);
+   });
    reset();const dash=$("dashboard");const obs=new MutationObserver(()=>{if(dash&&!dash.classList.contains("hidden"))load(true)});obs.observe(dash,{attributes:true,attributeFilter:["class"]});
    supabaseClient?.auth?.getSession().then(({data})=>{if(data?.session&&!dash.classList.contains("hidden"))load(true)});
  }
