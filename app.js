@@ -10,7 +10,7 @@ const defaultProducts=[
 {id:"e3",name:"Lavadora",category:"Electrodomésticos",price:320,currency:"USD",discountPrice:null,unit:"unidad",image:"",description:"Lavadora.",available:true},
 {id:"e4",name:"Cocina",category:"Electrodomésticos",price:180,currency:"USD",discountPrice:null,unit:"unidad",image:"",description:"Cocina doméstica.",available:true}
 ];
-let products=JSON.parse(localStorage.getItem("electroisla_products")||"null")||defaultProducts;
+let products=JSON.parse(localStorage.getItem("electroisla_products")||"null")||[];
 let cart=JSON.parse(localStorage.getItem("electroisla_cart")||"[]");
 let categories=JSON.parse(localStorage.getItem("electroisla_categories")||"null")||[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0};
