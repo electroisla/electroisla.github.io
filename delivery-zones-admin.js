@@ -98,9 +98,10 @@
      status("⚠️ No se pudo eliminar la zona: "+(err.message||err));
      alert("No se pudo eliminar la zona.\n\n"+(err.message||err));
    }finally{
-     busy=false;
- }
-   async function move(id,d){
+  busy=false;
+}
+}
+async function move(id,d){
    const i=zones.findIndex(z=>String(z.id)===String(id)),n=i+d;if(i<0||n<0||n>=zones.length||busy)return;
    const a=zones[i],b=zones[n],ao=a.sort_order,bo=b.sort_order;busy=true;status("Actualizando orden…");
    try{let r=await supabaseClient.from("delivery_zones").update({sort_order:bo}).eq("id",a.id);if(r.error)throw r.error;r=await supabaseClient.from("delivery_zones").update({sort_order:ao}).eq("id",b.id);if(r.error)throw r.error;busy=false;await load(true);status("✅ Orden actualizado.")}
