@@ -11,7 +11,7 @@ const defaultProducts=[
 let products=JSON.parse(localStorage.getItem("electroisla_products")||"null")||defaultProducts;
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0};
 let categories=[];
-const saveLocal=()=>localStorage.setItem("electroisla_products",JSON.stringify(products));
+const saveLocal=()=>{try{localStorage.setItem("electroisla_products",JSON.stringify(products));}catch(err){console.warn("Catálogo no guardado localmente; se conserva en Supabase.",err);}};
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
 const currencyLabel=c=>c||"USD";
