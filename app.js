@@ -645,11 +645,7 @@ document.getElementById("municipality")?.addEventListener("change",updateDeliver
 document.getElementById("otherZone")?.addEventListener("input",updatePaymentSummary);
 
 setupDeliveryPicker();
-renderCategoryTabs();
 ensureCategoryMenu();
-renderCategoryMenu();
-render();
-renderCart();
 startCloud();
 
 supabaseClient.channel("settings-store").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadStoreSettings();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
