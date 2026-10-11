@@ -283,11 +283,11 @@
       id:String(r.id),name:r.name||"",category:r.category||"Alimentos",
       price:Number(r.price)||0,currency:r.currency||"USD",
       discountPrice:(r.discount_price??r.discountPrice)==null||Number(r.discount_price??r.discountPrice)<=0?null:Number(r.discount_price??r.discountPrice),
-      unit:r.unit||"",image:r.image||old.image||"",description:r.description||"",available:r.available!==false
+      unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false
     };
     });
     if(!data.length)return;
-    try{localStorage.setItem("electroisla_products",JSON.stringify(data));}catch(_){}
+    try{localStorage.setItem("electroisla_products",JSON.stringify(data.map(p=>({...p,image:""}))));}catch(_){}
     box.innerHTML=data.map(p=>{
       const price=p.discountPrice&&p.discountPrice<p.price?p.discountPrice:p.price;
       const old=p.discountPrice&&p.discountPrice<p.price?'<span class="old-price">'+moneyFast(p.price,p.currency)+'</span> ':"";
@@ -303,7 +303,8 @@
   try{
     const cached=JSON.parse(localStorage.getItem("electroisla_products")||"null");
     if(Array.isArray(cached)&&cached.length){
-      show(cached);
+      // La caché conserva datos ligeros, nunca las imágenes codificadas.
+      show(cached.map(p=>({...p,image:""})));
       cacheShown=true;
     }
   }catch(_){}
@@ -319,7 +320,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=136"></script>
+<script src="app.js?v=137"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
