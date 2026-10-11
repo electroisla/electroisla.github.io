@@ -213,7 +213,7 @@ async function startCloud(){
   // Iniciar la consulta de productos inmediatamente: no esperar a que terminen
   // ajustes, categorías o reseñas para mostrar el catálogo.
   window.catalogLoading = products.length === 0;
-  if(window.catalogLoading) render();
+  if(window.catalogLoading && !window.__electroislaFastCatalog) render();
 
   const productsTask = (async()=>{
     try{
