@@ -14,6 +14,18 @@
 <style>
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
 .zelle-logo-icon svg{display:block;width:18px;height:18px}
+/* Estado visual de carga del catálogo: conserva el espacio de las tarjetas */
+.ei-skeleton-card{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:142px;margin:0 0 12px;padding:14px;border:1px solid #e6edf5;border-radius:18px;background:#fff;overflow:hidden}
+.ei-skeleton-copy{flex:1;min-width:0}
+.ei-skeleton-media{width:104px;height:112px;flex:0 0 104px;border-radius:14px}
+.ei-skeleton-line,.ei-skeleton-media,.ei-skeleton-pill{position:relative;overflow:hidden;background:#edf2f8}
+.ei-skeleton-line{height:11px;border-radius:8px;margin:0 0 11px}
+.ei-skeleton-line.short{width:42%}.ei-skeleton-line.medium{width:72%}.ei-skeleton-line.long{width:94%}
+.ei-skeleton-pill{height:20px;width:76px;border-radius:999px;margin-bottom:12px;background:#fff0e5}
+.ei-skeleton-price{height:15px;width:88px;margin-top:14px;border-radius:8px;background:#ffe0c8}
+.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);animation:ei-shimmer 1.25s infinite}
+@keyframes ei-shimmer{100%{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{animation:none}}
 </style>
 </head>
 <body>
@@ -203,6 +215,8 @@
   if(!box)return;
   const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=*";
   const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
+  box.innerHTML=Array.from({length:4},()=>'<article class="ei-skeleton-card" aria-hidden="true"><div class="ei-skeleton-copy"><div class="ei-skeleton-pill"></div><div class="ei-skeleton-line long"></div><div class="ei-skeleton-line medium"></div><div class="ei-skeleton-line short"></div><div class="ei-skeleton-price"></div></div><div class="ei-skeleton-media"></div></article>').join("");
+  window.__electroislaFastCatalog=true;
   const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
   function show(rows){
@@ -233,7 +247,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=127"></script>
+<script src="app.js?v=128"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
