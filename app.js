@@ -133,9 +133,13 @@ async function loadCloudProducts(){
 
   if(error) throw error;
 
-  // Supabase es la fuente oficial del catálogo.
-  // No conservar productos antiguos si la tabla está vacía.
-  products=(data||[]).map(fromRow);
+  // La tabla ya tiene productos. Una respuesta vacía inesperada no debe
+  // borrar el catálogo local ni mostrarse como si la tienda no tuviera stock.
+  if(!Array.isArray(data) || data.length===0){
+    throw new Error("Supabase devolvió un catálogo vacío; se reintentará la consulta.");
+  }
+
+  products=data.map(fromRow);
   save();
 
   return true;
