@@ -213,18 +213,24 @@
 (function(){
   const box=document.getElementById("products");
   if(!box)return;
-  const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=*";
+  const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=id,name,category,price,currency,discount_price,unit,description,available";
   const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
   const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
   function show(rows){
     if(!Array.isArray(rows)||!rows.length)return;
-    const data=rows.filter(r=>r.available!==false).map(r=>({
+    let previous=[];
+    try{previous=JSON.parse(localStorage.getItem("electroisla_products")||"[]");}catch(_){}
+    const previousById=new Map((Array.isArray(previous)?previous:[]).map(p=>[String(p.id),p]));
+    const data=rows.filter(r=>r.available!==false).map(r=>{
+      const old=previousById.get(String(r.id))||{};
+      return {
       id:String(r.id),name:r.name||"",category:r.category||"Alimentos",
       price:Number(r.price)||0,currency:r.currency||"USD",
       discountPrice:(r.discount_price??r.discountPrice)==null||Number(r.discount_price??r.discountPrice)<=0?null:Number(r.discount_price??r.discountPrice),
-      unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false
-    }));
+      unit:r.unit||"",image:r.image||old.image||"",description:r.description||"",available:r.available!==false
+    };
+    });
     if(!data.length)return;
     try{localStorage.setItem("electroisla_products",JSON.stringify(data));}catch(_){}
     box.innerHTML=data.map(p=>{
@@ -258,7 +264,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=130"></script>
+<script src="app.js?v=131"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
