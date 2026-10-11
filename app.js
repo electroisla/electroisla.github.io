@@ -423,52 +423,77 @@ function closeCategoryMenu(){
 }
 function updateStickyOrder(animate=false){const bar=document.getElementById("stickyOrder");if(!bar)return;const count=cart.reduce((s,i)=>s+i.qty,0);let total=0;cart.forEach(i=>{const p=products.find(x=>x.id===i.id);if(p)total+=effectivePrice(p)*i.qty});bar.classList.toggle("visible",count>0);const c=bar.querySelector("[data-sticky-count]");const n=bar.querySelector("[data-sticky-count-number]");const w=bar.querySelector("[data-sticky-count-word]");const t=bar.querySelector("[data-sticky-total]");if(n)n.textContent=count;if(w)w.textContent=count===1?"producto":"productos";if(c&&!n&&!w)c.textContent=`${count} producto${count===1?"":"s"}`;if(t)t.textContent=money(total,"USD");if(animate){bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce");void bar.offsetWidth;if(n)n.classList.add("electroisla-product-count-bounce");bar.classList.add("electroisla-order-update");setTimeout(()=>{bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce")},450)}}
 const requestedProductImages=new Set();
+const pendingProductImageElements=new Map();
 let productImageObserver=null;
+let productImageBatchScheduled=false;
 function scheduleProductImages(){
   const box=document.getElementById("products");
   if(!box)return;
   if(!("IntersectionObserver" in window)){
-    box.querySelectorAll("[data-product-image]").forEach(el=>loadProductImage(el));
+    queueProductImages([...box.querySelectorAll("[data-product-image]")]);
     return;
   }
   if(!productImageObserver){
     productImageObserver=new IntersectionObserver(entries=>{
+      const visible=[];
       entries.forEach(entry=>{
         if(!entry.isIntersecting)return;
         productImageObserver.unobserve(entry.target);
-        loadProductImage(entry.target);
+        visible.push(entry.target);
       });
-    },{rootMargin:"220px 0px"});
+      if(visible.length)queueProductImages(visible);
+    },{rootMargin:"450px 0px"});
   }
   box.querySelectorAll("[data-product-image]").forEach(el=>productImageObserver.observe(el));
 }
-async function loadProductImage(el){
-  const id=String(el?.dataset?.productImage||"");
-  if(!id||requestedProductImages.has(id))return;
-  requestedProductImages.add(id);
+// Agrupa las imágenes visibles en una sola consulta a Supabase, en vez de
+// realizar una petición de red por producto. Esto reduce mucho la latencia móvil.
+function queueProductImages(elements){
+  elements.forEach(el=>{
+    const id=String(el?.dataset?.productImage||"");
+    if(id&&!requestedProductImages.has(id))pendingProductImageElements.set(id,el);
+  });
+  if(productImageBatchScheduled||!pendingProductImageElements.size)return;
+  productImageBatchScheduled=true;
+  requestAnimationFrame(()=>setTimeout(flushProductImageBatch,0));
+}
+async function flushProductImageBatch(){
+  productImageBatchScheduled=false;
+  const batch=[...pendingProductImageElements.entries()];
+  pendingProductImageElements.clear();
+  const ids=batch.map(([id])=>id).filter(id=>!requestedProductImages.has(id));
+  if(!ids.length)return;
+  ids.forEach(id=>requestedProductImages.add(id));
   try{
-    const {data,error}=await catalogReadClient.from("products").select("image").eq("id",id).maybeSingle();
+    const {data,error}=await catalogReadClient.from("products").select("id,image").in("id",ids);
     if(error)throw error;
-    const image=typeof data?.image==="string"?data.image:"";
-    const product=products.find(p=>String(p.id)===id);
-    if(!product)return;
-    product.image=image;
+    const images=new Map((data||[]).map(row=>[String(row.id),typeof row.image==="string"?row.image:""]));
+    batch.forEach(([id,el])=>{
+      const product=products.find(p=>String(p.id)===id);
+      if(!product)return;
+      const image=images.get(id)||"";
+      product.image=image;
+      if(!el.isConnected)return;
+      el.removeAttribute("data-product-image");
+      if(image){
+        const img=document.createElement("img");
+        img.src=image;
+        img.alt=product.name||"";
+        img.loading="eager";
+        el.replaceChildren(img);
+      }else{
+        el.textContent=product.category==="Alimentos"?"🥩":"🏠";
+      }
+    });
     try{localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))));}catch(_){}
-    if(!el.isConnected)return;
-    el.removeAttribute("data-product-image");
-    if(image){
-      const img=document.createElement("img");
-      img.src=image;
-      img.alt=product.name||"";
-      img.loading="eager";
-      el.replaceChildren(img);
-    }else{
-      el.textContent=product.category==="Alimentos"?"🥩":"🏠";
-    }
   }catch(err){
-    requestedProductImages.delete(id);
-    console.warn("No se pudo cargar la imagen del producto "+id,err);
+    ids.forEach(id=>requestedProductImages.delete(id));
+    console.warn("No se pudieron cargar las imágenes del catálogo en lote.",err);
   }
+}
+async function loadProductImage(el){
+  // La ficha ampliada usa el mismo mecanismo de lote que las tarjetas del catálogo.
+  queueProductImages([el]);
 }
 function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(window.catalogLoading&&products.length===0&&window.__electroislaFastCatalog){if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const count=document.getElementById("resultCount");if(count)count.textContent="Cargando catálogo…";updateStickyOrder();return;}if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>String(c.name).trim()));
 const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));scheduleProductImages();updateStickyOrder()}
