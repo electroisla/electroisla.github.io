@@ -10,9 +10,18 @@ const defaultProducts=[
 {id:"e3",name:"Lavadora",category:"Electrodomésticos",price:320,currency:"USD",discountPrice:null,unit:"unidad",image:"",description:"Lavadora.",available:true},
 {id:"e4",name:"Cocina",category:"Electrodomésticos",price:180,currency:"USD",discountPrice:null,unit:"unidad",image:"",description:"Cocina doméstica.",available:true}
 ];
-let products=JSON.parse(localStorage.getItem("electroisla_products")||"null")||[];
-let cart=JSON.parse(localStorage.getItem("electroisla_cart")||"[]");
-let categories=JSON.parse(localStorage.getItem("electroisla_categories")||"null")||[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
+function readLocalJSON(key,fallback){
+  try{
+    const raw=localStorage.getItem(key);
+    return raw===null?fallback:JSON.parse(raw);
+  }catch(err){
+    console.warn(`Datos locales inválidos en ${key}; se utilizará el valor predeterminado.`,err);
+    return fallback;
+  }
+}
+let products=readLocalJSON("electroisla_products",[])||[];
+let cart=readLocalJSON("electroisla_cart",[])||[];
+let categories=readLocalJSON("electroisla_categories",null)||[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
