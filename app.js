@@ -19,9 +19,12 @@ function readLocalJSON(key,fallback){
     return fallback;
   }
 }
-let products=readLocalJSON("electroisla_products",[])||[];
-let cart=readLocalJSON("electroisla_cart",[])||[];
-let categories=readLocalJSON("electroisla_categories",null)||[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
+const localProducts=readLocalJSON("electroisla_products",[]);
+const localCart=readLocalJSON("electroisla_cart",[]);
+const localCategories=readLocalJSON("electroisla_categories",null);
+let products=Array.isArray(localProducts)?localProducts:[];
+let cart=Array.isArray(localCart)?localCart:[];
+let categories=Array.isArray(localCategories)?localCategories:[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
