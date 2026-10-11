@@ -203,36 +203,51 @@ function renderReviewBadge(p){
  return '<button type="button" class="product-review-summary" data-review-product="'+esc(p.id)+'" aria-label="Ver reseñas de '+esc(p.name)+'"><span class="review-stars">'+reviewStars(r.avg)+'</span><span>'+r.avg.toFixed(1)+' · '+r.count+' reseña'+(r.count===1?'':'s')+'</span></button>';
 }
 async function startCloud(){
-  const settingsResult = await Promise.allSettled([
-    loadStoreSettings(),
-    loadCloudCategories(),
-    loadApprovedReviews()
-  ]);
+  // Iniciar la consulta de productos inmediatamente: no esperar a que terminen
+  // ajustes, categorías o reseñas para mostrar el catálogo.
+  window.catalogLoading = products.length === 0;
+  if(window.catalogLoading) render();
 
-  settingsResult.forEach((result) => {
-    if (result.status === "rejected") {
-      console.warn("Error al cargar datos de Supabase:", result.reason);
+  const productsTask = (async()=>{
+    try{
+      await loadCloudProductsWithRetry();
+      window.catalogLoadError = "";
+      window.catalogLoading = false;
+      renderCategoryTabs();
+      renderCategoryMenu();
+      render();
+      renderCart();
+      renderCartRecommendations();
+    }catch(err){
+      window.catalogLoadError = String(err?.message || err || "Error desconocido");
+      window.catalogLoading = false;
+      console.error("Error al cargar productos de Supabase tras varios intentos:", err);
+      render();
+      renderCart();
     }
-  });
+  })();
 
-  try {
-    await loadCloudProductsWithRetry();
-    window.catalogLoadError = "";
-  } catch (err) {
-    window.catalogLoadError = String(err?.message || err || "Error desconocido");
-    console.error("Error al cargar productos de Supabase tras varios intentos:", err);
-  }
+  // Estos datos complementarios se cargan en paralelo y actualizan la vista
+  // cuando están listos, sin bloquear la primera aparición de los productos.
+  const settingsTask = loadStoreSettings()
+    .then(()=>{ updatePaymentSummary(); renderCart(); })
+    .catch(err=>console.warn("No se pudieron cargar los ajustes de la tienda:",err));
 
-  renderCategoryTabs();
-  renderCategoryMenu();
-  render();
-  if(window.catalogLoadError && products.length===0){
-    const box=document.getElementById("products");
-    if(box){
-      box.innerHTML='<div class="empty-state"><strong>No se pudo cargar el catálogo.</strong><p>'+esc(window.catalogLoadError)+'</p></div>';
-    }
-  }
-  renderCart();
+  const categoriesTask = loadCloudCategories()
+    .then(()=>{
+      if(currentFilter!=="Todos"&&!categories.some(c=>c.name===currentFilter)){
+        currentFilter="Todos";
+      }
+      renderCategoryTabs();
+      renderCategoryMenu();
+      render(currentFilter);
+    })
+    .catch(err=>console.warn("No se pudieron cargar las categorías:",err));
+
+  const reviewsTask = loadApprovedReviews()
+    .then(()=>{ if(products.length) render(currentFilter); });
+
+  await Promise.allSettled([productsTask,settingsTask,categoriesTask,reviewsTask]);
 }
 
 let currentFilter="Todos";
@@ -391,7 +406,7 @@ function closeCategoryMenu(){
 }
 function updateStickyOrder(animate=false){const bar=document.getElementById("stickyOrder");if(!bar)return;const count=cart.reduce((s,i)=>s+i.qty,0);let total=0;cart.forEach(i=>{const p=products.find(x=>x.id===i.id);if(p)total+=effectivePrice(p)*i.qty});bar.classList.toggle("visible",count>0);const c=bar.querySelector("[data-sticky-count]");const n=bar.querySelector("[data-sticky-count-number]");const w=bar.querySelector("[data-sticky-count-word]");const t=bar.querySelector("[data-sticky-total]");if(n)n.textContent=count;if(w)w.textContent=count===1?"producto":"productos";if(c&&!n&&!w)c.textContent=`${count} producto${count===1?"":"s"}`;if(t)t.textContent=money(total,"USD");if(animate){bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce");void bar.offsetWidth;if(n)n.classList.add("electroisla-product-count-bounce");bar.classList.add("electroisla-order-update");setTimeout(()=>{bar.classList.remove("electroisla-order-update");if(n)n.classList.remove("electroisla-product-count-bounce")},450)}}
 function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>String(c.name).trim()));
-const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><div class="product-img">${p.image?`<img src="${p.image}" alt="${esc(p.name)}">`:(p.category==="Alimentos"?"🥩":"🏠")}</div><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':'<p class="empty-products">No hay productos disponibles.</p>');box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));updateStickyOrder()}
+const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><div class="product-img">${p.image?`<img src="${p.image}" alt="${esc(p.name)}">`:(p.category==="Alimentos"?"🥩":"🏠")}</div><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));updateStickyOrder()}
 function electroislaAnimate(selector,className="electroisla-pop"){const el=document.querySelector(selector);if(!el)return;el.classList.remove(className);void el.offsetWidth;el.classList.add(className);setTimeout(()=>el.classList.remove(className),350)}
 function electroislaAnimateAdd(id){const product=products.find(p=>String(p.id)===String(id));const btn=product?[...document.querySelectorAll(".add-circle")].find(b=>b.getAttribute("aria-label")===`Agregar ${product.name}`):null;if(btn){btn.classList.remove("electroisla-bounce");void btn.offsetWidth;btn.classList.add("electroisla-bounce");setTimeout(()=>btn.classList.remove("electroisla-bounce"),400)}electroislaAnimate("#cartCount","electroisla-cart-bounce");electroislaAnimate("#cartTopTotal");electroislaAnimate("#cartTotal");electroislaAnimate(".cart-head-total strong");updateStickyOrder(true)}
 function updateCategoryHighlight(name){
@@ -732,19 +747,3 @@ supabaseClient.channel("categories-store").on("postgres_changes",{event:"*",sche
   console.warn("No se pudieron actualizar las categorías.",e);
  }
 }).subscribe();
-
-
-// Diagnóstico temporal exclusivo de la rama de prueba: detecta si el catálogo
-// sigue vacío después de que la carga inicial debería haber terminado.
-setTimeout(() => {
-  const box = document.getElementById("products");
-  if (!box || products.length > 0) return;
-  const details = window.catalogLoadError
-    ? String(window.catalogLoadError)
-    : "La carga inicial no registró un error, pero tampoco incorporó productos.";
-  box.innerHTML = '<p class="empty-products">Diagnóstico temporal del catálogo</p>' +
-    '<p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">' +
-    'Productos en memoria: ' + products.length +
-    '<br>Cliente Supabase: ' + (typeof supabaseClient !== "undefined" ? "inicializado" : "no inicializado") +
-    '<br>Detalle: ' + esc(details) + '</p>';
-}, 8000);
