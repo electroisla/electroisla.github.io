@@ -6,7 +6,11 @@
   <meta name="electroisla-version" content="9.8.44">
   <title>ElectroIsla | Alimentos y Electrodomésticos</title>
   <meta name="description" content="ElectroIsla: alimentos y electrodomésticos. Compra y solicita tu pedido por WhatsApp.">
-  <link rel="stylesheet" href="styles.css?v=9.8.126">
+  <link rel="preconnect" href="https://pdvfupvtofpzfllkjhhc.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//pdvfupvtofpzfllkjhhc.supabase.co">
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<link rel="stylesheet" href="styles.css?v=9.8.126">
 <style>
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
 .zelle-logo-icon svg{display:block;width:18px;height:18px}
@@ -191,9 +195,45 @@
 </div>
 
 <footer><strong>ElectroIsla</strong><span>Alimentos + Electrodomésticos</span><span>WhatsApp: +53 52017110</span></footer>
+<script>
+/* ElectroIsla: mostrar el catálogo en cuanto responda el endpoint público,
+   sin esperar a que se descargue la biblioteca completa de Supabase JS. */
+(function(){
+  const box=document.getElementById("products");
+  if(!box)return;
+  const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=*";
+  const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QgY-";
+  const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
+  function show(rows){
+    if(!Array.isArray(rows)||!rows.length)return;
+    const data=rows.filter(r=>r.available!==false).map(r=>({
+      id:String(r.id),name:r.name||"",category:r.category||"Alimentos",
+      price:Number(r.price)||0,currency:r.currency||"USD",
+      discountPrice:r.discount_price==null||Number(r.discount_price)<=0?null:Number(r.discount_price),
+      unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false
+    }));
+    if(!data.length)return;
+    try{localStorage.setItem("electroisla_products",JSON.stringify(data));}catch(_){}
+    box.innerHTML=data.map(p=>{
+      const price=p.discountPrice&&p.discountPrice<p.price?p.discountPrice:p.price;
+      const old=p.discountPrice&&p.discountPrice<p.price?'<span class="old-price">'+moneyFast(p.price,p.currency)+'</span> ':"";
+      const image=p.image?'<img src="'+escFast(p.image)+'" alt="'+escFast(p.name)+'">':(p.category==="Alimentos"?"🥩":"🏠");
+      return '<article class="product shop-product" data-category="'+escFast(p.category)+'"><div class="product-info"><span class="tag">'+escFast(p.category)+'</span><h3>'+escFast(p.name)+'</h3><p>'+escFast(p.description)+'</p><div class="price">'+old+'<span class="discount-price">'+moneyFast(price,p.currency)+'</span> <small>'+escFast(p.unit)+'</small></div></div><div class="product-media"><div class="product-img">'+image+'</div><button class="add-circle" type="button" disabled aria-label="Cargando controles">+</button></div></article>';
+    }).join("");
+    const count=document.getElementById("resultCount");
+    if(count)count.textContent=data.length+" productos";
+    window.__electroislaFastCatalog=true;
+  }
+  fetch(endpoint,{headers:{apikey:key,Authorization:"Bearer "+key},cache:"no-store"})
+    .then(r=>{if(!r.ok)throw new Error("Catálogo HTTP "+r.status);return r.json();})
+    .then(show)
+    .catch(e=>console.warn("La carga rápida inicial no estuvo disponible; continuará la carga normal.",e));
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=126"></script>
+<script src="app.js?v=127"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
