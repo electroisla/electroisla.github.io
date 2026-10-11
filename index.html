@@ -32,6 +32,29 @@
 .shop-product.electroisla-photo-added .product-img img{animation:ei-image-appear .32s ease-out both}
 @keyframes ei-image-appear{from{opacity:.45;transform:scale(.975)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.product-img[data-product-image],.shop-product.electroisla-photo-added .product-img img{animation:none}}
+
+/* ElectroIsla: imagen táctil y ficha ampliada del producto */
+.product-image-trigger{display:grid;border:0;padding:0;margin:0;text-align:center;color:inherit;appearance:none;-webkit-appearance:none;cursor:zoom-in;touch-action:manipulation}
+.product-image-trigger:focus-visible{outline:2px solid #f28a2e;outline-offset:3px}
+.product-detail-modal{z-index:75;padding:14px}
+.product-detail-card{width:min(520px,100%);max-height:94vh;padding:0;overflow:auto;border:1px solid #e8edf4;box-shadow:0 22px 70px rgba(8,35,73,.24)}
+.product-detail-close{z-index:2;background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.product-detail-image{height:min(42vh,340px);min-height:210px;margin:0;background:linear-gradient(100deg,#edf2f8 20%,#fff5ec 40%,#edf2f8 60%);background-size:220% 100%;display:grid;place-items:center;overflow:hidden}
+.product-detail-image.is-loading{animation:ei-image-wait 1.35s ease-in-out infinite}
+.product-detail-image img{width:100%;height:100%;object-fit:contain;padding:12px;animation:ei-image-appear .24s ease-out both}
+.product-detail-placeholder{font-size:64px}
+.product-detail-copy{padding:22px 24px 24px}
+.product-detail-category{display:inline-flex;border-radius:999px;background:#fff0e5;color:#e8781b;padding:5px 11px;font-size:11px;font-weight:800}
+.product-detail-copy h2{margin:12px 0 8px;font-size:23px;line-height:1.2}
+.product-detail-copy>p{color:#778392;font-size:14px;line-height:1.5;margin:0 0 14px;white-space:pre-line}
+.product-detail-price{color:#173b68;font-size:22px;font-weight:800;margin:12px 0 18px}
+.product-detail-price small{font-size:13px;color:#6c7d90;font-weight:600}
+.product-detail-add{min-height:50px;border-radius:14px;background:#f58220;box-shadow:0 5px 14px rgba(245,130,32,.2)}
+.product-detail-add:hover{background:#e87312}
+.product-detail-hint{font-size:11px!important;text-align:center;margin:12px 0 0!important}
+@media(max-width:520px){.product-detail-modal{padding:10px}.product-detail-card{max-height:92vh;border-radius:20px}.product-detail-image{height:34vh;min-height:190px}.product-detail-copy{padding:18px 19px 20px}.product-detail-copy h2{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.product-detail-image.is-loading,.product-detail-image img{animation:none}}
+
 </style>
 </head>
 <body>
@@ -178,6 +201,21 @@
   </div>
 </div>
 
+<div id="productDetailModal" class="modal hidden product-detail-modal" aria-hidden="true">
+  <div class="modal-card product-detail-card" role="dialog" aria-modal="true" aria-labelledby="productDetailName">
+    <button type="button" class="modal-close product-detail-close" id="productDetailClose" aria-label="Cerrar detalles">✕</button>
+    <div id="productDetailImage" class="product-detail-image"></div>
+    <div class="product-detail-copy">
+      <span id="productDetailCategory" class="product-detail-category"></span>
+      <h2 id="productDetailName">Producto</h2>
+      <p id="productDetailDescription"></p>
+      <div id="productDetailPrice" class="product-detail-price"></div>
+      <button type="button" id="productDetailAdd" class="btn primary full product-detail-add">Agregar al carrito</button>
+      <p class="product-detail-hint">Puedes seguir viendo los detalles o cerrar esta ventana para continuar comprando.</p>
+    </div>
+  </div>
+</div>
+
 <div id="reviewModal" class="modal hidden review-modal" aria-hidden="true">
   <div class="modal-card review-card" role="dialog" aria-modal="true" aria-labelledby="reviewProductName">
     <button type="button" class="review-close" id="reviewClose" aria-label="Cerrar">×</button>
@@ -270,7 +308,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=134"></script>
+<script src="app.js?v=135"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
