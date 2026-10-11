@@ -126,10 +126,11 @@ function save(){
 
 function fromRow(r){return{id:String(r.id),name:r.name||"",category:r.category||"Alimentos",price:Number(r.price)||0,currency:r.currency||"USD",discountPrice:r.discount_price===null||r.discount_price===undefined||Number(r.discount_price)<=0?null:Number(r.discount_price),unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false}}
 async function loadCloudProducts(){
+  // No depender del orden REST por created_at: la caché del esquema REST
+  // puede estar desactualizada aunque la tabla de productos tenga filas.
   const {data,error}=await supabaseClient
     .from("products")
-    .select("*")
-    .order("created_at",{ascending:true});
+    .select("*");
 
   if(error) throw error;
 
@@ -213,6 +214,12 @@ async function startCloud(){
   renderCategoryTabs();
   renderCategoryMenu();
   render();
+  if(window.catalogLoadError && products.length===0){
+    const box=document.getElementById("products");
+    if(box){
+      box.innerHTML='<div class="empty-state"><strong>No se pudo cargar el catálogo.</strong><p>'+esc(window.catalogLoadError)+'</p></div>';
+    }
+  }
   renderCart();
 }
 
