@@ -137,10 +137,17 @@ function save(){
 }
 
 function fromRow(r){return{id:String(r.id),name:r.name||"",category:r.category||"Alimentos",price:Number(r.price)||0,currency:r.currency||"USD",discountPrice:r.discount_price===null||r.discount_price===undefined||Number(r.discount_price)<=0?null:Number(r.discount_price),unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false}}
+// Cliente de solo lectura para el catálogo público: no reutiliza una sesión
+// de administrador/cliente que pueda necesitar renovar tokens antes de consultar.
+const catalogReadClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+);
+
 async function loadCloudProducts(){
-  // No depender del orden REST por created_at: la caché del esquema REST
-  // puede estar desactualizada aunque la tabla de productos tenga filas.
-  const {data,error}=await supabaseClient
+  // El catálogo público se consulta sin depender de la sesión persistida.
+  const {data,error}=await catalogReadClient
     .from("products")
     .select("*");
 
