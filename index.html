@@ -26,6 +26,12 @@
 .ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);animation:ei-shimmer 1.25s infinite}
 @keyframes ei-shimmer{100%{transform:translateX(100%)}}
 @media(prefers-reduced-motion:reduce){.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{animation:none}}
+/* Animación ligera mientras cada foto de producto se descarga */
+.product-img[data-product-image]{position:relative;background:linear-gradient(100deg,#edf2f8 20%,#fff5ec 40%,#edf2f8 60%);background-size:220% 100%;animation:ei-image-wait 1.35s ease-in-out infinite}
+@keyframes ei-image-wait{to{background-position-x:-220%}}
+.product-img img{animation:ei-image-appear .24s ease-out both}
+@keyframes ei-image-appear{from{opacity:.25;transform:scale(1.015)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.product-img[data-product-image],.product-img img{animation:none}}
 </style>
 </head>
 <body>
@@ -264,7 +270,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=132"></script>
+<script src="app.js?v=133"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
