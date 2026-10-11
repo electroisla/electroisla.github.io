@@ -213,7 +213,16 @@ async function startCloud(){
   // Iniciar la consulta de productos inmediatamente: no esperar a que terminen
   // ajustes, categorías o reseñas para mostrar el catálogo.
   window.catalogLoading = products.length === 0;
-  if(window.catalogLoading && !window.__electroislaFastCatalog) render();
+
+  // Si el navegador ya tiene un catálogo guardado, dibujar inmediatamente
+  // las tarjetas completas y habilitar sus controles antes de consultar Supabase.
+  if(products.length){
+    window.catalogLoading = false;
+    render(currentFilter);
+    renderCart();
+  }else if(!window.__electroislaFastCatalog){
+    render();
+  }
 
   const productsTask = (async()=>{
     try{
