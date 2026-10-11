@@ -732,3 +732,19 @@ supabaseClient.channel("categories-store").on("postgres_changes",{event:"*",sche
   console.warn("No se pudieron actualizar las categorías.",e);
  }
 }).subscribe();
+
+
+// Diagnóstico temporal exclusivo de la rama de prueba: detecta si el catálogo
+// sigue vacío después de que la carga inicial debería haber terminado.
+setTimeout(() => {
+  const box = document.getElementById("products");
+  if (!box || products.length > 0) return;
+  const details = window.catalogLoadError
+    ? String(window.catalogLoadError)
+    : "La carga inicial no registró un error, pero tampoco incorporó productos.";
+  box.innerHTML = '<p class="empty-products">Diagnóstico temporal del catálogo</p>' +
+    '<p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">' +
+    'Productos en memoria: ' + products.length +
+    '<br>Cliente Supabase: ' + (typeof supabaseClient !== "undefined" ? "inicializado" : "no inicializado") +
+    '<br>Detalle: ' + esc(details) + '</p>';
+}, 8000);
