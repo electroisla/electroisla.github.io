@@ -202,7 +202,7 @@
   const box=document.getElementById("products");
   if(!box)return;
   const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=*";
-  const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QgY-";
+  const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
   const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
   function show(rows){
