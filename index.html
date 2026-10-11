@@ -55,6 +55,15 @@
 @media(max-width:520px){.product-detail-modal{padding:10px}.product-detail-card{max-height:92vh;border-radius:20px}.product-detail-image{height:34vh;min-height:190px}.product-detail-copy{padding:18px 19px 20px}.product-detail-copy h2{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.product-detail-image.is-loading,.product-detail-image img{animation:none}}
 
+
+/* Reseñas dentro de la ficha ampliada */
+.product-detail-reviews{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px;color:#64748b;font-size:12px}
+.product-detail-reviews .review-stars{font-size:19px;letter-spacing:1px;color:#f59e0b}
+.product-detail-reviews .review-stars-empty{color:#cbd5e1}
+.product-detail-reviews strong{font-size:14px;color:#173b68}
+.product-detail-review{display:block;width:100%;border:0;background:transparent;color:#1763a6;font-size:13px;font-weight:700;text-align:left;padding:8px 0 16px;cursor:pointer}
+.product-detail-review:active{opacity:.72}
+
 </style>
 </head>
 <body>
@@ -210,6 +219,8 @@
       <h2 id="productDetailName">Producto</h2>
       <p id="productDetailDescription"></p>
       <div id="productDetailPrice" class="product-detail-price"></div>
+      <div id="productDetailReviews" class="product-detail-reviews" aria-live="polite"></div>
+      <button type="button" id="productDetailReview" class="product-detail-review">Escribir la primera reseña</button>
       <button type="button" id="productDetailAdd" class="btn primary full product-detail-add">Agregar al carrito</button>
       <p class="product-detail-hint">Puedes seguir viendo los detalles o cerrar esta ventana para continuar comprando.</p>
     </div>
@@ -308,7 +319,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=135"></script>
+<script src="app.js?v=136"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
