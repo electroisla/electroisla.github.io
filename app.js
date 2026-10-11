@@ -125,7 +125,7 @@ async function loadCloudCategories(){const {data,error}=await supabaseClient.fro
 function saveCategories(){localStorage.setItem("electroisla_categories",JSON.stringify(categories))}
 function save(){
   try{
-    localStorage.setItem("electroisla_products",JSON.stringify(products));
+    localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))));
   }catch(err){
     console.warn("Catálogo no guardado localmente; se conserva en Supabase.",err);
   }
@@ -454,7 +454,7 @@ async function loadProductImage(el){
     const product=products.find(p=>String(p.id)===id);
     if(!product)return;
     product.image=image;
-    try{localStorage.setItem("electroisla_products",JSON.stringify(products));}catch(_){}
+    try{localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))));}catch(_){}
     if(!el.isConnected)return;
     el.removeAttribute("data-product-image");
     if(image){
@@ -852,7 +852,7 @@ startCloud();
 
 supabaseClient.channel("settings-store").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadStoreSettings();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
 
-supabaseClient.channel("products-store").on("postgres_changes",{event:"*",schema:"public",table:"products"},async(payload)=>{try{const changedId=payload?.new?.id;if(changedId!==undefined){const changed=products.find(p=>String(p.id)===String(changedId));if(changed)changed.image="";requestedProductImages.delete(String(changedId));try{localStorage.setItem("electroisla_products",JSON.stringify(products))}catch(_){}}await loadCloudProducts();renderCategoryMenu();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
+supabaseClient.channel("products-store").on("postgres_changes",{event:"*",schema:"public",table:"products"},async(payload)=>{try{const changedId=payload?.new?.id;if(changedId!==undefined){const changed=products.find(p=>String(p.id)===String(changedId));if(changed)changed.image="";requestedProductImages.delete(String(changedId));try{localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))))}catch(_){}}await loadCloudProducts();renderCategoryMenu();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
 supabaseClient.channel("reviews-store").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},async()=>{try{await loadApprovedReviews();render()}catch(e){console.warn(e)}}).subscribe();
 
 supabaseClient.channel("categories-store").on("postgres_changes",{event:"*",schema:"public",table:"categories"},async()=>{
