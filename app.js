@@ -159,8 +159,7 @@ async function loadCloudProducts(){
   const previousById=new Map(products.map(p=>[String(p.id),p]));
   products=data.map(row=>{
     const p=fromRow(row);
-    const previous=previousById.get(p.id);
-    if(previous?.image) p.image=previous.image;
+    // Las imágenes no se recuperan de localStorage: se solicitan a Supabase bajo demanda.
     return p;
   });
   save();
