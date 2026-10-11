@@ -654,6 +654,7 @@ document.getElementById("products")?.addEventListener("click",e=>{const trigger=
 document.getElementById("productDetailClose")?.addEventListener("click",closeProductDetail);
 document.getElementById("productDetailModal")?.addEventListener("click",e=>{if(e.target.id==="productDetailModal")closeProductDetail();});
 document.getElementById("productDetailAdd")?.addEventListener("click",addFromProductDetail);
+document.getElementById("productDetailReview")?.addEventListener("click",()=>{const id=document.getElementById("productDetailModal")?.dataset.productId;if(!id)return;closeProductDetail();openReviewModal(id);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeProductDetail();});
 
 document.getElementById("productSearch")?.addEventListener("input",()=>render(currentFilter));
@@ -681,6 +682,11 @@ function openProductDetail(productId){
   imageBox.innerHTML=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'">':'<span class="product-detail-placeholder">'+(p.category==="Alimentos"?"🥩":"🏠")+'</span>';
  }
  if(addButton)addButton.textContent=(cart.find(i=>String(i.id)===String(productId))?.qty||0)>0?"Agregar otra unidad":"Agregar al carrito";
+ const reviewInfo=document.getElementById("productDetailReviews");
+ const reviewButton=document.getElementById("productDetailReview");
+ const review=reviewSummary(productId);
+ if(reviewInfo)reviewInfo.innerHTML=review.count?'<span class="review-stars">'+reviewStars(review.avg)+'</span><strong>'+review.avg.toFixed(1)+'</strong><span>'+review.count+' reseña'+(review.count===1?'':'s')+'</span>':'<span class="review-stars review-stars-empty">☆☆☆☆☆</span><span>Aún sin reseñas</span>';
+ if(reviewButton)reviewButton.textContent=review.count?"Leer reseñas o escribir la tuya":"Escribir la primera reseña";
  modal.classList.remove("hidden");
  modal.setAttribute("aria-hidden","false");
  if(!p.image){
