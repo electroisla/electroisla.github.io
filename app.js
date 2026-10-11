@@ -472,7 +472,7 @@ async function loadProductImage(el){
   }
 }
 function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(window.catalogLoading&&products.length===0&&window.__electroislaFastCatalog){if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const count=document.getElementById("resultCount");if(count)count.textContent="Cargando catálogo…";updateStickyOrder();return;}if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>String(c.name).trim()));
-const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><div class="product-img"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="${esc(p.name)}" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</div><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));scheduleProductImages();updateStickyOrder()}
+const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));scheduleProductImages();updateStickyOrder()}
 function electroislaAnimate(selector,className="electroisla-pop"){const el=document.querySelector(selector);if(!el)return;el.classList.remove(className);void el.offsetWidth;el.classList.add(className);setTimeout(()=>el.classList.remove(className),350)}
 function electroislaAnimateAdd(id){const product=products.find(p=>String(p.id)===String(id));const card=[...document.querySelectorAll(".shop-product")].find(el=>String(el.dataset.productId)===String(id));if(card){card.classList.remove("electroisla-photo-added");void card.offsetWidth;card.classList.add("electroisla-photo-added");setTimeout(()=>card.classList.remove("electroisla-photo-added"),400)}const btn=product?[...document.querySelectorAll(".add-circle")].find(b=>b.getAttribute("aria-label")===`Agregar ${product.name}`):null;if(btn){btn.classList.remove("electroisla-bounce");void btn.offsetWidth;btn.classList.add("electroisla-bounce");setTimeout(()=>btn.classList.remove("electroisla-bounce"),400)}electroislaAnimate("#cartCount","electroisla-cart-bounce");electroislaAnimate("#cartTopTotal");electroislaAnimate("#cartTotal");electroislaAnimate(".cart-head-total strong");updateStickyOrder(true)}
 function updateCategoryHighlight(name){
@@ -650,11 +650,64 @@ function openCheckout(){if(!cart.length){alert("Agrega al menos un producto.");r
 renderCategoryTabs();
 document.getElementById("shopSearchBtn")?.addEventListener("click",()=>{const w=document.getElementById("searchWrap");w.classList.toggle("hidden");if(!w.classList.contains("hidden"))document.getElementById("productSearch")?.focus()});
 document.getElementById("shopMenuBtn")?.addEventListener("click",openCategoryMenu);
+document.getElementById("products")?.addEventListener("click",e=>{const trigger=e.target.closest("[data-product-detail]");if(trigger)openProductDetail(trigger.dataset.productDetail);});
+document.getElementById("productDetailClose")?.addEventListener("click",closeProductDetail);
+document.getElementById("productDetailModal")?.addEventListener("click",e=>{if(e.target.id==="productDetailModal")closeProductDetail();});
+document.getElementById("productDetailAdd")?.addEventListener("click",addFromProductDetail);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeProductDetail();});
+
 document.getElementById("productSearch")?.addEventListener("input",()=>render(currentFilter));
 window.addEventListener("scroll",scheduleCategoryScrollSync,{passive:true});
 window.addEventListener("resize",scheduleCategoryScrollSync);
 window.addEventListener("load",scheduleCategoryScrollSync);
 document.getElementById("cartBtn")?.addEventListener("click",openCart);document.getElementById("closeCart").onclick=closeCart;document.getElementById("cartOverlay").onclick=closeCart;document.getElementById("checkoutBtn").onclick=openCheckout;document.getElementById("closeModal").onclick=()=>document.getElementById("checkoutModal").classList.add("hidden");
+function openProductDetail(productId){
+ const p=products.find(x=>String(x.id)===String(productId));
+ const modal=document.getElementById("productDetailModal");
+ if(!p||!modal)return;
+ modal.dataset.productId=String(productId);
+ const imageBox=document.getElementById("productDetailImage");
+ const title=document.getElementById("productDetailName");
+ const category=document.getElementById("productDetailCategory");
+ const description=document.getElementById("productDetailDescription");
+ const price=document.getElementById("productDetailPrice");
+ const addButton=document.getElementById("productDetailAdd");
+ if(title)title.textContent=p.name||"Producto";
+ if(category)category.textContent=p.category||"";
+ if(description)description.textContent=p.description||"Consulta los detalles de este producto.";
+ if(price)price.innerHTML=priceMarkup(p)+" <small>"+esc(p.unit||"")+"</small>";
+ if(imageBox){
+  imageBox.classList.toggle("is-loading",!p.image);
+  imageBox.innerHTML=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'">':'<span class="product-detail-placeholder">'+(p.category==="Alimentos"?"🥩":"🏠")+'</span>';
+ }
+ if(addButton)addButton.textContent=(cart.find(i=>String(i.id)===String(productId))?.qty||0)>0?"Agregar otra unidad":"Agregar al carrito";
+ modal.classList.remove("hidden");
+ modal.setAttribute("aria-hidden","false");
+ if(!p.image){
+  catalogReadClient.from("products").select("image").eq("id",String(productId)).maybeSingle().then(({data,error})=>{
+   if(error)throw error;
+   const image=typeof data?.image==="string"?data.image:"";
+   const current=products.find(x=>String(x.id)===String(productId));
+   if(current&&image)current.image=image;
+   if(modal.dataset.productId===String(productId)&&imageBox&&image){
+    imageBox.classList.remove("is-loading");
+    imageBox.innerHTML='<img src="'+esc(image)+'" alt="'+esc(p.name)+'">';
+   }
+   if(current&&image)save();
+  }).catch(error=>console.warn("No se pudo cargar la imagen ampliada del producto.",error));
+ }
+}
+function closeProductDetail(){
+ const modal=document.getElementById("productDetailModal");
+ if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true");}
+}
+function addFromProductDetail(){
+ const id=document.getElementById("productDetailModal")?.dataset.productId;
+ if(!id)return;
+ add(id);
+ const button=document.getElementById("productDetailAdd");
+ if(button)button.textContent="Agregar otra unidad";
+}
 function openReviewModal(productId){
  const p=products.find(x=>String(x.id)===String(productId));
  if(!p)return;
