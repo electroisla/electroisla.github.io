@@ -215,8 +215,6 @@
   if(!box)return;
   const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=*";
   const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
-  box.innerHTML=Array.from({length:4},()=>'<article class="ei-skeleton-card" aria-hidden="true"><div class="ei-skeleton-copy"><div class="ei-skeleton-pill"></div><div class="ei-skeleton-line long"></div><div class="ei-skeleton-line medium"></div><div class="ei-skeleton-line short"></div><div class="ei-skeleton-price"></div></div><div class="ei-skeleton-media"></div></article>').join("");
-  window.__electroislaFastCatalog=true;
   const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
   function show(rows){
@@ -224,7 +222,7 @@
     const data=rows.filter(r=>r.available!==false).map(r=>({
       id:String(r.id),name:r.name||"",category:r.category||"Alimentos",
       price:Number(r.price)||0,currency:r.currency||"USD",
-      discountPrice:r.discount_price==null||Number(r.discount_price)<=0?null:Number(r.discount_price),
+      discountPrice:(r.discount_price??r.discountPrice)==null||Number(r.discount_price??r.discountPrice)<=0?null:Number(r.discount_price??r.discountPrice),
       unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false
     }));
     if(!data.length)return;
@@ -239,6 +237,19 @@
     if(count)count.textContent=data.length+" productos";
     window.__electroislaFastCatalog=true;
   }
+  // Mostrar el último catálogo guardado inmediatamente y actualizarlo en segundo plano.
+  let cacheShown=false;
+  try{
+    const cached=JSON.parse(localStorage.getItem("electroisla_products")||"null");
+    if(Array.isArray(cached)&&cached.length){
+      show(cached);
+      cacheShown=true;
+    }
+  }catch(_){}
+  if(!cacheShown){
+    box.innerHTML=Array.from({length:4},()=>'<article class="ei-skeleton-card" aria-hidden="true"><div class="ei-skeleton-copy"><div class="ei-skeleton-pill"></div><div class="ei-skeleton-line long"></div><div class="ei-skeleton-line medium"></div><div class="ei-skeleton-line short"></div><div class="ei-skeleton-price"></div></div><div class="ei-skeleton-media"></div></article>').join("");
+    window.__electroislaFastCatalog=true;
+  }
   fetch(endpoint,{headers:{apikey:key,Authorization:"Bearer "+key},cache:"no-store"})
     .then(r=>{if(!r.ok)throw new Error("Catálogo HTTP "+r.status);return r.json();})
     .then(show)
@@ -247,7 +258,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=128"></script>
+<script src="app.js?v=129"></script>
   <script src="delivery-zones-store.js?v=1"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
