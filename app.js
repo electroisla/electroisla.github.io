@@ -140,6 +140,23 @@ async function loadCloudProducts(){
 
   return true;
 }
+
+async function loadCloudProductsWithRetry(maxAttempts=3){
+  let lastError;
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
+    try{
+      await loadCloudProducts();
+      return true;
+    }catch(err){
+      lastError=err;
+      console.warn(`Intento ${attempt}/${maxAttempts} de cargar productos fallido.`,err);
+      if(attempt<maxAttempts){
+        await new Promise(resolve=>setTimeout(resolve,attempt*1000));
+      }
+    }
+  }
+  throw lastError;
+}
 async function loadApprovedReviews(){
  try{
   const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,created_at").eq("approved",true).order("created_at",{ascending:false});
@@ -182,9 +199,9 @@ async function startCloud(){
   });
 
   try {
-    await loadCloudProducts();
+    await loadCloudProductsWithRetry();
   } catch (err) {
-    console.warn("Error al cargar productos de Supabase:", err);
+    console.warn("Error al cargar productos de Supabase tras varios intentos:", err);
   }
 
   renderCategoryTabs();
