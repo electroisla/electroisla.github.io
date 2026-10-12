@@ -3787,3 +3787,19 @@ button:active{
   border-radius:12px!important;
   box-sizing:border-box!important;
 }
+
+/* ElectroIsla: imágenes del catálogo ajustadas como en Ver mi pedido */
+/* Mantener la foto completa, pero quitar el marco interior que deja espacio innecesario. */
+.shop-product .product-img{
+  padding:0!important;
+  background:#fff!important;
+  overflow:hidden!important;
+}
+.shop-product .product-img img{
+  width:100%!important;
+  height:100%!important;
+  padding:0!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:14px!important;
+}
