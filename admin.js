@@ -485,7 +485,7 @@ function compressImage(file){
  return new Promise((resolve,reject)=>{
    if(!file || !file.type.startsWith("image/")){reject(new Error("El archivo seleccionado no es una imagen compatible."));return}
    const url=URL.createObjectURL(file);
-   const finish=(img)=>{try{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));const ctx=c.getContext("2d");ctx.drawImage(img,0,0,c.width,c.height);const data=c.toDataURL("image/jpeg",.82);URL.revokeObjectURL(url);if(!data||data.length<100){reject(new Error("No se pudo convertir la foto."));return}resolve(data)}catch(err){URL.revokeObjectURL(url);reject(err)}};
+   const finish=(img)=>{try{const max=800,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));const ctx=c.getContext("2d");ctx.drawImage(img,0,0,c.width,c.height);const data=c.toDataURL("image/jpeg",.76);URL.revokeObjectURL(url);if(!data||data.length<100){reject(new Error("No se pudo convertir la foto."));return}resolve(data)}catch(err){URL.revokeObjectURL(url);reject(err)}};
    if("createImageBitmap" in window){createImageBitmap(file).then(finish).catch(()=>{const img=new Image();img.onload=()=>finish(img);img.onerror=()=>reject(new Error("Tu navegador no puede leer esta imagen. Prueba con JPG o PNG."));img.src=url})}else{const img=new Image();img.onload=()=>finish(img);img.onerror=()=>reject(new Error("Tu navegador no puede leer esta imagen. Prueba con JPG o PNG."));img.src=url}
  });
 }
