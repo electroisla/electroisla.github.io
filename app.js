@@ -31,25 +31,33 @@ const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixe
 const effectivePrice=p=>Number.isFinite(Number(p.discountPrice))&&Number(p.discountPrice)>0&&Number(p.discountPrice)<Number(p.price)?Number(p.discountPrice):Number(p.price);
 const cashCup=p=>{const base=effectivePrice(p);if((p.currency||"USD")==="USD")return base*Number(storeSettings.usd_to_cup||0);if((p.currency||"USD")==="CUP")return base;return null};
 const transferCup=p=>{const cash=cashCup(p);return cash===null?null:cash*(1+Number(storeSettings.transfer_markup_percent||0)/100)};
+// Tarifas de respaldo: deben coincidir con delivery_zones en Supabase.
 const DELIVERY_FEES={
  "Nueva Gerona":0,
- "Micro 70":0,
+ "Mal Pais":4,
  "Micro 2":0,
+ "Frank País":5,
+ "Argelia":10,
+ "La Reforma":10,
+ "La Caoba":2,
+ "Comunidad la 53":3,
+ "La Tumbita":5,
+ "Micro 70":0,
  "Abel Santa María":0,
  "Pueblo Nuevo":0,
  "Francoi":0,
  "Sierra Caballos":0,
  "Nazareno":0,
- "Chacón":5,
- "Patria":5,
- "Los Colonos":5,
- "Los Bejeranos":5,
- "La Fe":10,
- "Demajagua":10,
- "La Victoria":10,
- "Atanagildo":10,
+ "Chacón":2,
+ "Patria":3,
+ "Los Colonos":2,
+ "Los Bejeranos":2,
+ "La Fe":5,
+ "Demajagua":5,
+ "La Victoria":7,
+ "Atanagildo":7,
  "Mella":10,
- "Ciro Redondo":10,
+ "Ciro Redondo":5,
  "Otro":10
 };
 function getDeliveryZone(){
