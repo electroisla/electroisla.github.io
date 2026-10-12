@@ -48,7 +48,15 @@
         option.dataset.fee = String(fee);
         select.add(option);
       });
-      if (zones.some(z => String(z.name).trim() === previous)) select.value = previous;
+
+      // Mantiene la opción histórica para zonas no registradas, sin duplicarla
+      // si el administrador ya creó una zona llamada "Otro".
+      if (!zones.some(z => String(z.name).trim().toLowerCase() === "otro")) {
+        const otherOption = new Option("Otro — 10 USD", "Otro");
+        otherOption.dataset.fee = "10";
+        select.add(otherOption);
+      }
+      if ([...select.options].some(option => option.value === previous)) select.value = previous;
 
       rebuildMenu();
       select.dispatchEvent(new Event("change", { bubbles: true }));

@@ -6,10 +6,63 @@
   <meta name="electroisla-version" content="9.8.44">
   <title>ElectroIsla | Alimentos y Electrodomésticos</title>
   <meta name="description" content="ElectroIsla: alimentos y electrodomésticos. Compra y solicita tu pedido por WhatsApp.">
-  <link rel="stylesheet" href="styles.css?v=9.8.126">
+  <link rel="preconnect" href="https://pdvfupvtofpzfllkjhhc.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//pdvfupvtofpzfllkjhhc.supabase.co">
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<link rel="stylesheet" href="styles.css?v=9.8.128">
 <style>
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
 .zelle-logo-icon svg{display:block;width:18px;height:18px}
+/* Estado visual de carga del catálogo: conserva el espacio de las tarjetas */
+.ei-skeleton-card{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:142px;margin:0 0 12px;padding:14px;border:1px solid #e6edf5;border-radius:18px;background:#fff;overflow:hidden}
+.ei-skeleton-copy{flex:1;min-width:0}
+.ei-skeleton-media{width:104px;height:112px;flex:0 0 104px;border-radius:14px}
+.ei-skeleton-line,.ei-skeleton-media,.ei-skeleton-pill{position:relative;overflow:hidden;background:#edf2f8}
+.ei-skeleton-line{height:11px;border-radius:8px;margin:0 0 11px}
+.ei-skeleton-line.short{width:42%}.ei-skeleton-line.medium{width:72%}.ei-skeleton-line.long{width:94%}
+.ei-skeleton-pill{height:20px;width:76px;border-radius:999px;margin-bottom:12px;background:#fff0e5}
+.ei-skeleton-price{height:15px;width:88px;margin-top:14px;border-radius:8px;background:#ffe0c8}
+.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);animation:ei-shimmer 1.25s infinite}
+@keyframes ei-shimmer{100%{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{animation:none}}
+/* Espera de imagen discreta: evita el brillo repetitivo y mantiene la identidad ElectroIsla */
+.product-img[data-product-image]{position:relative;background:#fff7f0;box-shadow:inset 0 0 0 1px #f7dfca;animation:none}
+.shop-product.electroisla-photo-added .product-img img{animation:ei-image-appear .22s ease-out both}
+@keyframes ei-image-appear{from{opacity:.7;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.product-img[data-product-image],.shop-product.electroisla-photo-added .product-img img{animation:none}}
+
+/* ElectroIsla: imagen táctil y ficha ampliada del producto */
+.product-image-trigger{display:grid;border:0;padding:0;margin:0;text-align:center;color:inherit;appearance:none;-webkit-appearance:none;cursor:zoom-in;touch-action:manipulation}
+.product-image-trigger:focus-visible{outline:2px solid #f28a2e;outline-offset:3px}
+.product-detail-modal{z-index:75;padding:14px}
+.product-detail-card{width:min(520px,100%);max-height:96dvh;max-height:96vh;padding:0;overflow:auto;border:1px solid #e8edf4;border-radius:24px;background:#fff;box-shadow:0 22px 70px rgba(8,35,73,.24)}
+.product-detail-close{z-index:2;background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.product-detail-image{height:min(58dvh,560px);height:min(58vh,560px);min-height:220px;margin:12px 12px 0;border:1px solid #f4d4bc;border-radius:20px;background:linear-gradient(145deg,#fff8f2 0%,#f7faff 100%);box-shadow:inset 0 0 0 4px rgba(255,255,255,.8);background-size:220% 100%;display:grid;place-items:center;overflow:hidden}
+.product-detail-image.is-loading{animation:ei-image-wait 1.35s ease-in-out infinite}
+.product-detail-image img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;box-sizing:border-box;padding:12px;border-radius:16px;animation:ei-image-appear .24s ease-out both}
+.product-detail-placeholder{font-size:64px}
+.product-detail-copy{padding:22px 24px 24px}
+.product-detail-category{display:inline-flex;border-radius:999px;background:#fff0e5;color:#e8781b;padding:5px 11px;font-size:11px;font-weight:800}
+.product-detail-copy h2{margin:12px 0 8px;font-size:23px;line-height:1.2}
+.product-detail-copy>p{color:#778392;font-size:14px;line-height:1.5;margin:0 0 14px;white-space:pre-line}
+.product-detail-price{color:#173b68;font-size:22px;font-weight:800;margin:12px 0 18px}
+.product-detail-price small{font-size:13px;color:#6c7d90;font-weight:600}
+.product-detail-add{min-height:50px;border-radius:14px;background:#f58220;box-shadow:0 5px 14px rgba(245,130,32,.2)}
+.product-detail-add:hover{background:#e87312}
+.product-detail-hint{font-size:11px!important;text-align:center;margin:12px 0 0!important}
+@media(max-width:520px){.product-detail-modal{padding:8px}.product-detail-card{max-height:96dvh;max-height:96vh;border-radius:22px}.product-detail-image{height:min(58dvh,440px);height:min(58vh,440px);min-height:220px;margin:10px 10px 0;border-radius:18px}.product-detail-image img{padding:10px;border-radius:14px}.product-detail-copy{padding:18px 19px 20px}.product-detail-copy h2{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.product-detail-image.is-loading,.product-detail-image img{animation:none}}
+
+
+/* Reseñas dentro de la ficha ampliada */
+.product-detail-reviews{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px;color:#64748b;font-size:12px}
+.product-detail-reviews .review-stars{font-size:19px;letter-spacing:1px;color:#f59e0b}
+.product-detail-reviews .review-stars-empty{color:#cbd5e1}
+.product-detail-reviews strong{font-size:14px;color:#173b68}
+.product-detail-review{display:block;width:100%;border:0;background:transparent;color:#1763a6;font-size:13px;font-weight:700;text-align:left;padding:8px 0 16px;cursor:pointer}
+.product-detail-review:active{opacity:.72}
+
 </style>
 </head>
 <body>
@@ -113,23 +166,30 @@
       <label class="delivery-field">Zona de entrega<select required id="municipality" class="delivery-native-select">
         <option value="">Selecciona...</option>
         <option value="Nueva Gerona" data-fee="0">Nueva Gerona — Gratis</option>
-        <option value="Micro 70" data-fee="0">Micro 70 — Gratis</option>
+        <option value="Mal Pais" data-fee="4">Mal Pais — 4 USD</option>
         <option value="Micro 2" data-fee="0">Micro 2 — Gratis</option>
+        <option value="Frank País" data-fee="5">Frank País — 5 USD</option>
+        <option value="Argelia" data-fee="10">Argelia — 10 USD</option>
+        <option value="La Reforma" data-fee="10">La Reforma — 10 USD</option>
+        <option value="La Caoba" data-fee="2">La Caoba — 2 USD</option>
+        <option value="Comunidad la 53" data-fee="3">Comunidad la 53 — 3 USD</option>
+        <option value="La Tumbita" data-fee="5">La Tumbita — 5 USD</option>
+        <option value="Micro 70" data-fee="0">Micro 70 — Gratis</option>
         <option value="Abel Santa María" data-fee="0">Abel Santa María — Gratis</option>
         <option value="Pueblo Nuevo" data-fee="0">Pueblo Nuevo — Gratis</option>
         <option value="Francoi" data-fee="0">Francoi — Gratis</option>
         <option value="Sierra Caballos" data-fee="0">Sierra Caballos — Gratis</option>
         <option value="Nazareno" data-fee="0">Nazareno — Gratis</option>
-        <option value="Chacón" data-fee="5">Chacón — 5 USD</option>
-        <option value="Patria" data-fee="5">Patria — 5 USD</option>
-        <option value="Los Colonos" data-fee="5">Los Colonos — 5 USD</option>
-        <option value="Los Bejeranos" data-fee="5">Los Bejeranos — 5 USD</option>
-        <option value="La Fe" data-fee="10">La Fe — 10 USD</option>
-        <option value="Demajagua" data-fee="10">Demajagua — 10 USD</option>
-        <option value="La Victoria" data-fee="10">La Victoria — 10 USD</option>
-        <option value="Atanagildo" data-fee="10">Atanagildo — 10 USD</option>
+        <option value="Chacón" data-fee="2">Chacón — 2 USD</option>
+        <option value="Patria" data-fee="3">Patria — 3 USD</option>
+        <option value="Los Colonos" data-fee="2">Los Colonos — 2 USD</option>
+        <option value="Los Bejeranos" data-fee="2">Los Bejeranos — 2 USD</option>
+        <option value="La Fe" data-fee="5">La Fe — 5 USD</option>
+        <option value="Demajagua" data-fee="5">Demajagua — 5 USD</option>
+        <option value="La Victoria" data-fee="7">La Victoria — 7 USD</option>
+        <option value="Atanagildo" data-fee="7">Atanagildo — 7 USD</option>
         <option value="Mella" data-fee="10">Mella — 10 USD</option>
-        <option value="Ciro Redondo" data-fee="10">Ciro Redondo — 10 USD</option>
+        <option value="Ciro Redondo" data-fee="5">Ciro Redondo — 5 USD</option>
         <option value="Otro" data-fee="10">Otro — 10 USD</option>
       </select>
       <div class="delivery-picker" id="deliveryPicker">
@@ -153,6 +213,23 @@
       <label>Nota adicional<textarea id="note" rows="3" placeholder="Horario, dirección o indicaciones..."></textarea></label>
       <button class="btn primary full" type="submit">📲 Enviar pedido por WhatsApp</button>
     </form>
+  </div>
+</div>
+
+<div id="productDetailModal" class="modal hidden product-detail-modal" aria-hidden="true">
+  <div class="modal-card product-detail-card" role="dialog" aria-modal="true" aria-labelledby="productDetailName">
+    <button type="button" class="modal-close product-detail-close" id="productDetailClose" aria-label="Cerrar detalles">✕</button>
+    <div id="productDetailImage" class="product-detail-image"></div>
+    <div class="product-detail-copy">
+      <span id="productDetailCategory" class="product-detail-category"></span>
+      <h2 id="productDetailName">Producto</h2>
+      <p id="productDetailDescription"></p>
+      <div id="productDetailPrice" class="product-detail-price"></div>
+      <div id="productDetailReviews" class="product-detail-reviews" aria-live="polite"></div>
+      <button type="button" id="productDetailReview" class="product-detail-review">Escribir la primera reseña</button>
+      <button type="button" id="productDetailAdd" class="btn primary full product-detail-add">Agregar al carrito</button>
+      <p class="product-detail-hint">Puedes seguir viendo los detalles o cerrar esta ventana para continuar comprando.</p>
+    </div>
   </div>
 </div>
 
@@ -191,10 +268,66 @@
 </div>
 
 <footer><strong>ElectroIsla</strong><span>Alimentos + Electrodomésticos</span><span>WhatsApp: +53 52017110</span></footer>
+<script>
+/* ElectroIsla: mostrar el catálogo en cuanto responda el endpoint público,
+   sin esperar a que se descargue la biblioteca completa de Supabase JS. */
+(function(){
+  const box=document.getElementById("products");
+  if(!box)return;
+  const endpoint="https://pdvfupvtofpzfllkjhhc.supabase.co/rest/v1/products?select=id,name,category,price,currency,discount_price,unit,description,available";
+  const key="sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
+  const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
+  function show(rows){
+    if(!Array.isArray(rows)||!rows.length)return;
+    let previous=[];
+    try{previous=JSON.parse(localStorage.getItem("electroisla_products")||"[]");}catch(_){}
+    const previousById=new Map((Array.isArray(previous)?previous:[]).map(p=>[String(p.id),p]));
+    const data=rows.filter(r=>r.available!==false).map(r=>{
+      const old=previousById.get(String(r.id))||{};
+      return {
+      id:String(r.id),name:r.name||"",category:r.category||"Alimentos",
+      price:Number(r.price)||0,currency:r.currency||"USD",
+      discountPrice:(r.discount_price??r.discountPrice)==null||Number(r.discount_price??r.discountPrice)<=0?null:Number(r.discount_price??r.discountPrice),
+      unit:r.unit||"",image:r.image||"",description:r.description||"",available:r.available!==false
+    };
+    });
+    if(!data.length)return;
+    try{localStorage.setItem("electroisla_products",JSON.stringify(data.map(p=>({...p,image:""}))));}catch(_){}
+    box.innerHTML=data.map(p=>{
+      const price=p.discountPrice&&p.discountPrice<p.price?p.discountPrice:p.price;
+      const old=p.discountPrice&&p.discountPrice<p.price?'<span class="old-price">'+moneyFast(p.price,p.currency)+'</span> ':"";
+      const image=p.image?'<img src="'+escFast(p.image)+'" alt="'+escFast(p.name)+'">':(p.category==="Alimentos"?"🥩":"🏠");
+      return '<article class="product shop-product" data-category="'+escFast(p.category)+'"><div class="product-info"><span class="tag">'+escFast(p.category)+'</span><h3>'+escFast(p.name)+'</h3><p>'+escFast(p.description)+'</p><div class="price">'+old+'<span class="discount-price">'+moneyFast(price,p.currency)+'</span> <small>'+escFast(p.unit)+'</small></div></div><div class="product-media"><div class="product-img">'+image+'</div><button class="add-circle" type="button" disabled aria-label="Cargando controles">+</button></div></article>';
+    }).join("");
+    const count=document.getElementById("resultCount");
+    if(count)count.textContent=data.length+" productos";
+    window.__electroislaFastCatalog=true;
+  }
+  // Mostrar el último catálogo guardado inmediatamente y actualizarlo en segundo plano.
+  let cacheShown=false;
+  try{
+    const cached=JSON.parse(localStorage.getItem("electroisla_products")||"null");
+    if(Array.isArray(cached)&&cached.length){
+      // La caché conserva datos ligeros, nunca las imágenes codificadas.
+      show(cached.map(p=>({...p,image:""})));
+      cacheShown=true;
+    }
+  }catch(_){}
+  if(!cacheShown){
+    box.innerHTML=Array.from({length:4},()=>'<article class="ei-skeleton-card" aria-hidden="true"><div class="ei-skeleton-copy"><div class="ei-skeleton-pill"></div><div class="ei-skeleton-line long"></div><div class="ei-skeleton-line medium"></div><div class="ei-skeleton-line short"></div><div class="ei-skeleton-price"></div></div><div class="ei-skeleton-media"></div></article>').join("");
+    window.__electroislaFastCatalog=true;
+  }
+  fetch(endpoint,{headers:{apikey:key,Authorization:"Bearer "+key},cache:"no-store"})
+    .then(r=>{if(!r.ok)throw new Error("Catálogo HTTP "+r.status);return r.json();})
+    .then(show)
+    .catch(e=>console.warn("La carga rápida inicial no estuvo disponible; continuará la carga normal.",e));
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=125"></script>
-  <script src="delivery-zones-store.js?v=1"></script>
+<script src="app.js?v=143"></script>
+  <script src="delivery-zones-store.js?v=2"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
 </html>
