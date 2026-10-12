@@ -26,11 +26,10 @@
 .ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);animation:ei-shimmer 1.25s infinite}
 @keyframes ei-shimmer{100%{transform:translateX(100%)}}
 @media(prefers-reduced-motion:reduce){.ei-skeleton-line:after,.ei-skeleton-media:after,.ei-skeleton-pill:after{animation:none}}
-/* Animación ligera mientras cada foto de producto se descarga */
-.product-img[data-product-image]{position:relative;background:linear-gradient(100deg,#edf2f8 20%,#fff5ec 40%,#edf2f8 60%);background-size:220% 100%;animation:ei-image-wait 1.35s ease-in-out infinite}
-@keyframes ei-image-wait{to{background-position-x:-220%}}
-.shop-product.electroisla-photo-added .product-img img{animation:ei-image-appear .32s ease-out both}
-@keyframes ei-image-appear{from{opacity:.45;transform:scale(.975)}to{opacity:1;transform:scale(1)}}
+/* Espera de imagen discreta: evita el brillo repetitivo y mantiene la identidad ElectroIsla */
+.product-img[data-product-image]{position:relative;background:#fff7f0;box-shadow:inset 0 0 0 1px #f7dfca;animation:none}
+.shop-product.electroisla-photo-added .product-img img{animation:ei-image-appear .22s ease-out both}
+@keyframes ei-image-appear{from{opacity:.7;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.product-img[data-product-image],.shop-product.electroisla-photo-added .product-img img{animation:none}}
 
 /* ElectroIsla: imagen táctil y ficha ampliada del producto */
