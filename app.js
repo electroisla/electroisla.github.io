@@ -468,18 +468,23 @@ async function flushProductImageBatch(){
     const {data,error}=await catalogReadClient.from("products").select("id,image").in("id",ids);
     if(error)throw error;
     const images=new Map((data||[]).map(row=>[String(row.id),typeof row.image==="string"?row.image:""]));
-    batch.forEach(([id,el])=>{
+    const box=document.getElementById("products");
+    batch.forEach(([id])=>{
       const product=products.find(p=>String(p.id)===id);
       if(!product)return;
       const image=images.get(id)||"";
       product.image=image;
-      if(!el.isConnected)return;
+      // El usuario puede cambiar de categoría mientras la consulta está en vuelo.
+      // Busca la tarjeta actual por ID; nunca deja sin actualizar una tarjeta nueva
+      // por haber intentado modificar un elemento antiguo que ya fue reemplazado.
+      const el=box&&[...box.querySelectorAll("[data-product-image]")].find(node=>String(node.dataset.productImage)===id);
+      if(!el)return;
       el.removeAttribute("data-product-image");
       if(image){
         const img=document.createElement("img");
         img.src=image;
         img.alt=product.name||"";
-        img.loading="eager";
+        img.loading="lazy";
         el.replaceChildren(img);
       }else{
         el.textContent=product.category==="Alimentos"?"🥩":"🏠";
@@ -487,6 +492,7 @@ async function flushProductImageBatch(){
     });
     try{localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))));}catch(_){}
   }catch(err){
+    // Permite que las tarjetas visibles vuelvan a intentar cargar si falla Supabase.
     ids.forEach(id=>requestedProductImages.delete(id));
     console.warn("No se pudieron cargar las imágenes del catálogo en lote.",err);
   }
