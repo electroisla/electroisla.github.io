@@ -279,6 +279,9 @@
   const escFast=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const moneyFast=(n,c)=>({USD:"$",CUP:"$",EUR:"€"}[c]||"")+Number(n||0).toFixed(2)+" "+c;
   function show(rows){
+    // Evita que esta carga rápida tardía reemplace las tarjetas reales de app.js
+    // por tarjetas provisionales sin imágenes y con el botón deshabilitado.
+    if(box.querySelector(".shop-product[data-product-id]"))return;
     if(!Array.isArray(rows)||!rows.length)return;
     let previous=[];
     try{previous=JSON.parse(localStorage.getItem("electroisla_products")||"[]");}catch(_){}
@@ -328,6 +331,6 @@
 <script src="supabase-config.js?v=4"></script>
 <script src="app.js?v=143"></script>
   <script src="delivery-zones-store.js?v=2"></script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.16-catalog-sync",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
 </html>
