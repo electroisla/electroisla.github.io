@@ -493,6 +493,7 @@ async function flushProductImageBatch(){
         img.src=image;
         img.alt=product.name||"";
         img.loading="lazy";
+        img.decoding="async";
         el.replaceChildren(img);
       }else{
         el.textContent=product.category==="Alimentos"?"🥩":"🏠";
@@ -528,7 +529,7 @@ function render(filter="Todos"){
  if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;
  const cardMarkup=p=>{
   const qty=cart.find(i=>i.id===p.id)?.qty||0;
-  return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`;
+  return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy" decoding="async">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`;
  };
  let markup="";
  if(filter==="Todos"&&list.length){
@@ -649,7 +650,7 @@ function renderCart(){
    const p=products.find(x=>x.id===i.id); if(!p)return"";
    const cur=p.currency||"USD",unitPrice=effectivePrice(p),lineTotal=unitPrice*i.qty;
    if(cur==="USD")usdTotal+=lineTotal;
-   const img=p.image?`<img class="cart-thumb" src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="cart-thumb placeholder">🛍️</div>`;
+   const img=p.image?`<img class="cart-thumb" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:`<div class="cart-thumb placeholder">🛍️</div>`;
    return `<div class="cart-item">
      <div class="cart-thumb-wrap">${img}</div>
      <div class="cart-item-main">
@@ -688,7 +689,7 @@ function renderCartRecommendations(){
  const cartIds=new Set(cart.map(i=>i.id));
  const list=products.filter(p=>p.available&&!cartIds.has(p.id)).slice(0,6);
  box.innerHTML=list.map(p=>{
-   const img=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="recommendation-placeholder">${p.category==="Alimentos"?"🥫":"🏠"}</div>`;
+   const img=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:`<div class="recommendation-placeholder">${p.category==="Alimentos"?"🥫":"🏠"}</div>`;
    return `<article class="recommendation-card">
      <div class="recommendation-image">${img}<button class="recommendation-add" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">+</button></div>
      <div class="recommendation-name">${esc(p.name)}</div>
@@ -754,7 +755,7 @@ function openProductDetail(productId){
  if(price)price.innerHTML=priceMarkup(p)+" <small>"+esc(p.unit||"")+"</small>";
  if(imageBox){
   imageBox.classList.toggle("is-loading",!p.image);
-  imageBox.innerHTML=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'">':'<span class="product-detail-placeholder">'+(p.category==="Alimentos"?"🥩":"🏠")+'</span>';
+  imageBox.innerHTML=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" decoding="async">':'<span class="product-detail-placeholder">'+(p.category==="Alimentos"?"🥩":"🏠")+'</span>';
  }
  if(addButton)addButton.textContent=(cart.find(i=>String(i.id)===String(productId))?.qty||0)>0?"Agregar otra unidad":"Agregar al carrito";
  const reviewInfo=document.getElementById("productDetailReviews");
@@ -772,7 +773,7 @@ function openProductDetail(productId){
    if(current&&image)current.image=image;
    if(modal.dataset.productId===String(productId)&&imageBox&&image){
     imageBox.classList.remove("is-loading");
-    imageBox.innerHTML='<img src="'+esc(image)+'" alt="'+esc(p.name)+'">';
+    imageBox.innerHTML='<img src="'+esc(image)+'" alt="'+esc(p.name)+'" decoding="async">';
    }
    if(current&&image)save();
   }).catch(error=>console.warn("No se pudo cargar la imagen ampliada del producto.",error));
