@@ -437,8 +437,13 @@ let productImageBatchScheduled=false;
 function scheduleProductImages(){
   const box=document.getElementById("products");
   if(!box)return;
+  const pending=[...box.querySelectorAll("[data-product-image]")];
+  // Solicita de inmediato las primeras fotos del catálogo, que son las que el
+  // usuario ve al abrir la tienda. Las demás siguen cargándose bajo demanda.
+  const firstVisibleBatch=pending.slice(0,8);
+  if(firstVisibleBatch.length)queueProductImages(firstVisibleBatch);
   if(!("IntersectionObserver" in window)){
-    queueProductImages([...box.querySelectorAll("[data-product-image]")]);
+    queueProductImages(pending.slice(8));
     return;
   }
   if(!productImageObserver){
@@ -450,9 +455,11 @@ function scheduleProductImages(){
         visible.push(entry.target);
       });
       if(visible.length)queueProductImages(visible);
-    },{rootMargin:"450px 0px"});
+    },{rootMargin:"700px 0px"});
   }
-  box.querySelectorAll("[data-product-image]").forEach(el=>productImageObserver.observe(el));
+  // Evita observar otra vez las primeras fotos: ya están en la petición inicial.
+  const firstSet=new Set(firstVisibleBatch);
+  pending.forEach(el=>{if(!firstSet.has(el))productImageObserver.observe(el);});
 }
 // Agrupa las imágenes visibles en una sola consulta a Supabase, en vez de
 // realizar una petición de red por producto. Esto reduce mucho la latencia móvil.
