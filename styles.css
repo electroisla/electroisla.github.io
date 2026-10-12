@@ -3763,3 +3763,27 @@ button:active{
 .review-existing-item>div{display:flex;align-items:center;gap:8px;font-size:11px;color:#17324d}
 .review-existing-item p{margin:4px 0 0;font-size:12px;line-height:1.35;color:#475569}
 .review-existing-empty{font-size:12px;color:#64748b}
+
+/* ElectroIsla: mostrar el producto completo en las fotos del catálogo principal */
+.shop-product .product-img{
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  padding:6px!important;
+  box-sizing:border-box!important;
+  border:1px solid #f2d8c5!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#fff8f2 0%,#f5f8fc 100%)!important;
+}
+.shop-product .product-img img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:2px!important;
+  border-radius:12px!important;
+  box-sizing:border-box!important;
+}
