@@ -495,8 +495,45 @@ async function loadProductImage(el){
   // La ficha ampliada usa el mismo mecanismo de lote que las tarjetas del catálogo.
   queueProductImages([el]);
 }
-function render(filter="Todos"){const box=document.getElementById("products");if(!box)return;const heading=document.querySelector(".catalog-heading h2");if(window.catalogLoading&&products.length===0&&window.__electroislaFastCatalog){if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const count=document.getElementById("resultCount");if(count)count.textContent="Cargando catálogo…";updateStickyOrder();return;}if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();const activeCategoryNames=new Set(categories.map(c=>String(c.name).trim()));
-const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));const count=document.getElementById("resultCount");if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;box.innerHTML=list.map(p=>{const qty=cart.find(i=>i.id===p.id)?.qty||0;return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`}).join("")||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));scheduleProductImages();updateStickyOrder()}
+function render(filter="Todos"){
+ const box=document.getElementById("products");
+ if(!box)return;
+ const heading=document.querySelector(".catalog-heading h2");
+ if(window.catalogLoading&&products.length===0&&window.__electroislaFastCatalog){
+  if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;
+  const count=document.getElementById("resultCount");
+  if(count)count.textContent="Cargando catálogo…";
+  updateStickyOrder();
+  return;
+ }
+ if(heading)heading.textContent=filter==="Todos"?"Ofertas":filter;
+ const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();
+ const activeCategoryNames=new Set(categories.map(c=>String(c.name).trim()));
+ const list=products.filter(p=>p.available!==false&&(filter==="Todos"||p.category===filter)&&(!q||`${p.name} ${p.description||""}`.toLowerCase().includes(q))&&(filter==="Todos"||activeCategoryNames.has(String(p.category||"").trim())));
+ const count=document.getElementById("resultCount");
+ if(count)count.textContent=`${list.length} producto${list.length===1?"":"s"}`;
+ const cardMarkup=p=>{
+  const qty=cart.find(i=>i.id===p.id)?.qty||0;
+  return `<article class="product shop-product" data-product-id="${esc(p.id)}" data-category="${esc(p.category||"")}"><div class="product-info"><span class="tag">${esc(p.category)}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p>${renderReviewBadge(p)}<div class="price">${priceMarkup(p)} <small>${esc(p.unit||"")}</small></div></div><div class="product-media"><button type="button" class="product-img product-image-trigger" data-product-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}"${p.image?"":` data-product-image="${esc(p.id)}"`}>${p.image?`<img src="${p.image}" alt="" loading="lazy">`:(p.category==="Alimentos"?"🥩":"🏠")}</button><button class="add-circle${qty>0?" has-qty":""}" onclick="add('${esc(p.id)}')" aria-label="Agregar ${esc(p.name)}">${qty>0?qty:"+"}</button></div></article>`;
+ };
+ let markup="";
+ if(filter==="Todos"&&list.length){
+  const orderedNames=categories.map(c=>String(c.name||"").trim()).filter(Boolean);
+  [...new Set(list.map(p=>String(p.category||"Otros").trim()||"Otros"))].filter(name=>!orderedNames.includes(name)).sort((a,b)=>a.localeCompare(b,"es")).forEach(name=>orderedNames.push(name));
+  orderedNames.forEach(name=>{
+   const group=list.filter(p=>(String(p.category||"Otros").trim()||"Otros")===name);
+   if(!group.length)return;
+   markup+=`<h3 class="catalog-category-heading" style="grid-column:1/-1;display:flex;align-items:center;gap:9px;margin:18px 0 2px;padding:0 2px 8px;border-bottom:1px solid #e8edf4;color:#173b67;font-size:16px;font-weight:700;line-height:1.3"><span style="display:inline-block;width:4px;height:20px;border-radius:4px;background:#f58220;flex:0 0 4px"></span><span>${esc(name)}</span><span style="margin-left:auto;color:#77869a;font-size:11px;font-weight:600">${group.length} producto${group.length===1?"":"s"}</span></h3>`;
+   markup+=group.map(cardMarkup).join("");
+  });
+ }else{
+  markup=list.map(cardMarkup).join("");
+ }
+ box.innerHTML=markup||(window.catalogLoadError?'<p class="empty-products">No se pudieron cargar los productos.</p><p class="catalog-load-error" style="font-size:12px;color:#b42318;overflow-wrap:anywhere">Diagnóstico: '+esc(window.catalogLoadError)+'</p>':(window.catalogLoading?'<p class="empty-products">Cargando productos…</p>':'<p class="empty-products">No hay productos disponibles.</p>'));
+ box.querySelectorAll("[data-review-product]").forEach(btn=>btn.addEventListener("click",()=>openReviewModal(btn.dataset.reviewProduct)));
+ scheduleProductImages();
+ updateStickyOrder();
+}
 function electroislaAnimate(selector,className="electroisla-pop"){const el=document.querySelector(selector);if(!el)return;el.classList.remove(className);void el.offsetWidth;el.classList.add(className);setTimeout(()=>el.classList.remove(className),350)}
 function electroislaAnimateAdd(id){const product=products.find(p=>String(p.id)===String(id));const card=[...document.querySelectorAll(".shop-product")].find(el=>String(el.dataset.productId)===String(id));if(card){card.classList.remove("electroisla-photo-added");void card.offsetWidth;card.classList.add("electroisla-photo-added");setTimeout(()=>card.classList.remove("electroisla-photo-added"),400)}const btn=product?[...document.querySelectorAll(".add-circle")].find(b=>b.getAttribute("aria-label")===`Agregar ${product.name}`):null;if(btn){btn.classList.remove("electroisla-bounce");void btn.offsetWidth;btn.classList.add("electroisla-bounce");setTimeout(()=>btn.classList.remove("electroisla-bounce"),400)}electroislaAnimate("#cartCount","electroisla-cart-bounce");electroislaAnimate("#cartTopTotal");electroislaAnimate("#cartTotal");electroislaAnimate(".cart-head-total strong");updateStickyOrder(true)}
 function updateCategoryHighlight(name){
