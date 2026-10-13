@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=4">
+<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=5-admin-layout">
 <style>
 .photo-picker{border:1px dashed #b9c2cc;border-radius:14px;padding:14px;margin-top:6px}
 .photo-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
@@ -253,8 +253,18 @@
 <button class="btn primary full" id="loginBtn">Entrar</button>
 </section>
 <section id="dashboard" class="hidden">
+<nav class="ei-admin-nav" aria-label="Navegación de administración">
+  <a href="#dashboard" class="ei-admin-nav-link is-current"><span>⌂</span> Resumen</a>
+  <a href="#productForm" class="ei-admin-nav-link"><span>＋</span> Agregar producto</a>
+  <a href="#catalogPanel" class="ei-admin-nav-link"><span>▦</span> Catálogo</a>
+  <a href="#categoryManager" class="ei-admin-nav-link"><span>▤</span> Categorías</a>
+  <a href="#salesReport" class="ei-admin-nav-link"><span>▥</span> Ventas y pedidos</a>
+  <a href="#reviewsAdmin" class="ei-admin-nav-link"><span>☆</span> Reseñas <span class="ei-admin-nav-badge" id="adminReviewNavBadge" hidden></span></a>
+  <a href="#reviewNotifications" class="ei-admin-nav-link"><span>♧</span> Avisos</a>
+  <a href="#logoutBtn" class="ei-admin-nav-link"><span>↪</span> Cerrar sesión</a>
+</nav>
 <div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
-<section class="admin-card settings-card">
+<section class="admin-card settings-card" id="storeSettings">
 <h2>💱 Precios y tasa de cambio</h2>
 <p class="settings-help">Configura aquí cuánto vale 1 USD en CUP y el recargo para pagos por transferencia. Los cambios se sincronizan con la tienda pública.</p>
 <div class="price-fields">
@@ -267,7 +277,7 @@
 </section>
 
 
-<section class="admin-card category-manager">
+<section class="admin-card category-manager" id="categoryManager">
   <h2>🗂️ Administrar categorías</h2>
   <p class="category-help">Crea, edita y organiza las categorías de tu tienda. Puedes ocultarlas sin borrarlas.</p>
 
@@ -352,7 +362,7 @@
 <label class="check"><input type="checkbox" id="pAvailable" checked> Disponible</label>
 <div class="row"><button class="btn primary" type="submit">Guardar producto</button><button class="btn secondary" type="button" id="cancelEdit">Limpiar</button></div>
 </form>
-<div class="admin-card"><h2>📦 Catálogo actual</h2><p id="cloudStatus" style="font-size:.9rem;color:#5b6670;margin-top:-6px;margin-bottom:12px">☁️ Esperando conexión…</p><button type="button" class="btn secondary" id="refreshCloud" style="margin-bottom:12px">🔄 Actualizar catálogo</button><div id="adminProducts"></div></div>
+<div class="admin-card" id="catalogPanel"><h2>📦 Catálogo actual</h2><p id="cloudStatus" style="font-size:.9rem;color:#5b6670;margin-top:-6px;margin-bottom:12px">☁️ Esperando conexión…</p><button type="button" class="btn secondary" id="refreshCloud" style="margin-bottom:12px">🔄 Actualizar catálogo</button><div id="adminProducts"></div></div>
 </div>
 
 <section class="admin-card sales-report" id="salesReport">
