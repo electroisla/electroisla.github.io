@@ -3926,3 +3926,97 @@ button:active{
   .admin-page .ei-admin-quick-card>b{display:none}
   .admin-page .ei-admin-quick-card small{overflow-wrap:anywhere}
 }
+
+
+/* Ajuste de fidelidad al boceto ElectroIsla: cabecera azul, naranja y panel de accesos */
+.admin-page{background:#f2f6fb;color:#12345b}
+.admin-page .topbar{
+  height:82px!important;padding:0 24px!important;gap:18px!important;
+  background:linear-gradient(110deg,#0757a6 0%,#063b86 100%)!important;
+  border-bottom:4px solid #f58220!important;box-shadow:0 5px 18px rgba(6,59,134,.13);
+  position:sticky!important;top:0!important;z-index:60!important
+}
+.admin-page .topbar:after{content:"";position:absolute;bottom:-4px;left:0;width:44%;height:4px;background:#ff922b;border-radius:0 0 100% 0}
+.admin-page .topbar .brand{color:#fff!important}
+.admin-page .topbar .ei-admin-logo{max-height:66px;max-width:min(250px,55vw);object-fit:contain}
+.admin-page .topbar .btn.secondary{
+  margin-left:auto;color:#fff!important;background:rgba(255,255,255,.09)!important;
+  border:1px solid rgba(255,255,255,.35)!important;border-radius:12px!important
+}
+.admin-page .admin-wrap{padding-top:22px!important}
+.admin-page .admin-title{padding:2px 0 14px;border-bottom:1px solid #dbe7f4;margin-bottom:16px}
+.admin-page .admin-title .eyebrow{margin-bottom:5px;color:#f58220}
+.admin-page .admin-title h1{font-size:clamp(1.45rem,2.5vw,2rem);letter-spacing:-.4px;color:#064887}
+.admin-page .admin-title #logoutBtn{border-radius:11px;color:#0757a6;border-color:#d3e2f2}
+.admin-page .ei-admin-nav{top:98px;left:12px;bottom:12px;width:198px;border-radius:16px;box-shadow:0 12px 28px rgba(6,59,134,.15)}
+.admin-page .ei-admin-nav-link{font-size:.86rem;min-height:43px}
+.admin-page .ei-mobile-menu-toggle{
+  display:none;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  border:1px solid #d6e4f3;background:#fff;color:#0757a6;border-radius:13px;
+  padding:12px 14px;margin:0 0 10px;font-weight:800;box-shadow:0 4px 12px rgba(16,43,77,.05)
+}
+.admin-page .ei-menu-chevron{transition:transform .15s ease}
+.admin-page .ei-admin-quick-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px
+}
+.admin-page .ei-admin-quick-card{
+  display:flex;align-items:center;gap:11px;min-width:0;padding:14px 12px;
+  text-decoration:none;background:#fff;border:1px solid #dbe7f4;border-radius:15px;
+  box-shadow:0 5px 16px rgba(16,43,77,.045);transition:transform .15s ease,box-shadow .15s ease
+}
+.admin-page .ei-admin-quick-card:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(16,43,77,.09)}
+.admin-page .ei-quick-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;color:#fff;font-size:1.55rem;font-weight:800}
+.admin-page .ei-quick-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-page .ei-quick-copy strong{font-size:.9rem;line-height:1.2;color:#103b72}
+.admin-page .ei-quick-copy small{font-size:.73rem;line-height:1.3;color:#667b95}
+.admin-page .ei-quick-arrow{margin-left:auto;font-size:1.5rem;color:#8ba3bd}
+.admin-page .ei-quick-orange .ei-quick-icon{background:#f58220}
+.admin-page .ei-quick-blue .ei-quick-icon{background:#2473e8}
+.admin-page .ei-quick-green .ei-quick-icon{background:#17a36b}
+.admin-page .ei-quick-purple .ei-quick-icon{background:#8255d9}
+.admin-page .admin-card{border-radius:16px!important;border-color:#dbe7f4!important;box-shadow:0 5px 18px rgba(16,43,77,.045)!important;padding:18px!important}
+.admin-page .admin-card h2{font-size:1.08rem;margin-top:0;color:#103b72}
+.admin-page .settings-help,.admin-page .category-help{max-width:900px}
+.admin-page .admin-grid{gap:14px}
+.admin-page #productForm{gap:8px}
+.admin-page #productForm label{font-size:.82rem}
+.admin-page #productForm input:not([type=checkbox]):not([type=file]),.admin-page #productForm textarea,.admin-page #productForm select{padding:10px 11px;border-radius:10px}
+.admin-page .reviews-admin-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-page .review-admin-item{background:#fff;border:1px solid #dbe7f4;border-radius:13px;padding:13px!important}
+.admin-page .sales-report-grid>div,.admin-page .sales-table-wrap{background:#f8fbff;border:1px solid #e2ebf5;border-radius:12px;padding:12px}
+@media(max-width:1100px){
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-page .ei-admin-nav{width:178px}
+ .admin-page .admin-wrap{margin-left:198px!important}
+}
+@media(max-width:900px){
+ .admin-page .topbar{height:72px!important;padding:0 12px!important}
+ .admin-page .topbar .ei-admin-logo{max-height:55px;max-width:58vw}
+ .admin-page .admin-wrap{margin:10px!important;padding:0 0 18px!important}
+ .admin-page .ei-mobile-menu-toggle{display:flex}
+ .admin-page .ei-admin-nav{display:none;position:relative;top:auto;left:auto;bottom:auto;width:100%;max-width:none;margin:0 0 12px;padding:8px;flex-direction:column;overflow:visible;white-space:normal}
+ .admin-page .ei-admin-nav.is-open{display:flex}
+ .admin-page .ei-admin-nav-link{width:100%;min-height:40px}
+ .admin-page .ei-admin-quick-grid{gap:9px}
+ .admin-page .ei-admin-quick-card{padding:11px 10px;gap:9px}
+ .admin-page .ei-quick-icon{flex-basis:36px;width:36px;height:36px;font-size:1.25rem}
+ .admin-page .ei-quick-copy strong{font-size:.83rem}
+ .admin-page .ei-quick-copy small{font-size:.7rem}
+ .admin-page .admin-grid{grid-template-columns:minmax(0,1fr)!important}
+ .admin-page .reviews-admin-list{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+ .admin-page .topbar{height:66px!important}
+ .admin-page .topbar .ei-admin-logo{max-width:54vw;max-height:49px}
+ .admin-page .topbar .btn.secondary{font-size:.76rem;padding:8px 9px}
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-page .ei-admin-quick-card{align-items:flex-start;min-height:94px;position:relative;padding:11px 9px}
+ .admin-page .ei-quick-icon{flex-basis:32px;width:32px;height:32px;border-radius:10px}
+ .admin-page .ei-quick-arrow{position:absolute;right:8px;bottom:6px;font-size:1.2rem}
+ .admin-page .ei-quick-copy{padding-right:5px}
+ .admin-page .ei-quick-copy strong{font-size:.78rem}
+ .admin-page .ei-quick-copy small{font-size:.68rem}
+ .admin-page .admin-title{align-items:flex-start}
+ .admin-page .admin-card{padding:13px!important}
+ .admin-page .category-form{grid-template-columns:minmax(0,1fr)}
+}
