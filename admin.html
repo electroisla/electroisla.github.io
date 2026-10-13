@@ -253,7 +253,8 @@
 <button class="btn primary full" id="loginBtn">Entrar</button>
 </section>
 <section id="dashboard" class="hidden">
-<nav class="ei-admin-nav" aria-label="Navegación de administración">
+<button type="button" class="ei-mobile-menu-toggle" id="eiMobileMenuToggle" aria-expanded="false" aria-controls="eiAdminNav"><span>☰</span> Menú de administración <span class="ei-menu-chevron">⌄</span></button>
+<nav class="ei-admin-nav" id="eiAdminNav" aria-label="Navegación de administración">
   <a href="#dashboard" class="ei-admin-nav-link is-current"><span>⌂</span> Resumen</a>
   <a href="#productForm" class="ei-admin-nav-link"><span>＋</span> Agregar producto</a>
   <a href="#catalogPanel" class="ei-admin-nav-link"><span>▦</span> Catálogo</a>
@@ -264,6 +265,12 @@
   <a href="#logoutBtn" class="ei-admin-nav-link"><span>↪</span> Cerrar sesión</a>
 </nav>
 <div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
+<section class="ei-admin-quick-grid" aria-label="Accesos rápidos">
+  <a class="ei-admin-quick-card ei-quick-product" href="#productForm"><span class="ei-quick-icon">＋</span><span><strong>Agregar producto</strong><small>Registrar un artículo nuevo</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-category" href="#categoryManager"><span class="ei-quick-icon">▦</span><span><strong>Categorías</strong><small>Ordenar y organizar</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-sales" href="#salesReport"><span class="ei-quick-icon">▥</span><span><strong>Ventas y pedidos</strong><small>Consultar actividad</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-reviews" href="#reviewsAdmin"><span class="ei-quick-icon">☆</span><span><strong>Reseñas</strong><small>Revisar opiniones</small></span><b>›</b></a>
+</section>
 <section class="admin-card settings-card" id="storeSettings">
 <h2>💱 Precios y tasa de cambio</h2>
 <p class="settings-help">Configura aquí cuánto vale 1 USD en CUP y el recargo para pagos por transferencia. Los cambios se sincronizan con la tienda pública.</p>
@@ -429,4 +436,7 @@
 <script src="supabase-config.js?v=2"></script>
 <script src="admin.js?v=22"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
+<script>
+(()=>{const b=document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;b.addEventListener('click',()=>{const open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(open));n.classList.toggle('is-open',open)});n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches){b.setAttribute('aria-expanded','false');n.classList.remove('is-open')}}));})();
+</script>
 </body></html>
