@@ -453,6 +453,7 @@ async function show(){
  }
 }
 function render(){
+ const overviewProducts=document.getElementById("eiOverviewProducts");if(overviewProducts)overviewProducts.textContent=`${products.length} producto(s) en catálogo`;
  const box=document.getElementById("adminProducts");
  box.innerHTML=products.length?products.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):"<p>No hay productos. Agrega el primero.</p>";
 }
@@ -549,7 +550,7 @@ function renderAdminReviews(){
 }
 async function loadAdminReviews(){
  const status=document.getElementById("reviewsStatus"); if(status)status.textContent="☁️ Cargando reseñas…";
- try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
+ try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();const overviewReviews=document.getElementById("eiOverviewReviews");if(overviewReviews)overviewReviews.textContent=`${reviewRows.length} reseña(s) registradas`;if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
 async function setReviewApproved(id,approved){try{const {error}=await supabaseClient.from("reviews").update({approved}).eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo actualizar la reseña: "+(err.message||err))}}
 async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acción no se puede deshacer."))return;try{const {error}=await supabaseClient.from("reviews").delete().eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo eliminar la reseña: "+(err.message||err))}}
 
@@ -569,6 +570,7 @@ function renderSalesList(id,items,empty="Sin datos"){
   box.innerHTML=items.map(x=>`<div class="sales-row"><span>${salesEscape(x.label)}</span><strong>${salesEscape(x.value)}</strong></div>`).join("");
 }
 function renderSalesReport(){
+ const overviewOrders=document.getElementById("eiOverviewOrders");if(overviewOrders)overviewOrders.textContent=`${salesRows.length} pedido(s) registrados`;
   const rows=salesRows;
   const usd=rows.filter(r=>r.currency==="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
   const cup=rows.filter(r=>r.currency!=="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
