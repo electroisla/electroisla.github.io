@@ -366,6 +366,139 @@
 @media(max-width:760px){#dashboard .ei-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#dashboard .ei-overview-card{padding:12px 9px;gap:8px}#dashboard .ei-overview-icon{flex-basis:34px;width:34px;height:34px;font-size:17px;border-radius:10px}#dashboard .ei-overview-copy strong{font-size:12px}#dashboard .ei-overview-copy small{font-size:10px}#dashboard .ei-dashboard-subtitle{max-width:240px;font-size:11px}}
 @media(max-width:360px){#dashboard .ei-overview-grid{grid-template-columns:1fr}}
 
+
+/* Corrección de diseño: acercar el administrador al primer boceto ElectroIsla 360 */
+.admin-page{
+  background:#f4f7fb!important;
+  color:#24364b;
+}
+.admin-page .topbar{
+  min-height:76px;
+  padding:10px 24px;
+  background:#fff!important;
+  border-bottom:3px solid #f28c28!important;
+  box-shadow:0 3px 14px rgba(8,35,65,.07);
+}
+.admin-page .ei-admin-logo{width:205px;max-height:64px}
+.admin-page .admin-sidebar{
+  top:79px!important;
+  width:238px!important;
+  padding:20px 13px!important;
+  background:#0b2e52!important;
+  border-right:0!important;
+  box-shadow:5px 0 18px rgba(5,30,55,.08);
+}
+.admin-page .admin-sidebar-label{
+  color:#a9c5df!important;
+  padding:9px 12px 10px!important;
+  letter-spacing:.12em;
+}
+.admin-page .admin-sidebar a{
+  min-height:46px;
+  color:#f2f7fc!important;
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  font-weight:650!important;
+}
+.admin-page .admin-sidebar a:hover,
+.admin-page .admin-sidebar a:focus-visible{
+  background:#17466f!important;
+  border-color:#f28c28!important;
+  color:#fff!important;
+}
+.admin-page .admin-sidebar a .nav-icon{
+  background:rgba(255,255,255,.12)!important;
+  color:#ffb15e;
+}
+.admin-page .admin-sidebar a:hover .nav-icon{background:#f28c28!important;color:#fff}
+.admin-page .admin-sidebar .nav-help{
+  background:#123b62!important;
+  color:#d4e3f1!important;
+  border-left:3px solid #f28c28;
+}
+.admin-page .admin-wrap{
+  margin-left:238px!important;
+  padding:27px clamp(16px,2.4vw,36px)!important;
+}
+#dashboard>.admin-title{
+  background:#0b2e52!important;
+  color:#fff!important;
+  border-radius:17px!important;
+  padding:22px 24px!important;
+  margin:0 0 18px!important;
+  box-shadow:0 8px 22px rgba(11,46,82,.12);
+}
+#dashboard>.admin-title h1,
+#dashboard>.admin-title .eyebrow{color:#fff!important}
+#dashboard>.admin-title .eyebrow{color:#ffb15e!important;letter-spacing:.12em}
+#dashboard>.admin-title .ei-dashboard-subtitle{color:#e0ebf5!important;font-size:13px!important}
+#dashboard>.admin-title #logoutBtn{
+  background:#fff!important;
+  color:#0b2e52!important;
+  border-color:#fff!important;
+}
+#dashboard .ei-overview-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:14px!important;
+  margin-bottom:20px!important;
+}
+#dashboard .ei-overview-card{
+  min-height:112px;
+  padding:17px!important;
+  border:1px solid #e0e8f1!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 5px 18px rgba(11,46,82,.06)!important;
+}
+#dashboard .ei-overview-card:hover{
+  border-color:#f28c28!important;
+  box-shadow:0 8px 22px rgba(11,46,82,.11)!important;
+}
+#dashboard .ei-overview-icon{
+  background:#fff0df!important;
+  color:#0b2e52!important;
+  border-radius:13px!important;
+}
+#dashboard .ei-overview-copy strong{color:#0b2e52!important;font-size:14px!important}
+#dashboard .ei-overview-copy small{font-size:11px!important}
+#dashboard .ei-overview-arrow{color:#f28c28!important}
+.admin-page .admin-card{
+  background:#fff!important;
+  border:1px solid #e1e8f0!important;
+  border-radius:16px!important;
+  box-shadow:0 4px 16px rgba(11,46,82,.045)!important;
+}
+.admin-page .admin-card h2{color:#0b2e52!important}
+.admin-page .btn.primary{
+  background:#f28c28!important;
+  border-color:#f28c28!important;
+  color:#fff!important;
+}
+.admin-page .btn.primary:hover{background:#d96f0b!important}
+.admin-page .admin-nav-scrim{background:rgba(5,24,43,.48)!important}
+@media(max-width:1120px){
+  #dashboard .ei-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  .admin-page .topbar{min-height:64px!important;padding:8px 12px!important;border-bottom-width:2px!important}
+  .admin-page .ei-admin-logo{width:145px!important;max-height:48px!important}
+  .admin-page .admin-sidebar{
+    top:0!important;bottom:0!important;width:min(290px,84vw)!important;
+    background:#0b2e52!important;
+  }
+  .admin-page .admin-wrap{margin-left:0!important;padding:16px 12px!important}
+  #dashboard>.admin-title{padding:17px!important;gap:12px}
+  #dashboard .ei-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  #dashboard .ei-overview-card{min-height:95px;padding:12px 10px!important;gap:8px!important}
+  #dashboard .ei-overview-icon{flex-basis:34px!important;width:34px!important;height:34px!important;font-size:17px!important}
+  #dashboard .ei-overview-copy strong{font-size:12px!important}
+  #dashboard .ei-overview-copy small{font-size:10px!important}
+}
+@media(max-width:360px){
+  #dashboard .ei-overview-grid{grid-template-columns:1fr!important}
+}
+
 </style>
 </head>
 <body class="admin-page">
