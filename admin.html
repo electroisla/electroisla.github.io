@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=9-menu-lateral">
+<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=10-admin-organizado">
 <style>
 .photo-picker{border:1px dashed #b9c2cc;border-radius:14px;padding:14px;margin-top:6px}
 .photo-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
@@ -238,6 +238,80 @@
 .admin-page #saveSettings,.admin-page #saveCategory,.admin-page #loginBtn{box-shadow:0 5px 12px rgba(242,140,40,.18)}
 .admin-page .admin-products .btn.primary{background:var(--admin-orange)!important}
 
+
+/* v10: organización coherente del administrador ElectroIsla */
+.admin-page{background:#f3f6fb!important;color:#20364f!important}
+.admin-page .topbar{height:74px!important;padding:0 22px!important;gap:16px!important;background:linear-gradient(110deg,#0757a6,#063b86)!important;border-bottom:4px solid #f28c28!important;box-shadow:0 4px 16px rgba(6,59,134,.13)!important}
+.admin-page .topbar:after{content:"";position:absolute;bottom:-4px;left:0;width:40%;height:4px;background:#f28c28;border-radius:0 0 100% 0}
+.admin-page .topbar .ei-admin-logo{width:205px!important;max-width:52vw!important;max-height:61px!important;object-fit:contain!important}
+.admin-page .topbar .btn.secondary{margin-left:auto!important;border-radius:10px!important;padding:9px 13px!important}
+.admin-page .admin-wrap{max-width:none!important;margin:16px 24px 34px 244px!important;padding:0 0 24px!important}
+.admin-page .admin-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:15px 18px!important;margin:0 0 16px!important;background:#fff!important;border:1px solid #dce5ef!important;border-left:5px solid #f28c28!important;border-radius:14px!important;box-shadow:0 4px 14px rgba(31,55,80,.035)!important}
+.admin-page .admin-title h1{font-size:clamp(1.35rem,2vw,1.8rem)!important;line-height:1.2!important;color:#0757a6!important}
+.admin-page .admin-title .eyebrow{margin:0 0 4px!important;letter-spacing:.13em!important;color:#e67a16!important}
+.admin-page .ei-admin-nav{position:fixed!important;z-index:70!important;top:91px!important;left:14px!important;bottom:14px!important;width:210px!important;max-width:210px!important;height:auto!important;display:flex!important;flex-direction:column!important;gap:6px!important;margin:0!important;padding:12px 10px!important;overflow-y:auto!important;overflow-x:hidden!important;white-space:normal!important;background:linear-gradient(180deg,#0757a6,#063b86)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:16px!important;box-shadow:0 10px 26px rgba(6,59,134,.16)!important;transform:none!important;visibility:visible!important}
+.admin-page .ei-admin-nav-link{display:flex!important;align-items:center!important;gap:9px!important;width:100%!important;min-height:42px!important;padding:9px 10px!important;border-radius:10px!important;color:#fff!important;font-size:.84rem!important;line-height:1.25!important;text-decoration:none!important;white-space:normal!important}
+.admin-page .ei-admin-nav-link:hover,.admin-page .ei-admin-nav-link:focus-visible{background:rgba(255,255,255,.13)!important;outline:none!important}
+.admin-page .ei-admin-nav-link.is-current{background:#f28c28!important;color:#fff!important;box-shadow:0 4px 11px rgba(242,140,40,.2)!important}
+.admin-page .ei-admin-nav-link>span:first-child{display:inline-grid!important;place-items:center!important;flex:0 0 25px!important;width:25px!important;height:25px!important;border-radius:8px!important;background:rgba(255,255,255,.13)!important;font-size:1rem!important}
+.admin-page .ei-admin-nav-link[href="#logoutBtn"]{display:none!important}
+.admin-page .ei-mobile-menu-toggle{display:none!important}
+.admin-page .ei-admin-quick-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:0 0 16px!important}
+.admin-page .ei-admin-quick-card{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important;min-height:88px!important;padding:13px!important;background:#fff!important;border:1px solid #dce5ef!important;border-radius:14px!important;text-decoration:none!important;box-shadow:0 4px 14px rgba(31,55,80,.045)!important}
+.admin-page .ei-admin-quick-card>span:nth-child(2){display:flex!important;flex-direction:column!important;gap:4px!important;min-width:0!important}
+.admin-page .ei-admin-quick-card strong{font-size:.87rem!important;line-height:1.25!important;color:#124a80!important}
+.admin-page .ei-admin-quick-card small{font-size:.72rem!important;line-height:1.35!important;color:#687b91!important;overflow-wrap:anywhere!important}
+.admin-page .ei-quick-icon{display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:38px!important;border-radius:11px!important;background:#fff0df!important;color:#e87b18!important;font-size:1.25rem!important}
+.admin-page .ei-quick-sales .ei-quick-icon{background:#e5f7ed!important;color:#15965b!important}
+.admin-page .ei-quick-reviews .ei-quick-icon{background:#f0e9ff!important;color:#8050d8!important}
+.admin-page .ei-quick-zones .ei-quick-icon{background:#eaf2ff!important;color:#0757a6!important}
+.admin-page .ei-admin-quick-card>b{margin-left:auto!important;color:#9aa9ba!important;font-size:1.3rem!important}
+.admin-page .admin-card{margin:0 0 14px!important;padding:18px!important;border:1px solid #dce5ef!important;border-radius:15px!important;background:#fff!important;box-shadow:0 4px 15px rgba(31,55,80,.04)!important}
+.admin-page .admin-card h2{margin:0 0 10px!important;color:#124a80!important;font-size:1.08rem!important;line-height:1.3!important}
+.admin-page .settings-help,.admin-page .category-help{font-size:.88rem!important;line-height:1.5!important;color:#65778b!important}
+.admin-page .admin-grid{display:grid!important;grid-template-columns:minmax(300px,.88fr) minmax(0,1.2fr)!important;gap:14px!important;align-items:start!important}
+.admin-page #productForm{gap:8px!important}
+.admin-page #productForm label{margin:8px 0!important;font-size:.84rem!important}
+.admin-page #productForm input:not([type=checkbox]):not([type=file]),.admin-page #productForm textarea,.admin-page #productForm select{min-height:40px!important;padding:9px 11px!important;border-radius:10px!important}
+.admin-page #deliveryZonesPanel{margin:0 0 14px!important;padding:18px!important;border:1px solid #dce5ef!important;border-top:3px solid #f28c28!important;border-radius:15px!important;background:#fff!important;box-shadow:0 4px 15px rgba(31,55,80,.04)!important}
+.admin-page #deliveryZonesPanel h2{color:#124a80!important;margin:0 0 8px!important}
+.admin-page #deliveryZonesPanel p{color:#65778b!important;line-height:1.45!important}
+.admin-page #deliveryZoneForm{gap:10px!important}
+.admin-page #deliveryZoneForm label{margin:0!important;font-size:.84rem!important}
+.admin-page .delivery-zone-row{padding:12px 0!important;border-top:1px solid #e5edf5!important}
+.admin-page .delivery-zone-actions{gap:6px!important}
+.admin-page .reviews-admin-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.admin-page .review-admin-item{min-width:0!important;margin:0!important;padding:13px!important;background:#fff!important;border:1px solid #dce5ef!important;border-radius:12px!important}
+.admin-page .sales-report-grid{gap:10px!important}
+.admin-page .sales-report-grid>div,.admin-page .sales-table-wrap{border:1px solid #e2ebf5!important;border-radius:12px!important;background:#f8fbff!important;padding:12px!important}
+.admin-page .ei-view-hidden{display:none!important}
+@media(max-width:1100px) and (min-width:901px){.admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.admin-page .admin-wrap{margin-left:210px!important}.admin-page .ei-admin-nav{width:182px!important;max-width:182px!important}}
+@media(max-width:900px){
+ .admin-page .topbar{height:66px!important;padding:0 12px!important;gap:8px!important}
+ .admin-page .topbar .ei-admin-logo{width:170px!important;max-width:55vw!important;max-height:50px!important}
+ .admin-page .topbar .btn.secondary{font-size:.76rem!important;padding:8px 10px!important}
+ .admin-page .admin-wrap{width:auto!important;max-width:none!important;margin:10px!important;padding:0 0 20px!important}
+ .admin-page .ei-mobile-menu-toggle{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;width:100%!important;min-height:44px!important;margin:0 0 10px!important;padding:10px 13px!important;border:1px solid #0757a6!important;border-radius:12px!important;background:#0757a6!important;color:#fff!important;font-weight:750!important;box-shadow:0 4px 12px rgba(6,59,134,.13)!important}
+ .admin-page .ei-mobile-menu-toggle>span:first-child{font-size:1.15rem!important}.admin-page .ei-menu-chevron{margin-left:auto!important;transition:transform .15s ease!important}
+ .admin-page .ei-admin-nav{display:flex!important;position:fixed!important;z-index:1002!important;left:0!important;top:0!important;bottom:0!important;width:min(84vw,310px)!important;max-width:310px!important;height:100dvh!important;margin:0!important;padding:76px 12px 18px!important;gap:7px!important;overflow-y:auto!important;overflow-x:hidden!important;flex-direction:column!important;border-radius:0 18px 18px 0!important;transform:translateX(-110%)!important;visibility:hidden!important;transition:transform .22s ease,visibility .22s ease!important;box-shadow:12px 0 35px rgba(6,59,134,.25)!important}
+ .admin-page .ei-admin-nav.is-open{transform:translateX(0)!important;visibility:visible!important}
+ .admin-page .ei-admin-nav-link{width:100%!important;min-height:44px!important;font-size:.9rem!important}
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:10px!important}
+ .admin-page .ei-admin-quick-card{min-height:88px!important;align-items:flex-start!important;padding:10px!important;gap:8px!important}
+ .admin-page .ei-quick-icon{flex-basis:32px!important;width:32px!important;height:32px!important;font-size:1.05rem!important}
+ .admin-page .ei-admin-quick-card strong{font-size:.79rem!important}.admin-page .ei-admin-quick-card small{font-size:.68rem!important}
+ .admin-page .ei-admin-quick-card>b{display:none!important}
+ .admin-page .admin-title{padding:12px!important;margin-bottom:10px!important}
+ .admin-page .admin-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ .admin-page .admin-card{padding:13px!important;margin-bottom:10px!important}
+ .admin-page #deliveryZonesPanel{padding:13px!important}
+ .admin-page .reviews-admin-list{grid-template-columns:minmax(0,1fr)!important}
+ .admin-page .sales-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #eiNavShade.is-open{display:block!important;position:fixed!important;inset:0!important;z-index:1001!important;border:0!important;border-radius:0!important;background:rgba(12,28,48,.46)!important;padding:0!important;margin:0!important;cursor:pointer!important}
+ body.ei-nav-locked{overflow:hidden!important}
+}
+@media(max-width:390px){.admin-page .admin-title h1{font-size:1.2rem!important}.admin-page .ei-admin-quick-card{min-height:96px!important}.admin-page .ei-admin-quick-card small{overflow-wrap:anywhere!important}}
+
 </style>
 </head>
 <body class="admin-page">
@@ -260,16 +334,17 @@
   <a href="#catalogPanel" class="ei-admin-nav-link"><span>▦</span> Catálogo</a>
   <a href="#categoryManager" class="ei-admin-nav-link"><span>▤</span> Categorías</a>
   <a href="#salesReport" class="ei-admin-nav-link"><span>▥</span> Ventas y pedidos</a>
+  <a href="#deliveryZonesPanel" class="ei-admin-nav-link"><span>🚚</span> Zonas y costos de domicilio</a>
   <a href="#reviewsAdmin" class="ei-admin-nav-link"><span>☆</span> Reseñas <span class="ei-admin-nav-badge" id="adminReviewNavBadge" hidden></span></a>
   <a href="#reviewNotifications" class="ei-admin-nav-link"><span>♧</span> Avisos</a>
   <a href="#logoutBtn" class="ei-admin-nav-link"><span>↪</span> Cerrar sesión</a>
 </nav>
 <div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
 <section class="ei-admin-quick-grid" aria-label="Accesos rápidos">
-  <a class="ei-admin-quick-card ei-quick-product" href="#productForm"><span class="ei-quick-icon">＋</span><span><strong>Agregar producto</strong><small>Registrar un artículo nuevo</small></span><b>›</b></a>
-  <a class="ei-admin-quick-card ei-quick-category" href="#categoryManager"><span class="ei-quick-icon">▦</span><span><strong>Categorías</strong><small>Ordenar y organizar</small></span><b>›</b></a>
-  <a class="ei-admin-quick-card ei-quick-sales" href="#salesReport"><span class="ei-quick-icon">▥</span><span><strong>Ventas y pedidos</strong><small>Consultar actividad</small></span><b>›</b></a>
-  <a class="ei-admin-quick-card ei-quick-reviews" href="#reviewsAdmin"><span class="ei-quick-icon">☆</span><span><strong>Reseñas</strong><small>Revisar opiniones</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-product" href="#catalogPanel"><span class="ei-quick-icon">▦</span><span><strong>Productos</strong><small>Administrar el catálogo</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-sales" href="#salesReport"><span class="ei-quick-icon">▥</span><span><strong>Ventas y pedidos</strong><small>Consultar pedidos</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-reviews" href="#reviewsAdmin"><span class="ei-quick-icon">☆</span><span><strong>Reseñas</strong><small>Opiniones de clientes</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-zones" href="#deliveryZonesPanel"><span class="ei-quick-icon">🚚</span><span><strong>Zonas de domicilio</strong><small>Precios y disponibilidad</small></span><b>›</b></a>
 </section>
 <section class="admin-card settings-card" id="storeSettings">
 <h2>💱 Precios y tasa de cambio</h2>
@@ -452,6 +527,7 @@
   const sales=document.getElementById('salesReport');
   const alerts=document.getElementById('reviewNotifications');
   const reviews=document.getElementById('reviewsAdmin');
+  const zones=document.getElementById('deliveryZonesPanel');
   const nav=document.getElementById('eiAdminNav');
   const toggle=document.getElementById('eiMobileMenuToggle');
   const groups={
@@ -461,9 +537,10 @@
     categorias:{label:'Categorías',show:[categories]},
     ventas:{label:'Ventas y pedidos',show:[sales]},
     resenas:{label:'Reseñas de productos',show:[alerts,reviews]},
-    avisos:{label:'Notificaciones',show:[alerts]}
+    avisos:{label:'Notificaciones',show:[alerts]},
+    zonas:{label:'Zonas y costos de domicilio',show:[zones]}
   };
-  const all=[quick,settings,categories,products,sales,alerts,reviews].filter(Boolean);
+  const all=[quick,settings,categories,products,sales,alerts,reviews,zones].filter(Boolean);
   function openView(name, target){
     const cfg=groups[name]||groups.resumen;
     all.forEach(el=>el.classList.add('ei-view-hidden'));
@@ -477,7 +554,8 @@
         (name==='categorias'&&href==='#categoryManager')||
         (name==='ventas'&&href==='#salesReport')||
         (name==='resenas'&&href==='#reviewsAdmin')||
-        (name==='avisos'&&href==='#reviewNotifications');
+        (name==='avisos'&&href==='#reviewNotifications')||
+      (name==='zonas'&&href==='#deliveryZonesPanel');
       a.classList.toggle('is-current',active);
     });
     if(toggle&&window.matchMedia('(max-width:900px)').matches){
@@ -495,7 +573,8 @@
     '#categoryManager':['categorias','categoryManager'],
     '#salesReport':['ventas','salesReport'],
     '#reviewsAdmin':['resenas','reviewsAdmin'],
-    '#reviewNotifications':['avisos','reviewNotifications']
+    '#reviewNotifications':['avisos','reviewNotifications'],
+    '#deliveryZonesPanel':['zonas','deliveryZonesPanel']
   };
   nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{
     const route=routes[a.getAttribute('href')];
