@@ -3879,3 +3879,50 @@ button:active{
 @media(max-width:900px){
   .admin-page .admin-wrap:has(#loginBox:not(.hidden)){margin:12px auto}
 }
+
+
+/* Ajuste de fidelidad al boceto: resumen con accesos directos y menú móvil desplegable */
+.admin-page .ei-mobile-menu-toggle{display:none}
+.admin-page .ei-admin-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.admin-page .ei-admin-quick-card{
+  min-width:0;display:flex;align-items:center;gap:10px;padding:14px;
+  background:#fff;border:1px solid #dce7f2;border-radius:15px;text-decoration:none;color:#12345a;
+  box-shadow:0 5px 16px rgba(16,43,77,.04);transition:transform .15s ease,box-shadow .15s ease
+}
+.admin-page .ei-admin-quick-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,43,77,.09)}
+.admin-page .ei-admin-quick-card>span:nth-child(2){display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-page .ei-admin-quick-card strong{font-size:.92rem;line-height:1.25}
+.admin-page .ei-admin-quick-card small{font-size:.76rem;color:#64748b;line-height:1.35}
+.admin-page .ei-admin-quick-card>b{margin-left:auto;font-size:1.35rem;color:#9aa9ba}
+.admin-page .ei-quick-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;background:#fff1e3;color:#f58220;font-size:1.4rem;font-weight:800}
+.admin-page .ei-quick-category .ei-quick-icon{background:#eaf2ff;color:#2166d5}
+.admin-page .ei-quick-sales .ei-quick-icon{background:#e5f7ed;color:#15965b}
+.admin-page .ei-quick-reviews .ei-quick-icon{background:#f0e9ff;color:#8050d8}
+.admin-page .ei-admin-nav-link{white-space:normal}
+@media(max-width:1100px) and (min-width:901px){
+  .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .admin-page .ei-mobile-menu-toggle{
+    display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:0 0 8px;padding:10px 13px;
+    border:1px solid #d7e5f3;border-radius:12px;background:#0757a6;color:#fff;
+    font-weight:750;text-align:left;box-shadow:0 4px 12px rgba(6,59,134,.13)
+  }
+  .admin-page .ei-mobile-menu-toggle>span:first-child{font-size:1.15rem}
+  .admin-page .ei-menu-chevron{margin-left:auto;font-size:1.1rem}
+  .admin-page .ei-mobile-menu-toggle[aria-expanded="true"] .ei-menu-chevron{transform:rotate(180deg)}
+  .admin-page .ei-admin-nav{display:none;position:relative;top:auto;left:auto;bottom:auto;width:100%;max-width:none;margin:0 0 12px;padding:8px;flex-direction:column;overflow:visible;white-space:normal}
+  .admin-page .ei-admin-nav.is-open{display:flex}
+  .admin-page .ei-admin-nav-link{width:100%;min-height:40px}
+  .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-page .ei-admin-quick-card{padding:11px;gap:8px}
+  .admin-page .ei-quick-icon{flex-basis:34px;width:34px;height:34px;border-radius:10px;font-size:1.1rem}
+  .admin-page .ei-admin-quick-card strong{font-size:.83rem}
+  .admin-page .ei-admin-quick-card small{font-size:.7rem}
+}
+@media(max-width:420px){
+  .admin-page .ei-admin-quick-grid{grid-template-columns:1fr 1fr}
+  .admin-page .ei-admin-quick-card{align-items:flex-start}
+  .admin-page .ei-admin-quick-card>b{display:none}
+  .admin-page .ei-admin-quick-card small{overflow-wrap:anywhere}
+}
