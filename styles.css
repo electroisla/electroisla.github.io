@@ -4036,3 +4036,17 @@ button:active{
   .admin-page .ei-admin-quick-grid{margin-bottom:10px}
   .admin-page #dashboard>.admin-grid{gap:10px}
 }
+
+
+/* Corrección v8: el menú de administración móvil es un panel lateral real */
+#eiNavShade{display:none}
+@media(max-width:900px){
+ .admin-page .ei-mobile-menu-toggle{display:flex!important;max-width:100%;cursor:pointer}
+ .admin-page .ei-admin-nav{display:flex!important;position:fixed!important;z-index:1002!important;left:0!important;top:0!important;bottom:0!important;width:min(82vw,300px)!important;max-width:300px!important;height:100dvh!important;margin:0!important;padding:82px 12px 18px!important;gap:7px!important;overflow-y:auto!important;overflow-x:hidden!important;white-space:normal!important;flex-direction:column!important;border-radius:0 20px 20px 0!important;box-shadow:12px 0 35px rgba(6,59,134,.25)!important;transform:translateX(-110%);visibility:hidden;transition:transform .22s ease,visibility .22s ease}
+ .admin-page .ei-admin-nav.is-open{transform:translateX(0);visibility:visible}
+ .admin-page .ei-admin-nav-link{width:100%!important;min-height:44px!important;justify-content:flex-start!important}
+ #eiNavShade.is-open{display:block;position:fixed;inset:0;z-index:1001;border:0;border-radius:0;background:rgba(12,28,48,.46);padding:0;margin:0;cursor:pointer}
+ body.ei-nav-locked{overflow:hidden}
+ .admin-page .ei-mobile-menu-toggle[aria-expanded="true"] .ei-menu-chevron{transform:rotate(180deg)}
+}
+@media(min-width:901px){.admin-page .ei-admin-nav{transform:none;visibility:visible}}
