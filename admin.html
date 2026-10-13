@@ -249,6 +249,8 @@
 .admin-sidebar .nav-help{margin-top:auto;padding:12px;border-radius:12px;background:#f7f9fc;color:#667788;font-size:12px;line-height:1.45}
 .admin-menu-toggle{display:none;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:11px;background:#fff;color:#0757a6;font-weight:800}
 .admin-nav-scrim{display:none}
+.admin-page:not(.admin-authenticated) .admin-sidebar,.admin-page:not(.admin-authenticated) .admin-menu-toggle{display:none!important}
+.admin-page:not(.admin-authenticated) .admin-wrap{max-width:1250px;margin:0 auto;padding:55px 7%;width:auto}
 .admin-page .topbar{position:sticky;top:0;z-index:110}
 .admin-page .admin-wrap{max-width:none;margin:0 0 0 238px;padding:28px clamp(16px,2.5vw,38px);width:auto}
 #dashboard>.admin-title{scroll-margin-top:95px}
@@ -491,6 +493,9 @@
   if(sidebar)sidebar.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
   const dashboard=document.getElementById('dashboard');
+  const syncAuthLayout=()=>page.classList.toggle('admin-authenticated',!!dashboard&&!dashboard.classList.contains('hidden'));
+  syncAuthLayout();
+  if(dashboard&&window.MutationObserver){new MutationObserver(syncAuthLayout).observe(dashboard,{attributes:true,attributeFilter:['class']})}
   if(dashboard){
     const settings=dashboard.querySelector('.settings-card');
     const categories=dashboard.querySelector('.category-manager');
