@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=6-admin-layout">
+<title>ElectroIsla | Administración</title><link rel="stylesheet" href="styles.css?v=7-admin-workspace">
 <style>
 .photo-picker{border:1px dashed #b9c2cc;border-radius:14px;padding:14px;margin-top:6px}
 .photo-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
@@ -439,4 +439,77 @@
 <script>
 (()=>{const b=document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;b.addEventListener('click',()=>{const open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(open));n.classList.toggle('is-open',open)});n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches){b.setAttribute('aria-expanded','false');n.classList.remove('is-open')}}));})();
 </script>
+
+<script>
+(()=> {
+  const dash=document.getElementById('dashboard');
+  if(!dash)return;
+  const title=dash.querySelector('.admin-title h1');
+  const quick=dash.querySelector('.ei-admin-quick-grid');
+  const settings=document.getElementById('storeSettings');
+  const categories=document.getElementById('categoryManager');
+  const products=document.querySelector('#dashboard>.admin-grid');
+  const sales=document.getElementById('salesReport');
+  const alerts=document.getElementById('reviewNotifications');
+  const reviews=document.getElementById('reviewsAdmin');
+  const nav=document.getElementById('eiAdminNav');
+  const toggle=document.getElementById('eiMobileMenuToggle');
+  const groups={
+    resumen:{label:'Panel de administración',show:[quick,settings]},
+    productos:{label:'Productos',show:[products]},
+    catalogo:{label:'Catálogo actual',show:[products]},
+    categorias:{label:'Categorías',show:[categories]},
+    ventas:{label:'Ventas y pedidos',show:[sales]},
+    resenas:{label:'Reseñas de productos',show:[alerts,reviews]},
+    avisos:{label:'Notificaciones',show:[alerts]}
+  };
+  const all=[quick,settings,categories,products,sales,alerts,reviews].filter(Boolean);
+  function openView(name, target){
+    const cfg=groups[name]||groups.resumen;
+    all.forEach(el=>el.classList.add('ei-view-hidden'));
+    cfg.show.forEach(el=>el&&el.classList.remove('ei-view-hidden'));
+    if(title)title.textContent=cfg.label;
+    nav?.querySelectorAll('a').forEach(a=>{
+      const href=a.getAttribute('href')||'';
+      const active=(name==='resumen'&&href==='#dashboard')||
+        (name==='productos'&&href==='#productForm')||
+        (name==='catalogo'&&href==='#catalogPanel')||
+        (name==='categorias'&&href==='#categoryManager')||
+        (name==='ventas'&&href==='#salesReport')||
+        (name==='resenas'&&href==='#reviewsAdmin')||
+        (name==='avisos'&&href==='#reviewNotifications');
+      a.classList.toggle('is-current',active);
+    });
+    if(toggle&&window.matchMedia('(max-width:900px)').matches){
+      toggle.setAttribute('aria-expanded','false');nav?.classList.remove('is-open');
+    }
+    if(name!=='resumen'&&target){
+      const el=document.getElementById(target);
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    }else window.scrollTo({top:0,behavior:'smooth'});
+  }
+  const routes={
+    '#dashboard':['resumen',null],
+    '#productForm':['productos','productForm'],
+    '#catalogPanel':['catalogo','catalogPanel'],
+    '#categoryManager':['categorias','categoryManager'],
+    '#salesReport':['ventas','salesReport'],
+    '#reviewsAdmin':['resenas','reviewsAdmin'],
+    '#reviewNotifications':['avisos','reviewNotifications']
+  };
+  nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{
+    const route=routes[a.getAttribute('href')];
+    if(!route)return;
+    e.preventDefault();openView(route[0],route[1]);
+  }));
+  dash.querySelectorAll('.ei-admin-quick-card').forEach(a=>a.addEventListener('click',e=>{
+    const route=routes[a.getAttribute('href')];
+    if(!route)return;
+    e.preventDefault();openView(route[0],route[1]);
+  }));
+  // Inicio compacto: muestra accesos directos y configuración, sin desplegar todo el administrador.
+  openView('resumen',null);
+})();
+</script>
+
 </body></html>
