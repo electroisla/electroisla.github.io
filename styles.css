@@ -3869,3 +3869,13 @@ button:active{
   .admin-page .category-form .row{grid-column:auto!important}
   .admin-page .sales-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* Mantener centrado el acceso de inicio de sesión; reservar espacio lateral solo tras entrar */
+@media(min-width:901px){
+  .admin-page .admin-wrap:has(#dashboard:not(.hidden)){margin:18px 20px 30px 222px}
+  .admin-page .admin-wrap:has(#loginBox:not(.hidden)){margin:30px auto}
+}
+@media(max-width:900px){
+  .admin-page .admin-wrap:has(#loginBox:not(.hidden)){margin:12px auto}
+}
