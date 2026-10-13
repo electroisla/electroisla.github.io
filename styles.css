@@ -4020,3 +4020,19 @@ button:active{
  .admin-page .admin-card{padding:13px!important}
  .admin-page .category-form{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Vista por secciones: evita que el administrador sea una página interminable */
+.admin-page .ei-view-hidden{display:none!important}
+.admin-page .ei-admin-quick-grid{scroll-margin-top:14px}
+.admin-page .admin-title{padding:14px 16px;margin-bottom:12px;background:linear-gradient(105deg,#eef6ff 0%,#fff 78%);border:1px solid #dce7f2;border-left:4px solid #f58220;border-radius:14px}
+.admin-page .admin-title h1{margin:0;color:#0757a6}
+.admin-page .admin-title .eyebrow{margin:0 0 3px;color:#f58220;font-weight:800;letter-spacing:.12em}
+.admin-page #storeSettings{margin-top:0}
+.admin-page #dashboard>.admin-grid{margin-top:0}
+.admin-page .ei-admin-nav-link.is-current{background:#f58220;color:#fff}
+@media(max-width:900px){
+  .admin-page .admin-title{padding:12px;margin-bottom:10px}
+  .admin-page .ei-admin-quick-grid{margin-bottom:10px}
+  .admin-page #dashboard>.admin-grid{gap:10px}
+}
