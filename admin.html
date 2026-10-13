@@ -351,6 +351,21 @@
  #dashboard .category-actions{flex-wrap:wrap}
 }
 
+
+/* Resumen principal ElectroIsla 360: accesos rápidos sin reemplazar módulos existentes */
+#dashboard .ei-dashboard-subtitle{margin:4px 0 0;color:#E1ECF6;font-size:13px}
+#dashboard .ei-overview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+#dashboard .ei-overview-card{display:flex;align-items:center;gap:11px;min-width:0;padding:15px 13px;border:1px solid #DCE6F0;border-radius:15px;background:#fff;box-shadow:0 5px 18px rgba(18,52,90,.045);text-decoration:none;color:#203247;transition:transform .16s,border-color .16s,box-shadow .16s}
+#dashboard .ei-overview-card:hover{transform:translateY(-2px);border-color:#F5B36D;box-shadow:0 8px 22px rgba(18,52,90,.09)}
+#dashboard .ei-overview-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;background:#FFF1E2;font-size:20px}
+#dashboard .ei-overview-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+#dashboard .ei-overview-copy strong{font-size:13px;color:#12345A;line-height:1.25}
+#dashboard .ei-overview-copy small{font-size:11px;color:#6B7C8E;line-height:1.35}
+#dashboard .ei-overview-arrow{margin-left:auto;align-self:flex-start;color:#F58220;font-size:18px;font-weight:800}
+@media(max-width:1120px){#dashboard .ei-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){#dashboard .ei-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#dashboard .ei-overview-card{padding:12px 9px;gap:8px}#dashboard .ei-overview-icon{flex-basis:34px;width:34px;height:34px;font-size:17px;border-radius:10px}#dashboard .ei-overview-copy strong{font-size:12px}#dashboard .ei-overview-copy small{font-size:10px}#dashboard .ei-dashboard-subtitle{max-width:240px;font-size:11px}}
+@media(max-width:360px){#dashboard .ei-overview-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body class="admin-page">
@@ -381,7 +396,13 @@
 <button class="btn primary full" id="loginBtn">Entrar</button>
 </section>
 <section id="dashboard" class="hidden">
-<div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
+<div class="admin-title"><div><p class="eyebrow">ELECTROISLA 360</p><h1>Resumen</h1><p class="ei-dashboard-subtitle">Tu hogar, nuestra prioridad. Administra la tienda desde un solo lugar.</p></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
+<div class="ei-overview-grid" aria-label="Accesos rápidos de administración">
+<a class="ei-overview-card" href="#admin-catalog-card"><span class="ei-overview-icon">📦</span><span class="ei-overview-copy"><strong>Productos</strong><small id="eiOverviewProducts">Catálogo de la tienda</small></span><span class="ei-overview-arrow">↗</span></a>
+<a class="ei-overview-card" href="#salesReport"><span class="ei-overview-icon">🧾</span><span class="ei-overview-copy"><strong>Pedidos y ventas</strong><small id="eiOverviewOrders">Consulta los pedidos</small></span><span class="ei-overview-arrow">↗</span></a>
+<a class="ei-overview-card" href="#reviewsAdmin"><span class="ei-overview-icon">⭐</span><span class="ei-overview-copy"><strong>Reseñas</strong><small id="eiOverviewReviews">Gestiona opiniones</small></span><span class="ei-overview-arrow">↗</span></a>
+<a class="ei-overview-card" href="#deliveryZonesPanel"><span class="ei-overview-icon">🚚</span><span class="ei-overview-copy"><strong>Zonas de domicilio</strong><small>Tarifas y disponibilidad</small></span><span class="ei-overview-arrow">↗</span></a>
+</div>
 <section class="admin-card settings-card">
 <h2>💱 Precios y tasa de cambio</h2>
 <p class="settings-help">Configura aquí cuánto vale 1 USD en CUP y el recargo para pagos por transferencia. Los cambios se sincronizan con la tienda pública.</p>
