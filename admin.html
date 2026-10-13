@@ -283,6 +283,74 @@
 }
 @media(prefers-reduced-motion:reduce){.admin-sidebar,.admin-nav-scrim,.admin-sidebar a{transition:none}}
 
+
+/* ElectroIsla 360 — identidad visual aplicada al administrador de prueba */
+:root{
+ --ei-brand-blue:#12345A;
+ --ei-brand-blue-2:#1B5685;
+ --ei-brand-orange:#F58220;
+ --ei-brand-orange-soft:#FFF1E2;
+ --ei-brand-border:#DCE6F0;
+}
+.admin-page{background:#F3F7FB;color:#203247}
+.admin-page .topbar{
+ min-height:76px;padding:10px 22px;background:linear-gradient(110deg,#fff 0%,#fff 76%,#fff5e9 100%);
+ border-bottom:3px solid var(--ei-brand-orange);
+ box-shadow:0 3px 14px rgba(18,52,90,.07)
+}
+.admin-page .topbar:after{content:"";position:absolute;bottom:-3px;left:0;width:180px;height:4px;background:var(--ei-brand-blue);border-radius:0 100% 0 0}
+.admin-page .ei-admin-logo{width:190px;max-height:62px}
+.admin-page .topbar>.btn.secondary{border-color:#DCE6F0;color:var(--ei-brand-blue);font-weight:700}
+.admin-page .topbar>.btn.secondary:hover{background:#EAF3FA;border-color:#B8CDE0}
+.admin-sidebar{
+ background:linear-gradient(180deg,#12345A 0%,#0D2948 100%);
+ border-right:0;box-shadow:4px 0 18px rgba(18,52,90,.08);
+ padding:20px 13px 14px
+}
+.admin-sidebar-label{color:#B8D0E5}
+.admin-sidebar a{color:#F4F8FC;border-color:transparent;padding:11px 12px;font-weight:650}
+.admin-sidebar a .nav-icon{background:rgba(255,255,255,.10);color:#FFD2A6}
+.admin-sidebar a:hover,.admin-sidebar a:focus-visible{background:rgba(245,130,32,.15);border-color:rgba(245,130,32,.4);color:#fff;outline:none}
+.admin-sidebar a:hover .nav-icon{background:var(--ei-brand-orange);color:#fff}
+.admin-sidebar a[href="#dashboard"]{background:var(--ei-brand-orange);color:#fff;box-shadow:0 5px 12px rgba(0,0,0,.12)}
+.admin-sidebar a[href="#dashboard"] .nav-icon{background:rgba(255,255,255,.2);color:#fff}
+.admin-sidebar .nav-help{background:rgba(255,255,255,.08);color:#D6E3EF;border:1px solid rgba(255,255,255,.12)}
+.admin-menu-toggle{border-color:#DCE6F0;color:var(--ei-brand-blue);font-weight:800}
+.admin-page .admin-wrap{padding-top:24px}
+#dashboard>.admin-title{display:flex;align-items:center;justify-content:space-between;padding:17px 20px;margin-bottom:14px;border-radius:16px;background:linear-gradient(110deg,#12345A,#1B5685);color:#fff;box-shadow:0 8px 20px rgba(18,52,90,.12)}
+#dashboard>.admin-title h1,#dashboard>.admin-title .eyebrow{color:#fff!important;margin-bottom:3px}
+#dashboard>.admin-title .eyebrow{opacity:.78;letter-spacing:.12em}
+#dashboard>.admin-title #logoutBtn{background:#fff;border-color:#fff;color:#12345A}
+#dashboard .admin-card{border:1px solid var(--ei-brand-border);border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(18,52,90,.045)}
+#dashboard .admin-card h2{color:var(--ei-brand-blue);font-weight:750;letter-spacing:-.015em}
+#dashboard .admin-card h2:has(+.category-help),#dashboard .admin-card h2:has(+.settings-help){display:flex;align-items:center;gap:8px}
+#dashboard .settings-card,#dashboard .category-manager{border-top:3px solid var(--ei-brand-orange)}
+#dashboard .btn.primary,#dashboard button.btn.primary{background:var(--ei-brand-orange)!important;border-color:var(--ei-brand-orange)!important;border-radius:11px;font-weight:750;box-shadow:0 3px 8px rgba(245,130,32,.13)}
+#dashboard .btn.primary:hover{background:#D96F0B!important;border-color:#D96F0B!important}
+#dashboard .btn.secondary{border-radius:11px}
+#dashboard .category-item{border-radius:12px}
+#dashboard .admin-grid{align-items:start}
+#dashboard #productForm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:10px}
+#dashboard #productForm>h2,#dashboard #productForm>input[type="hidden"],#dashboard #productForm>label:nth-of-type(1),#dashboard #productForm>label:nth-of-type(2),#dashboard #productForm>label:nth-of-type(6),#dashboard #productForm>label:nth-of-type(7),#dashboard #productForm>.row{grid-column:1/-1}
+#dashboard #productForm label{margin-bottom:0}
+#dashboard #productForm input:not([type="checkbox"]),#dashboard #productForm select,#dashboard #productForm textarea{min-height:42px;border-radius:10px}
+#dashboard #productForm textarea{min-height:72px}
+#dashboard .photo-picker{padding:10px}
+#dashboard .sales-report-head{align-items:center}
+#dashboard .sales-kpi{border-radius:13px;border-color:#DCE6F0;background:linear-gradient(180deg,#fff,#F7FAFD)}
+#dashboard .sales-kpi strong{color:var(--ei-brand-blue)}
+#dashboard .sales-kpi span{color:#62758A}
+#dashboard #reviewsList .admin-card,#dashboard .reviews-admin-list>*{border-radius:12px}
+@media(max-width:760px){
+ .admin-page .topbar{min-height:64px;padding:7px 10px}
+ .admin-page .ei-admin-logo{width:138px;max-height:48px}
+ .admin-page .topbar>.btn.secondary{font-size:12px;padding:8px 9px}
+ #dashboard>.admin-title{padding:14px;border-radius:13px}
+ #dashboard #productForm{grid-template-columns:minmax(0,1fr);row-gap:9px}
+ #dashboard #productForm>*{grid-column:1/-1}
+ #dashboard .category-actions{flex-wrap:wrap}
+}
+
 </style>
 </head>
 <body class="admin-page">
