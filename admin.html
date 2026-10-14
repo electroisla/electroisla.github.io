@@ -92,17 +92,29 @@ body.admin-page{margin:0;background:var(--ei-bg);color:var(--ei-ink);font-family
 .admin-page .review-admin-item{min-width:0;padding:11px;border:1px solid var(--ei-line);border-radius:11px;background:#fff}
 .admin-page .login-status,.admin-page .settings-status,.admin-page .sales-status{margin-top:8px;color:var(--ei-muted);font-size:.82rem}
 .admin-page .narrow{width:100%;max-width:430px}
-.admin-page #loginBox{margin:clamp(20px,6vh,60px) auto 32px;padding:24px;background:#fff;border:1px solid #ffffff70;border-radius:20px;box-shadow:0 16px 40px #063b8628}
-body.admin-page:has(#loginBox:not(.hidden)){min-height:100vh;background:linear-gradient(145deg,#0757a6,#063b86);padding:1px 12px 24px}
-.admin-page .login-logo-wrap{display:flex;justify-content:center;margin:0 0 16px}
+.admin-page #loginBox{position:relative;isolation:isolate;width:min(100%,430px);margin:clamp(24px,8vh,76px) auto 32px;padding:30px 28px 24px;overflow:hidden;background:#fff;border:1px solid #ffffff9c;border-radius:24px;box-shadow:0 24px 65px #021d4d50}
+.admin-page #loginBox:before{content:"";position:absolute;z-index:-1;top:0;left:0;right:0;height:7px;background:linear-gradient(90deg,var(--ei-orange),#ffbd67,var(--ei-orange))}
+body.admin-page:has(#loginBox:not(.hidden)){min-height:100vh;background:radial-gradient(ellipse at 12% 5%,#ffffff18 0,transparent 36%),linear-gradient(145deg,#0757a6 0%,#063b86 58%,#042d68 100%);padding:1px 12px 24px}
+.admin-page .login-logo-wrap{display:flex;justify-content:center;margin:0 0 18px}
 .admin-page .ei-login-logo{display:block;width:min(260px,85%);max-height:82px;object-fit:contain}
-.admin-page .ei-login-brandmark{display:flex;justify-content:center;align-items:center;margin:0 auto 13px}
-.admin-page .ei-login-cart{display:grid;place-items:center;width:70px;height:70px;border:3px solid var(--ei-orange);border-radius:50%;background:#fff;color:var(--ei-blue);font-size:1.8rem}
-.admin-page .ei-login-wordmark{color:var(--ei-blue);font-size:1.8rem;font-weight:850;letter-spacing:-.04em;text-align:center}
-.admin-page .ei-login-kicker{text-align:center;color:var(--ei-orange-dark);font-weight:800}
-.admin-page .ei-login-subtitle{margin:0 0 17px;color:var(--ei-muted);text-align:center}
-.admin-page .ei-login-field{display:block;margin:12px 0}
-.admin-page .ei-login-footer{margin-top:15px;color:var(--ei-muted);font-size:.78rem;text-align:center}
+.admin-page .ei-login-brandmark{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;margin:0 auto 14px}
+.admin-page .ei-login-cart{display:grid;place-items:center;width:76px;height:76px;border:3px solid var(--ei-orange);border-radius:50%;background:linear-gradient(145deg,#fff,#f2f7ff);color:var(--ei-blue);font-size:1.8rem;box-shadow:0 5px 16px #f28a2226}
+.admin-page .ei-login-cart svg{width:43px;height:43px}
+.admin-page .ei-login-cart svg path{stroke:var(--ei-blue)}
+.admin-page .ei-login-cart svg circle{fill:var(--ei-orange)}
+.admin-page .ei-login-wordmark{color:var(--ei-blue);font-size:1.9rem;font-weight:850;letter-spacing:-.045em;line-height:1.1;text-align:center}
+.admin-page .ei-login-wordmark span{color:var(--ei-orange-dark)}
+.admin-page #loginBox>h1{margin:5px 0 7px;color:var(--ei-blue);font-size:1.65rem;line-height:1.2;text-align:center}
+.admin-page .ei-login-kicker{text-align:center;color:var(--ei-orange-dark);font-weight:800;letter-spacing:.1em}
+.admin-page .ei-login-subtitle{margin:0 0 21px;color:var(--ei-muted);text-align:center}
+.admin-page .ei-login-field{display:block;margin:13px 0;color:var(--ei-ink);font-size:.86rem;font-weight:700}
+.admin-page .ei-login-field input{margin-top:6px}
+.admin-page .ei-password-wrap{display:flex;align-items:center;gap:6px}
+.admin-page .ei-password-wrap input{min-width:0;flex:1}
+.admin-page #eiPasswordToggle{flex:0 0 42px;min-height:40px;border:1px solid var(--ei-line);border-radius:10px;background:var(--ei-soft-blue);color:var(--ei-blue)}
+.admin-page #loginBtn{min-height:46px;margin-top:4px;border-radius:12px;font-size:.92rem;box-shadow:0 5px 12px #f28a2228}
+.admin-page .ei-login-footer{margin-top:18px;padding-top:13px;border-top:1px solid #e8edf4;color:var(--ei-muted);font-size:.78rem;text-align:center}
+@media(max-width:480px){.admin-page #loginBox{margin:clamp(20px,6vh,42px) auto 24px;padding:25px 19px 20px;border-radius:20px}.admin-page .ei-login-cart{width:68px;height:68px}.admin-page .ei-login-wordmark{font-size:1.7rem}.admin-page #loginBox>h1{font-size:1.45rem}}
 .admin-page .ei-nav-shade{display:none}
 #eiNavShade{display:none}
 @media(max-width:1100px) and (min-width:901px){.admin-page #dashboard{padding-left:210px;padding-right:13px}.admin-page .ei-admin-nav{width:180px;max-width:180px}.admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
