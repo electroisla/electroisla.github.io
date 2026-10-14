@@ -156,6 +156,57 @@ body.admin-page:has(#loginBox:not(.hidden)){min-height:100vh;background:radial-g
  .admin-page .admin-grid,.admin-page .reviews-admin-list,.admin-page .sales-report-grid{grid-template-columns:minmax(0,1fr)!important}
 }
 
+
+/* Inicio de sección: cabecera de marca coherente con el boceto ElectroIsla */
+.admin-page #dashboard > .admin-title{
+  position:relative;
+  min-height:86px;
+  margin:0 0 14px;
+  padding:17px 20px 17px 22px;
+  overflow:hidden;
+  background:linear-gradient(112deg,#fff 0%,#fff 72%,#fff4e7 100%);
+  border:1px solid #dce5ef;
+  border-left:5px solid var(--ei-orange);
+  border-radius:15px;
+  box-shadow:0 5px 18px #063b8610;
+}
+.admin-page #dashboard > .admin-title:after{
+  content:"";
+  position:absolute;
+  top:-36px;
+  right:72px;
+  width:128px;
+  height:128px;
+  border:18px solid #f28a2210;
+  border-radius:50%;
+  pointer-events:none;
+}
+.admin-page #dashboard > .admin-title > div{position:relative;z-index:1}
+.admin-page #dashboard > .admin-title .eyebrow{
+  margin:0 0 5px;
+  color:var(--ei-orange-dark);
+  font-size:.7rem;
+  font-weight:850;
+  letter-spacing:.13em;
+}
+.admin-page #dashboard > .admin-title h1{
+  color:var(--ei-blue);
+  font-size:clamp(1.35rem,2.4vw,1.85rem);
+  font-weight:850;
+  letter-spacing:-.035em;
+}
+.admin-page #dashboard > .admin-title #logoutBtn{position:relative;z-index:1}
+@media(max-width:900px){
+  .admin-page #dashboard > .admin-title{
+    min-height:70px;
+    margin-bottom:10px;
+    padding:12px 13px 12px 15px;
+    border-radius:12px;
+  }
+  .admin-page #dashboard > .admin-title:after{top:-46px;right:20px;width:100px;height:100px;border-width:14px}
+  .admin-page #dashboard > .admin-title h1{font-size:1.25rem}
+}
+
 </style>
 </head>
 <body class="admin-page">
