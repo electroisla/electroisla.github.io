@@ -7,7 +7,8 @@
 
 
 
-<style id="ei-admin-single-design">
+<style>
+
 
 /* ElectroIsla 360 · ÚNICA capa visual del administrador.
    Conserva IDs, HTML, scripts y lógica existentes; no cambia tienda ni datos. */
@@ -126,6 +127,22 @@ body.admin-page:has(#loginBox:not(.hidden)){min-height:100vh;background:linear-g
 }
 @media(max-width:380px){.admin-page #dashboard{padding-left:7px;padding-right:7px}.admin-page .ei-admin-quick-card{padding:7px;gap:6px}.admin-page .ei-quick-icon{flex-basis:27px;width:27px;height:27px}.admin-page .sales-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.admin-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+
+/* Reglas finales del boceto: un solo menú móvil, lateral y oculto hasta pulsar ☰ */
+.admin-page .ei-header-menu-toggle{display:none!important;align-items:center!important;justify-content:center!important;flex:0 0 40px!important;width:40px!important;height:40px!important;padding:0!important;border:1px solid #ffffff45!important;border-radius:10px!important;background:#ffffff18!important;color:#fff!important;font-size:1.2rem!important}
+.admin-page .ei-mobile-menu-toggle{display:none!important}
+@media(max-width:900px){
+ .admin-page .ei-header-menu-toggle{display:flex!important}
+ .admin-page .ei-mobile-menu-toggle{display:none!important}
+ .admin-page .ei-admin-nav{position:fixed!important;z-index:1002!important;top:0!important;right:auto!important;bottom:0!important;left:0!important;width:min(82vw,300px)!important;max-width:300px!important;height:100dvh!important;margin:0!important;padding:72px 12px 18px!important;overflow-y:auto!important;overflow-x:hidden!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;border-radius:0 16px 16px 0!important;transform:translateX(-110%)!important;visibility:hidden!important;transition:transform .22s ease,visibility .22s ease!important}
+ .admin-page .ei-admin-nav.is-open{transform:translateX(0)!important;visibility:visible!important}
+ .admin-page #eiNavShade.is-open{display:block!important;position:fixed!important;inset:0!important;z-index:1001!important;width:100%!important;height:100%!important;background:rgba(9,26,44,.48)!important}
+ .admin-page #dashboard{padding:10px 11px 24px!important}
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .admin-page .admin-grid,.admin-page .reviews-admin-list,.admin-page .sales-report-grid{grid-template-columns:minmax(0,1fr)!important}
+}
 
 </style>
 </head>
