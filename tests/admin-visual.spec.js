@@ -27,7 +27,7 @@ test('administración: login y navegación completa en móvil/escritorio', async
   await page.waitForTimeout(100);
 
   await expect(page.locator('#eiAdminNav')).toBeAttached();
-  await expect(page.locator('.ei-admin-quick-card')).toHaveCount(4);
+  await expect(page.locator('.ei-admin-quick-card')).toHaveCount(6);
   await expect(page.locator('#productForm')).toBeAttached();
   await expect(page.locator('#categoryManager')).toBeAttached();
   await expect(page.locator('#salesReport')).toBeAttached();
