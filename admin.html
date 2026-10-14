@@ -728,14 +728,18 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{
  background:#f8fbff!important;box-shadow:0 8px 28px rgba(0,25,70,.17)!important;
 }
 body.admin-page:has(#loginBox:not(.hidden)) #loginBox:before{
- content:"";position:absolute;z-index:-2;left:0;right:0;top:-230px;height:300px;
+ content:"";position:absolute;z-index:0;left:0;right:0;top:-230px;height:300px;
  background:linear-gradient(135deg,#0757a6,#063b86);border-bottom:5px solid #f28a22;
+ pointer-events:none;
 }
 body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{
- content:"";position:absolute;z-index:-1;left:-8%;right:-8%;bottom:-34px;height:112px;
+ content:"";position:absolute;z-index:0;left:-8%;right:-8%;bottom:-34px;height:112px;
  background:#0757a6;border-top:9px solid #f28a22;border-radius:0 0 50% 50% / 0 0 35% 35%;
- transform:rotate(-1deg);
+ transform:rotate(-1deg);pointer-events:none;
 }
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox>*{position:relative;z-index:1}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox .login-logo-wrap{position:absolute;z-index:2}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox{background:#f8fbff!important;}
 body.admin-page:has(#loginBox:not(.hidden)) #loginBox .login-logo-wrap{
  position:absolute;left:0;right:0;top:-172px;margin:0;display:flex;justify-content:center;
 }
