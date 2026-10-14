@@ -256,7 +256,7 @@
 .admin-page .ei-admin-nav-link>span:first-child{display:inline-grid!important;place-items:center!important;flex:0 0 25px!important;width:25px!important;height:25px!important;border-radius:8px!important;background:rgba(255,255,255,.13)!important;font-size:1rem!important}
 .admin-page .ei-admin-nav-link[href="#logoutBtn"]{display:none!important}
 .admin-page .ei-mobile-menu-toggle{display:none!important}
-.admin-page .ei-admin-quick-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:0 0 16px!important}
+.admin-page .ei-admin-quick-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0 0 16px!important}
 .admin-page .ei-admin-quick-card{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important;min-height:88px!important;padding:13px!important;background:#fff!important;border:1px solid #dce5ef!important;border-radius:14px!important;text-decoration:none!important;box-shadow:0 4px 14px rgba(31,55,80,.045)!important}
 .admin-page .ei-admin-quick-card>span:nth-child(2){display:flex!important;flex-direction:column!important;gap:4px!important;min-width:0!important}
 .admin-page .ei-admin-quick-card strong{font-size:.87rem!important;line-height:1.25!important;color:#124a80!important}
@@ -417,9 +417,11 @@
 <div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
 <section class="ei-admin-quick-grid" aria-label="Accesos rápidos">
   <a class="ei-admin-quick-card ei-quick-product" href="#catalogPanel"><span class="ei-quick-icon">▦</span><span><strong>Productos</strong><small>Administrar el catálogo</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-categories" href="#categoryManager"><span class="ei-quick-icon">▤</span><span><strong>Categorías</strong><small>Ordenar y editar</small></span><b>›</b></a>
   <a class="ei-admin-quick-card ei-quick-sales" href="#salesReport"><span class="ei-quick-icon">▥</span><span><strong>Ventas y pedidos</strong><small>Consultar pedidos</small></span><b>›</b></a>
   <a class="ei-admin-quick-card ei-quick-reviews" href="#reviewsAdmin"><span class="ei-quick-icon">☆</span><span><strong>Reseñas</strong><small>Opiniones de clientes</small></span><b>›</b></a>
   <a class="ei-admin-quick-card ei-quick-zones" href="#deliveryZonesPanel"><span class="ei-quick-icon">🚚</span><span><strong>Zonas de domicilio</strong><small>Precios y disponibilidad</small></span><b>›</b></a>
+  <a class="ei-admin-quick-card ei-quick-notifications" href="#reviewNotifications"><span class="ei-quick-icon">♧</span><span><strong>Notificaciones</strong><small>Avisos de reseñas</small></span><b>›</b></a>
 </section>
 <section class="admin-card settings-card" id="storeSettings">
 <h2>💱 Precios y tasa de cambio</h2>
@@ -854,6 +856,10 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart{
 }
 body.admin-page:has(#loginBox:not(.hidden)) .ei-header-menu-toggle{display:none!important}
 
+
+.admin-page .ei-quick-categories .ei-quick-icon{background:#fff0df!important;color:#e87b18!important}
+.admin-page .ei-quick-notifications .ei-quick-icon{background:#fff0df!important;color:#e87b18!important}
+@media(max-width:900px){.admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 <script id="ei-password-toggle-script">
 (()=>{const b=document.getElementById('eiPasswordToggle'),p=document.getElementById('adminPass');if(!b||!p)return;b.addEventListener('click',()=>{const show=p.type==='password';p.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña');b.textContent=show?'⊘':'◉';});})();
