@@ -114,6 +114,66 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{margin:0 auto;width:min(10
  .admin-page .ei-admin-quick-card{padding:8px;gap:7px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Pulido visual final: mejor jerarquía, contraste y adaptación móvil */
+body.admin-page:has(#loginBox:not(.hidden)){
+ background:
+   radial-gradient(ellipse at 50% 8%,#0b5aaa 0%,transparent 48%),
+   linear-gradient(160deg,#073b79 0%,#062f66 100%);
+}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{position:relative;isolation:isolate}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap:before,
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap:after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap:before{width:300px;height:300px;top:-190px;right:-120px;border:28px solid #ff69001c}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap:after{width:230px;height:230px;bottom:-155px;left:-95px;border:24px solid #ffffff0d}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox{
+ position:relative;overflow:hidden;border-radius:20px;padding-top:30px;
+ box-shadow:0 22px 60px #001b3f45,0 2px 7px #001b3f18;
+}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{
+ content:"";position:absolute;bottom:0;left:0;right:0;height:5px;
+ background:linear-gradient(90deg,var(--ei-orange) 0%,#ff9a35 52%,var(--ei-orange) 100%);
+}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-cart{
+ width:76px;height:76px;background:var(--ei-blue);border:4px solid var(--ei-orange);
+ box-shadow:0 0 0 5px #ff690012;
+}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-wordmark{font-size:clamp(2rem,6vw,2.3rem);letter-spacing:-.055em}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox>h1{letter-spacing:-.025em}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-subtitle{line-height:1.5}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-field{margin:16px 0}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-field input{transition:border-color .15s,box-shadow .15s}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-field input:focus{box-shadow:0 0 0 4px #ff690015}
+body.admin-page:has(#loginBox:not(.hidden)) #eiPasswordToggle{font-size:1.1rem;transition:background .15s,border-color .15s}
+body.admin-page:has(#loginBox:not(.hidden)) #eiPasswordToggle:hover{background:#e5f0fc;border-color:#b7cbe1}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBtn{box-shadow:0 5px 12px #ff690026;transition:transform .15s,box-shadow .15s,background .15s}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBtn:hover{transform:translateY(-1px);box-shadow:0 8px 17px #ff690033}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBtn:active{transform:translateY(0)}
+body.admin-page:has(#loginBox:not(.hidden)) .ei-login-footer{margin-top:22px}
+.admin-page .admin-title,.admin-page .admin-card,.admin-page #deliveryZonesPanel,.admin-page .ei-admin-quick-card{box-shadow:0 2px 7px #173c6208}
+.admin-page .ei-admin-nav-link{transition:background .15s,color .15s}
+.admin-page .btn{transition:background .15s,border-color .15s,transform .15s}
+.admin-page .btn:active{transform:translateY(1px)}
+@media(max-width:900px){
+ body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{padding:26px 12px 34px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{border-radius:18px;padding:27px 22px 26px}
+ body.admin-page:has(#loginBox:not(.hidden)) .login-logo-wrap{margin-bottom:15px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-cart{width:70px;height:70px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-cart svg{width:39px;height:39px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-wordmark{font-size:2.05rem}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-subtitle{margin-bottom:19px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBtn{min-height:48px}
+}
+@media(max-height:720px) and (max-width:900px){
+ body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{justify-content:flex-start;padding-top:18px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{padding-top:20px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-cart{width:58px;height:58px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-cart svg{width:32px;height:32px}
+ body.admin-page:has(#loginBox:not(.hidden)) .login-logo-wrap{margin-bottom:10px}
+ body.admin-page:has(#loginBox:not(.hidden)) .ei-login-field{margin:11px 0}
+}
+@media(prefers-reduced-motion:reduce){.admin-page .btn,.admin-page #loginBtn,.admin-page .ei-login-field input{transition:none!important}}
+
 </style>
 </head>
 <body class="admin-page">
