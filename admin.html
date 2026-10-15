@@ -127,6 +127,41 @@ body.admin-page:has(#loginBox:not(.hidden)){min-height:100vh;background:var(--bl
 }
 @media(max-width:380px){.admin-page #dashboard{padding-left:7px;padding-right:7px}.admin-page .ei-admin-quick-card{padding:7px;gap:6px}.admin-page .ei-quick-icon{flex-basis:27px;width:27px;height:27px}.admin-page .sales-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-page #loginBox{padding:22px 18px}}
 @media(prefers-reduced-motion:reduce){.admin-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Ajuste fiel al boceto de inicio de sesión ElectroIsla */
+@media (max-width:900px){
+ body.admin-page:has(#loginBox:not(.hidden)){min-height:100svh;background:var(--blue-dark);padding:0 14px 30px}
+ body.admin-page:has(#loginBox:not(.hidden)) .topbar{display:none}
+ body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{display:flex;flex-direction:column;justify-content:center;min-height:100svh;padding-top:190px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{width:100%;max-width:520px;margin:0 auto;padding:76px 22px 24px;border:0;border-radius:18px 18px 24px 24px;box-shadow:0 10px 28px #001e4a30;overflow:visible}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:absolute;z-index:0;left:0;right:0;bottom:-15px;height:34px;background:var(--orange);border-radius:0 0 45% 45%;clip-path:ellipse(70% 48% at 50% 0%);pointer-events:none}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .login-logo-wrap{position:absolute;left:0;right:0;top:-177px;height:164px;margin:0;display:flex;align-items:center;justify-content:center}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-brandmark{gap:12px;margin:0}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart{width:78px;height:78px;border:4px solid var(--orange);background:var(--orange);box-shadow:inset 0 0 0 5px var(--blue-dark);color:#fff}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart svg{width:40px;height:40px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart svg path{stroke:#fff}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart svg circle{fill:var(--orange)}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-wordmark{color:#fff;font-size:clamp(2rem,8vw,2.55rem);letter-spacing:-.045em}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-wordmark span{color:var(--orange)}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-kicker{display:none}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox>h1{margin:0 0 5px;color:var(--blue-dark);font-size:1.55rem}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-subtitle{margin:0 0 22px;color:#53657a;font-size:1rem}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-field{margin:14px 0;font-size:.9rem}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox input:not([type=checkbox]):not([type=radio]):not([type=file]){min-height:48px;border-color:#dce5ef;background:#fbfdff;font-size:1rem}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-password-wrap{gap:8px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox #eiPasswordToggle{flex-basis:46px;min-height:46px;background:#f2f7fc;border-color:#dce5ef}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox #loginBtn{min-height:48px;margin-top:14px;background:#ff6900;border-color:#ff6900;font-size:1rem}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-footer{margin-top:18px;padding-top:0;border:0;color:var(--blue-dark);font-weight:750;font-size:.86rem}
+}
+@media(max-width:420px){
+ body.admin-page:has(#loginBox:not(.hidden)){padding-left:12px;padding-right:12px}
+ body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{padding-top:174px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{padding:66px 17px 21px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .login-logo-wrap{top:-160px;height:150px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-cart{width:68px;height:68px}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox .ei-login-wordmark{font-size:2rem}
+}
+
 </style>
 </head>
 <body class="admin-page">
