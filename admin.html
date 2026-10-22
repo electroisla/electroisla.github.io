@@ -419,7 +419,7 @@ function initRouter(){
       a.classList.toggle('is-current',active);
       if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
     });
-    if(toggle&&window.matchMedia('(max-width:900px)').matches){
+    if(toggle){
       toggle.setAttribute('aria-expanded','false');
       nav?.classList.remove('is-open');
       document.getElementById('eiNavShade')?.classList.remove('is-open');
