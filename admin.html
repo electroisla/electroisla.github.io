@@ -899,6 +899,32 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 .admin-page .ei-admin-quick-card.ei-quick-reviews .ei-quick-icon svg{width:27px;height:27px}
 @media(max-width:350px){.admin-page .ei-admin-quick-card .ei-quick-icon svg{width:24px;height:24px}}
 </style>
+
+<style id="ei-login-final-shape-v2">
+/* Autenticación compacta y franjas asimétricas ElectroIsla */
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{padding:12px 14px!important}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox{transform:translateY(-12px)!important;padding:21px 25px 19px!important}
+.admin-page .login-logo-wrap{margin-bottom:11px!important}
+.admin-page .ei-login-brandmark{gap:6px!important}
+.admin-page .ei-login-cart{width:58px!important;height:58px!important}
+.admin-page .ei-login-cart svg{width:32px!important;height:32px!important}
+.admin-page .ei-login-wordmark{font-size:clamp(1.65rem,5.5vw,1.95rem)!important}
+.admin-page .ei-login-tagline{font-size:.73rem!important}
+.admin-page #loginBox>h1{font-size:1.18rem!important}
+.admin-page .ei-login-subtitle{font-size:.81rem!important;margin-bottom:12px!important}
+.admin-page .ei-login-field{font-size:.78rem!important;margin:9px 0!important}
+.admin-page .ei-login-field input{min-height:40px!important;padding:8px 10px!important;font-size:15px!important}
+.admin-page #eiPasswordToggle{min-height:40px!important;flex-basis:40px!important}
+.admin-page #loginBtn{min-height:42px!important;font-size:.88rem!important;margin-top:8px!important}
+.admin-page .ei-forgot-password{font-size:.76rem!important;margin-top:7px!important}
+.admin-page .ei-login-footer{font-size:.68rem!important;margin-top:8px!important}
+body.admin-page:has(#loginBox:not(.hidden))::before{z-index:2!important;left:-14%!important;right:-14%!important;bottom:-105px!important;height:clamp(125px,19svh,175px)!important;border-radius:0 0 48% 52% / 0 0 30% 25%!important;transform:rotate(-3deg)!important}
+body.admin-page:has(#loginBox:not(.hidden))::after{z-index:0!important}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox::after{z-index:3!important;left:0!important;right:0!important;bottom:-1px!important;height:6px!important}
+@media(max-width:480px){body.admin-page:has(#loginBox:not(.hidden)) #loginBox{padding:19px 18px 17px!important}.admin-page .ei-login-cart{width:54px!important;height:54px!important}.admin-page .ei-login-wordmark{font-size:1.65rem!important}.admin-page .ei-login-tagline{font-size:.69rem!important}}
+@media(max-height:650px){body.admin-page:has(#loginBox:not(.hidden)) #loginBox{transform:translateY(-5px)!important;max-height:calc(100svh - 12px)!important;padding-top:12px!important;padding-bottom:12px!important}.admin-page .login-logo-wrap{margin-bottom:6px!important}.admin-page .ei-login-cart{width:46px!important;height:46px!important}.admin-page .ei-login-cart svg{width:26px!important;height:26px!important}.admin-page .ei-login-field{margin:6px 0!important}}
+</style>
+
 </html>
 
 <style id="ei-summary-square-cards">
