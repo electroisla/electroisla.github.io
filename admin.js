@@ -690,3 +690,30 @@ const salesExportEl=document.getElementById("salesExport");
 if(salesExportEl)salesExportEl.addEventListener("click",exportSalesCsv);
 supabaseClient.channel("reviews-admin").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},()=>loadAdminReviews()).subscribe();
 supabaseClient.channel("orders-admin").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>loadSalesReport()).subscribe();
+
+
+/* Recuperación de acceso: usa el flujo seguro de recuperación de Supabase */
+async function recoverAdminPassword(){
+ const emailInput=document.getElementById("adminEmail");
+ const email=(emailInput?.value||"").trim();
+ if(!email){
+   loginBoxMessage("Escribe tu correo para enviarte el enlace de recuperación.");
+   emailInput?.focus();
+   return;
+ }
+ const button=document.getElementById("eiForgotPassword");
+ if(button){button.disabled=true;button.textContent="Enviando enlace…";}
+ loginBoxMessage("Solicitando enlace de recuperación…");
+ try{
+   const redirectTo=window.location.origin+window.location.pathname;
+   const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+   if(error) throw error;
+   loginBoxMessage("Si el correo está registrado, recibirás un enlace para recuperar el acceso. Revisa también el correo no deseado.");
+ }catch(error){
+   loginBoxMessage("No se pudo solicitar la recuperación. Comprueba el correo e inténtalo de nuevo.");
+ }finally{
+   if(button){button.disabled=false;button.textContent="¿Olvidaste tu contraseña?";}
+ }
+}
+const eiForgotPasswordButton=document.getElementById("eiForgotPassword");
+if(eiForgotPasswordButton)eiForgotPasswordButton.addEventListener("click",recoverAdminPassword);
