@@ -831,6 +831,34 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});else apply();
 })();
 </script>
+
+<style id="ei-final-centered-header-fix">
+.admin-page .topbar{position:sticky;isolation:isolate}
+.admin-page .ei-logo-brand{
+ position:absolute!important;left:50%!important;top:50%!important;
+ transform:translate(-50%,-50%)!important;z-index:2;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ gap:12px!important;width:max-content;max-width:calc(100% - 300px);
+}
+.admin-page .ei-logo-brand .ei-admin-logo{
+ display:block!important;width:54px!important;height:54px!important;
+ flex:0 0 54px!important;object-fit:cover;
+}
+.admin-page .ei-logo-brand .ei-brand-name{
+ display:inline-flex!important;align-items:center;white-space:nowrap;
+ font-size:clamp(1.3rem,2.8vw,1.8rem)!important;line-height:1.08!important;
+}
+@media(max-width:700px){
+ .admin-page .ei-logo-brand{max-width:calc(100% - 170px);gap:7px!important}
+ .admin-page .ei-logo-brand .ei-admin-logo{width:40px!important;height:40px!important;flex-basis:40px!important}
+ .admin-page .ei-logo-brand .ei-brand-name{font-size:clamp(1rem,4.2vw,1.28rem)!important}
+}
+@media(max-width:390px){
+ .admin-page .ei-logo-brand{max-width:calc(100% - 130px);gap:5px!important}
+ .admin-page .ei-logo-brand .ei-admin-logo{width:32px!important;height:32px!important;flex-basis:32px!important}
+ .admin-page .ei-logo-brand .ei-brand-name{font-size:.88rem!important}
+}
+</style>
 </body>
 <style id="ei-summary-outline-icons">
 .admin-page .ei-admin-quick-card .ei-quick-icon{color:#fff}
