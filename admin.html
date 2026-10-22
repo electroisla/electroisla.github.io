@@ -352,6 +352,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 
 <script id="ei-admin-view-router">
 (()=> {
+function initRouter(){
   const dash=document.getElementById('dashboard');
   if(!dash)return;
   const title=dash.querySelector('.admin-title h1');
@@ -421,6 +422,8 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
     if(name)openView(name,false);
   });
   openView(routes[location.hash]||'resumen',false);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initRouter,{once:true});else initRouter();
 })();
 </script>
 
