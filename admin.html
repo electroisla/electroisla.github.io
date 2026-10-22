@@ -481,6 +481,13 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 .admin-page #categoryManager .category-item:not(.is-hidden) .category-state::first-letter{color:#39ff14;text-shadow:0 0 4px #39ff1480,0 0 9px #39ff1460}
 .admin-page #categoryManager .category-item.is-hidden .category-state{color:#8793a0}
 
+
+/* Punto de estado explícito: independiente del color de los caracteres */
+.admin-page #categoryManager .category-state{display:flex;align-items:center;gap:7px}
+.admin-page #categoryManager .category-status-dot{display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:#39ff14;border:1px solid #24d900;box-shadow:0 0 3px #39ff14,0 0 8px #39ff14,0 0 13px #39ff1470}
+.admin-page #categoryManager .category-state.is-hidden .category-status-dot{background:#a8b2bd;border-color:#929eaa;box-shadow:none}
+.admin-page #categoryManager .category-state.is-hidden{color:#8793a0}
+
 </style>
 </head>
 <body class="admin-page">
