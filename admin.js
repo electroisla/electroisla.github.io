@@ -436,17 +436,22 @@ async function renderAdminIdentity(){
   target.replaceChildren();
   const label=document.createElement("span");
   label.textContent="Administrador: "+(name||user.email||"Cuenta activa");
-  const button=document.createElement("button");
-  button.type="button";button.id="eiEditAdminName";
-  button.textContent=name?"Editar nombre":"Asignar nombre";
-  button.addEventListener("click",editAdminDisplayName);
-  target.append(label,button);
+  target.append(label);
+  // El nombre queda fijo tras asignarse: solo mostrar la acción si aún no existe.
+  if(!name){
+   const button=document.createElement("button");
+   button.type="button";button.id="eiEditAdminName";
+   button.textContent="Asignar nombre";
+   button.addEventListener("click",editAdminDisplayName);
+   target.append(button);
+  }
  }catch(err){target.textContent="Administrador: "+(supabaseClient.auth.getSession()?.user?.email||"Cuenta activa");}
 }
 async function editAdminDisplayName(){
  const {data:{user},error}=await supabaseClient.auth.getUser();
  if(error||!user){alert("No se pudo identificar la cuenta activa. Cierra sesión y vuelve a entrar.");return;}
  const current=String(user.user_metadata?.full_name||user.user_metadata?.name||"").trim();
+ if(current){await renderAdminIdentity();return;}
  const value=prompt("Nombre que aparecerá en la administración:",current);
  if(value===null)return;
  const name=value.trim();
