@@ -300,6 +300,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
   <a href="#productForm" class="ei-admin-nav-link"><span>＋</span> Agregar producto</a>
   <a href="#catalogPanel" class="ei-admin-nav-link"><span>▦</span> Catálogo</a>
   <a href="#categoryManager" class="ei-admin-nav-link"><span>▤</span> Categorías</a>
+  <a href="#storeSettings" class="ei-admin-nav-link"><span>💱</span> Precios y tasas de cambio</a>
   <a href="#salesReport" class="ei-admin-nav-link"><span>▥</span> Ventas y pedidos</a>
   <a href="#deliveryZonesPanel" class="ei-admin-nav-link"><span>🚚</span> Zonas y costos de domicilio</a>
   <a href="#reviewsAdmin" class="ei-admin-nav-link"><span>☆</span> Reseñas <span class="ei-admin-nav-badge" id="adminReviewNavBadge" hidden></span></a>
@@ -506,6 +507,7 @@ function initRouter(){
     productos:{label:'Agregar producto',show:[productForm],href:'#productForm'},
     catalogo:{label:'Catálogo actual',show:[catalog],href:'#catalogPanel'},
     categorias:{label:'Categorías',show:[categories],href:'#categoryManager'},
+    precios:{label:'Precios y tasas de cambio',show:[settings],href:'#storeSettings'},
     ventas:{label:'Ventas y pedidos',show:[sales],href:'#salesReport'},
     resenas:{label:'Reseñas de productos',show:[reviews],href:'#reviewsAdmin'},
     avisos:{label:'Notificaciones',show:[alerts],href:'#reviewNotifications'},
@@ -517,6 +519,7 @@ function initRouter(){
     '#productForm':'productos',
     '#catalogPanel':'catalogo',
     '#categoryManager':'categorias',
+    '#storeSettings':'precios',
     '#salesReport':'ventas',
     '#reviewsAdmin':'resenas',
     '#reviewNotifications':'avisos',
