@@ -425,6 +425,39 @@ async function cloudDelete(id){
 function loginBoxMessage(msg){
  const p=document.querySelector("#loginBox .login-status"); if(p)p.textContent=msg||"";
 }
+async function renderAdminIdentity(){
+ const target=document.getElementById("eiAdminIdentity");
+ if(!target)return;
+ try{
+  const {data:{user},error}=await supabaseClient.auth.getUser();
+  if(error||!user){target.textContent="Administrador: sesión no identificada";return;}
+  const metadata=user.user_metadata||{};
+  const name=String(metadata.full_name||metadata.name||"").trim();
+  target.replaceChildren();
+  const label=document.createElement("span");
+  label.textContent="Administrador: "+(name||user.email||"Cuenta activa");
+  const button=document.createElement("button");
+  button.type="button";button.id="eiEditAdminName";
+  button.textContent=name?"Editar nombre":"Asignar nombre";
+  button.addEventListener("click",editAdminDisplayName);
+  target.append(label,button);
+ }catch(err){target.textContent="Administrador: "+(supabaseClient.auth.getSession()?.user?.email||"Cuenta activa");}
+}
+async function editAdminDisplayName(){
+ const {data:{user},error}=await supabaseClient.auth.getUser();
+ if(error||!user){alert("No se pudo identificar la cuenta activa. Cierra sesión y vuelve a entrar.");return;}
+ const current=String(user.user_metadata?.full_name||user.user_metadata?.name||"").trim();
+ const value=prompt("Nombre que aparecerá en la administración:",current);
+ if(value===null)return;
+ const name=value.trim();
+ if(!name){alert("Escribe un nombre para guardar.");return;}
+ if(name.length>60){alert("El nombre no puede superar 60 caracteres.");return;}
+ const oldMetadata=user.user_metadata||{};
+ const {error:updateError}=await supabaseClient.auth.updateUser({data:{...oldMetadata,full_name:name}});
+ if(updateError){alert("No se pudo guardar el nombre: "+updateError.message);return;}
+ await renderAdminIdentity();
+ alert("Nombre guardado para esta cuenta.");
+}
 async function login(){
  const email=document.getElementById("adminEmail").value.trim();
  const password=document.getElementById("adminPass").value;
@@ -438,6 +471,7 @@ async function show(){
  document.getElementById("loginBox").classList.add("hidden");
  document.getElementById("dashboard").classList.remove("hidden");
  loginBoxMessage("");
+ await renderAdminIdentity();
  const status=document.getElementById("cloudStatus");
  if(status) status.textContent="☁️ Conectando con Supabase…";
  try{
