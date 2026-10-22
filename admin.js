@@ -536,7 +536,9 @@ function updateZoneSummary(stats){
 }
 function renderAdminNotices(){
  const list=document.getElementById("summaryAlertsList"),count=document.getElementById("summaryAlertsCount"),caption=document.getElementById("summaryAlertsCaption");
- const total=eiAdminNotices.size;
+ const pendingReviews=Array.isArray(reviewRows)?reviewRows.filter(r=>r.approved!==true).length:0;
+ const otherNotices=[...eiAdminNotices.keys()].filter(key=>key!=="reviews-pending").length;
+ const total=pendingReviews+otherNotices;
  if(count)count.textContent=String(total);
  if(caption)caption.textContent=total?"Avisos que requieren atención: "+total:"Sin errores detectados en las comprobaciones realizadas.";
  const navBadge=document.querySelector('#eiAdminNav a[href="#reviewNotifications"] .ei-admin-nav-badge');
@@ -740,8 +742,10 @@ async function loadSalesReport(){
     salesRows=Array.isArray(data)?data:[];
     renderSalesReport();
     status.textContent=`☁️ ${salesRows.length} pedido(s) encontrado(s)`;
+    clearAdminNotice("sales-load");
   }catch(err){
     salesRows=[];renderSalesReport();
+    setAdminNotice("sales-load","No se pudieron cargar los pedidos/ventas: "+(err.message||err),"#salesReport","Revisar ventas");
     status.textContent="⚠️ No se pudo cargar el reporte: "+(err.message||err);
     console.error("Reporte de ventas:",err);
   }
