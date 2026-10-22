@@ -474,6 +474,13 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn,.admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;height:27px;min-height:27px;font-size:.7rem}
 }
 
+
+/* Indicador neón para categorías visibles en la tienda */
+.admin-page #categoryManager .category-state{display:flex;align-items:center;gap:6px}
+.admin-page #categoryManager .category-item:not(.is-hidden) .category-state{color:#536779}
+.admin-page #categoryManager .category-item:not(.is-hidden) .category-state::first-letter{color:#39ff14;text-shadow:0 0 4px #39ff1480,0 0 9px #39ff1460}
+.admin-page #categoryManager .category-item.is-hidden .category-state{color:#8793a0}
+
 </style>
 </head>
 <body class="admin-page">
