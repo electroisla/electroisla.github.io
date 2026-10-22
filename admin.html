@@ -547,6 +547,31 @@ body.admin-page .topbar .ei-logo-brand .ei-brand-name{
 @media(max-width:900px){.admin-page .admin-title{min-height:66px;padding:12px 15px 12px 17px;border-left-width:5px;border-radius:11px}.admin-page .admin-title:after{width:94px;height:94px;right:-24px;top:-30px;border-width:14px}}
 </style>
 
+<style id="ei-admin-title-sidebar-details">
+/* Detalles de títulos inspirados en el menú lateral ElectroIsla */
+.admin-page .admin-title{
+  border-top:1px solid color-mix(in srgb,var(--section-accent,#f58220) 22%,#fff)!important;
+}
+.admin-page .admin-title .eyebrow{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;
+  width:max-content!important;max-width:100%!important;
+  margin:0 0 5px!important;padding:3px 8px!important;
+  border:1px solid color-mix(in srgb,var(--section-accent,#f58220) 24%,#fff)!important;
+  border-radius:999px!important;
+  background:color-mix(in srgb,var(--section-accent,#f58220) 9%,#fff)!important;
+  font-size:.68rem!important;font-weight:850!important;letter-spacing:.075em!important;
+}
+.admin-page .admin-title h1::after{
+  content:""!important;display:block!important;width:48px!important;height:3px!important;
+  margin-top:7px!important;border-radius:99px!important;
+  background:linear-gradient(90deg,var(--section-accent,#f58220),color-mix(in srgb,var(--section-accent,#f58220) 10%,transparent))!important;
+}
+@media(max-width:600px){
+  .admin-page .admin-title h1::after{width:38px!important;height:3px!important;margin-top:5px!important}
+  .admin-page .admin-title .eyebrow{font-size:.63rem!important;padding:2px 7px!important}
+}
+</style>
+
 
 <style id="ei-login-store-cohesive-v1">
 /* Única capa visual de acceso: lenguaje limpio de la tienda ElectroIsla, sin ondas ni adornos superpuestos. */
