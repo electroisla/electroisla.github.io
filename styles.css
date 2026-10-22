@@ -3803,3 +3803,250 @@ button:active{
   object-position:center!important;
   border-radius:14px!important;
 }
+
+
+/* ElectroIsla Admin: navegación compacta y menos desplazamiento, solo administración */
+.admin-page .admin-wrap{max-width:1500px}
+.admin-page #dashboard{min-width:0}
+.admin-page .ei-admin-nav{
+  position:fixed;z-index:50;left:14px;top:88px;bottom:14px;width:190px;
+  display:flex;flex-direction:column;gap:5px;padding:12px 9px;
+  overflow-y:auto;overflow-x:hidden;background:linear-gradient(180deg,#0757a6 0%,#063b86 100%);
+  border:1px solid rgba(255,255,255,.16);border-radius:18px;
+  box-shadow:0 12px 28px rgba(6,59,134,.16)
+}
+.admin-page .ei-admin-nav-link{
+  display:flex;align-items:center;gap:10px;min-height:42px;padding:9px 11px;
+  color:#fff;text-decoration:none;font-size:.88rem;font-weight:650;
+  border-radius:11px;transition:background .16s ease,transform .16s ease
+}
+.admin-page .ei-admin-nav-link>span:first-child{
+  display:inline-grid;place-items:center;flex:0 0 25px;width:25px;height:25px;
+  border-radius:8px;background:rgba(255,255,255,.12);font-size:1.05rem
+}
+.admin-page .ei-admin-nav-link:hover,.admin-page .ei-admin-nav-link:focus-visible{
+  background:rgba(255,255,255,.13);outline:none
+}
+.admin-page .ei-admin-nav-link.is-current{background:#f58220;color:#fff;box-shadow:0 5px 12px rgba(245,130,32,.22)}
+.admin-page .ei-admin-nav-link.is-current>span:first-child{background:rgba(255,255,255,.2)}
+.admin-page .ei-admin-nav-badge{margin-left:auto;background:#ffede0;color:#9b4b08;border-radius:999px;padding:2px 7px;font-size:.72rem}
+.admin-page .admin-wrap{margin:18px 20px 30px 222px;padding:0 0 20px}
+.admin-page .admin-title{scroll-margin-top:18px}
+.admin-page #storeSettings,.admin-page #categoryManager,.admin-page #productForm,
+.admin-page #catalogPanel,.admin-page #salesReport,.admin-page #reviewsAdmin,
+.admin-page #reviewNotifications{scroll-margin-top:18px}
+.admin-page #dashboard>.admin-grid{align-items:start;gap:14px}
+.admin-page #dashboard>.admin-grid>.admin-card,
+.admin-page #dashboard>.admin-card{padding:16px}
+.admin-page #productForm{gap:10px}
+.admin-page #productForm label{margin-bottom:0}
+.admin-page #productForm input:not([type=checkbox]):not([type=file]),
+.admin-page #productForm textarea,.admin-page #productForm select{min-height:40px}
+.admin-page #productForm textarea{min-height:76px}
+.admin-page .reviews-admin-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-page .review-admin-item{margin:0!important;min-width:0}
+.admin-page .sales-report-grid{gap:12px}
+@media(max-width:900px){
+  .admin-page .ei-admin-nav{
+    position:sticky;top:6px;left:auto;bottom:auto;width:auto;max-width:100%;
+    flex-direction:row;align-items:center;gap:5px;margin:0 0 12px;padding:7px;
+    overflow-x:auto;overflow-y:hidden;border-radius:13px;white-space:nowrap;
+    scrollbar-width:thin
+  }
+  .admin-page .ei-admin-nav-link{flex:0 0 auto;min-height:38px;padding:7px 10px;font-size:.82rem}
+  .admin-page .ei-admin-nav-link>span:first-child{flex-basis:22px;width:22px;height:22px}
+  .admin-page .admin-wrap{margin:12px;padding:0 0 18px}
+  .admin-page .reviews-admin-list{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .admin-page .admin-wrap{margin:8px}
+  .admin-page .ei-admin-nav{margin-left:0;margin-right:0}
+  .admin-page .admin-title h1{font-size:1.35rem}
+  .admin-page #dashboard>.admin-grid{grid-template-columns:minmax(0,1fr)}
+  .admin-page #productForm .row{flex-wrap:wrap}
+  .admin-page #productForm .row .btn{flex:1 1 140px}
+  .admin-page .category-form{grid-template-columns:minmax(0,1fr)}
+  .admin-page .category-form .row{grid-column:auto!important}
+  .admin-page .sales-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+/* Mantener centrado el acceso de inicio de sesión; reservar espacio lateral solo tras entrar */
+@media(min-width:901px){
+  .admin-page .admin-wrap:has(#dashboard:not(.hidden)){margin:18px 20px 30px 222px}
+  .admin-page .admin-wrap:has(#loginBox:not(.hidden)){margin:30px auto}
+}
+@media(max-width:900px){
+  .admin-page .admin-wrap:has(#loginBox:not(.hidden)){margin:12px auto}
+}
+
+
+/* Ajuste de fidelidad al boceto: resumen con accesos directos y menú móvil desplegable */
+.admin-page .ei-mobile-menu-toggle{display:none}
+.admin-page .ei-admin-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.admin-page .ei-admin-quick-card{
+  min-width:0;display:flex;align-items:center;gap:10px;padding:14px;
+  background:#fff;border:1px solid #dce7f2;border-radius:15px;text-decoration:none;color:#12345a;
+  box-shadow:0 5px 16px rgba(16,43,77,.04);transition:transform .15s ease,box-shadow .15s ease
+}
+.admin-page .ei-admin-quick-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,43,77,.09)}
+.admin-page .ei-admin-quick-card>span:nth-child(2){display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-page .ei-admin-quick-card strong{font-size:.92rem;line-height:1.25}
+.admin-page .ei-admin-quick-card small{font-size:.76rem;color:#64748b;line-height:1.35}
+.admin-page .ei-admin-quick-card>b{margin-left:auto;font-size:1.35rem;color:#9aa9ba}
+.admin-page .ei-quick-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;background:#fff1e3;color:#f58220;font-size:1.4rem;font-weight:800}
+.admin-page .ei-quick-category .ei-quick-icon{background:#eaf2ff;color:#2166d5}
+.admin-page .ei-quick-sales .ei-quick-icon{background:#e5f7ed;color:#15965b}
+.admin-page .ei-quick-reviews .ei-quick-icon{background:#f0e9ff;color:#8050d8}
+.admin-page .ei-admin-nav-link{white-space:normal}
+@media(max-width:1100px) and (min-width:901px){
+  .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .admin-page .ei-mobile-menu-toggle{
+    display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:0 0 8px;padding:10px 13px;
+    border:1px solid #d7e5f3;border-radius:12px;background:#0757a6;color:#fff;
+    font-weight:750;text-align:left;box-shadow:0 4px 12px rgba(6,59,134,.13)
+  }
+  .admin-page .ei-mobile-menu-toggle>span:first-child{font-size:1.15rem}
+  .admin-page .ei-menu-chevron{margin-left:auto;font-size:1.1rem}
+  .admin-page .ei-mobile-menu-toggle[aria-expanded="true"] .ei-menu-chevron{transform:rotate(180deg)}
+  .admin-page .ei-admin-nav{display:none;position:relative;top:auto;left:auto;bottom:auto;width:100%;max-width:none;margin:0 0 12px;padding:8px;flex-direction:column;overflow:visible;white-space:normal}
+  .admin-page .ei-admin-nav.is-open{display:flex}
+  .admin-page .ei-admin-nav-link{width:100%;min-height:40px}
+  .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-page .ei-admin-quick-card{padding:11px;gap:8px}
+  .admin-page .ei-quick-icon{flex-basis:34px;width:34px;height:34px;border-radius:10px;font-size:1.1rem}
+  .admin-page .ei-admin-quick-card strong{font-size:.83rem}
+  .admin-page .ei-admin-quick-card small{font-size:.7rem}
+}
+@media(max-width:420px){
+  .admin-page .ei-admin-quick-grid{grid-template-columns:1fr 1fr}
+  .admin-page .ei-admin-quick-card{align-items:flex-start}
+  .admin-page .ei-admin-quick-card>b{display:none}
+  .admin-page .ei-admin-quick-card small{overflow-wrap:anywhere}
+}
+
+
+/* Ajuste de fidelidad al boceto ElectroIsla: cabecera azul, naranja y panel de accesos */
+.admin-page{background:#f2f6fb;color:#12345b}
+.admin-page .topbar{
+  height:82px!important;padding:0 24px!important;gap:18px!important;
+  background:linear-gradient(110deg,#0757a6 0%,#063b86 100%)!important;
+  border-bottom:4px solid #f58220!important;box-shadow:0 5px 18px rgba(6,59,134,.13);
+  position:sticky!important;top:0!important;z-index:60!important
+}
+.admin-page .topbar:after{content:"";position:absolute;bottom:-4px;left:0;width:44%;height:4px;background:#ff922b;border-radius:0 0 100% 0}
+.admin-page .topbar .brand{color:#fff!important}
+.admin-page .topbar .ei-admin-logo{max-height:66px;max-width:min(250px,55vw);object-fit:contain}
+.admin-page .topbar .btn.secondary{
+  margin-left:auto;color:#fff!important;background:rgba(255,255,255,.09)!important;
+  border:1px solid rgba(255,255,255,.35)!important;border-radius:12px!important
+}
+.admin-page .admin-wrap{padding-top:22px!important}
+.admin-page .admin-title{padding:2px 0 14px;border-bottom:1px solid #dbe7f4;margin-bottom:16px}
+.admin-page .admin-title .eyebrow{margin-bottom:5px;color:#f58220}
+.admin-page .admin-title h1{font-size:clamp(1.45rem,2.5vw,2rem);letter-spacing:-.4px;color:#064887}
+.admin-page .admin-title #logoutBtn{border-radius:11px;color:#0757a6;border-color:#d3e2f2}
+.admin-page .ei-admin-nav{top:98px;left:12px;bottom:12px;width:198px;border-radius:16px;box-shadow:0 12px 28px rgba(6,59,134,.15)}
+.admin-page .ei-admin-nav-link{font-size:.86rem;min-height:43px}
+.admin-page .ei-mobile-menu-toggle{
+  display:none;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  border:1px solid #d6e4f3;background:#fff;color:#0757a6;border-radius:13px;
+  padding:12px 14px;margin:0 0 10px;font-weight:800;box-shadow:0 4px 12px rgba(16,43,77,.05)
+}
+.admin-page .ei-menu-chevron{transition:transform .15s ease}
+.admin-page .ei-admin-quick-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px
+}
+.admin-page .ei-admin-quick-card{
+  display:flex;align-items:center;gap:11px;min-width:0;padding:14px 12px;
+  text-decoration:none;background:#fff;border:1px solid #dbe7f4;border-radius:15px;
+  box-shadow:0 5px 16px rgba(16,43,77,.045);transition:transform .15s ease,box-shadow .15s ease
+}
+.admin-page .ei-admin-quick-card:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(16,43,77,.09)}
+.admin-page .ei-quick-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;color:#fff;font-size:1.55rem;font-weight:800}
+.admin-page .ei-quick-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-page .ei-quick-copy strong{font-size:.9rem;line-height:1.2;color:#103b72}
+.admin-page .ei-quick-copy small{font-size:.73rem;line-height:1.3;color:#667b95}
+.admin-page .ei-quick-arrow{margin-left:auto;font-size:1.5rem;color:#8ba3bd}
+.admin-page .ei-quick-orange .ei-quick-icon{background:#f58220}
+.admin-page .ei-quick-blue .ei-quick-icon{background:#2473e8}
+.admin-page .ei-quick-green .ei-quick-icon{background:#17a36b}
+.admin-page .ei-quick-purple .ei-quick-icon{background:#8255d9}
+.admin-page .admin-card{border-radius:16px!important;border-color:#dbe7f4!important;box-shadow:0 5px 18px rgba(16,43,77,.045)!important;padding:18px!important}
+.admin-page .admin-card h2{font-size:1.08rem;margin-top:0;color:#103b72}
+.admin-page .settings-help,.admin-page .category-help{max-width:900px}
+.admin-page .admin-grid{gap:14px}
+.admin-page #productForm{gap:8px}
+.admin-page #productForm label{font-size:.82rem}
+.admin-page #productForm input:not([type=checkbox]):not([type=file]),.admin-page #productForm textarea,.admin-page #productForm select{padding:10px 11px;border-radius:10px}
+.admin-page .reviews-admin-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-page .review-admin-item{background:#fff;border:1px solid #dbe7f4;border-radius:13px;padding:13px!important}
+.admin-page .sales-report-grid>div,.admin-page .sales-table-wrap{background:#f8fbff;border:1px solid #e2ebf5;border-radius:12px;padding:12px}
+@media(max-width:1100px){
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-page .ei-admin-nav{width:178px}
+ .admin-page .admin-wrap{margin-left:198px!important}
+}
+@media(max-width:900px){
+ .admin-page .topbar{height:72px!important;padding:0 12px!important}
+ .admin-page .topbar .ei-admin-logo{max-height:55px;max-width:58vw}
+ .admin-page .admin-wrap{margin:10px!important;padding:0 0 18px!important}
+ .admin-page .ei-mobile-menu-toggle{display:flex}
+ .admin-page .ei-admin-nav{display:none;position:relative;top:auto;left:auto;bottom:auto;width:100%;max-width:none;margin:0 0 12px;padding:8px;flex-direction:column;overflow:visible;white-space:normal}
+ .admin-page .ei-admin-nav.is-open{display:flex}
+ .admin-page .ei-admin-nav-link{width:100%;min-height:40px}
+ .admin-page .ei-admin-quick-grid{gap:9px}
+ .admin-page .ei-admin-quick-card{padding:11px 10px;gap:9px}
+ .admin-page .ei-quick-icon{flex-basis:36px;width:36px;height:36px;font-size:1.25rem}
+ .admin-page .ei-quick-copy strong{font-size:.83rem}
+ .admin-page .ei-quick-copy small{font-size:.7rem}
+ .admin-page .admin-grid{grid-template-columns:minmax(0,1fr)!important}
+ .admin-page .reviews-admin-list{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+ .admin-page .topbar{height:66px!important}
+ .admin-page .topbar .ei-admin-logo{max-width:54vw;max-height:49px}
+ .admin-page .topbar .btn.secondary{font-size:.76rem;padding:8px 9px}
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-page .ei-admin-quick-card{align-items:flex-start;min-height:94px;position:relative;padding:11px 9px}
+ .admin-page .ei-quick-icon{flex-basis:32px;width:32px;height:32px;border-radius:10px}
+ .admin-page .ei-quick-arrow{position:absolute;right:8px;bottom:6px;font-size:1.2rem}
+ .admin-page .ei-quick-copy{padding-right:5px}
+ .admin-page .ei-quick-copy strong{font-size:.78rem}
+ .admin-page .ei-quick-copy small{font-size:.68rem}
+ .admin-page .admin-title{align-items:flex-start}
+ .admin-page .admin-card{padding:13px!important}
+ .admin-page .category-form{grid-template-columns:minmax(0,1fr)}
+}
+
+
+/* Vista por secciones: evita que el administrador sea una página interminable */
+.admin-page .ei-view-hidden{display:none!important}
+.admin-page .ei-admin-quick-grid{scroll-margin-top:14px}
+.admin-page .admin-title{padding:14px 16px;margin-bottom:12px;background:linear-gradient(105deg,#eef6ff 0%,#fff 78%);border:1px solid #dce7f2;border-left:4px solid #f58220;border-radius:14px}
+.admin-page .admin-title h1{margin:0;color:#0757a6}
+.admin-page .admin-title .eyebrow{margin:0 0 3px;color:#f58220;font-weight:800;letter-spacing:.12em}
+.admin-page #storeSettings{margin-top:0}
+.admin-page #dashboard>.admin-grid{margin-top:0}
+.admin-page .ei-admin-nav-link.is-current{background:#f58220;color:#fff}
+@media(max-width:900px){
+  .admin-page .admin-title{padding:12px;margin-bottom:10px}
+  .admin-page .ei-admin-quick-grid{margin-bottom:10px}
+  .admin-page #dashboard>.admin-grid{gap:10px}
+}
+
+
+/* Corrección v8: el menú de administración móvil es un panel lateral real */
+#eiNavShade{display:none}
+@media(max-width:900px){
+ .admin-page .ei-mobile-menu-toggle{display:flex!important;max-width:100%;cursor:pointer}
+ .admin-page .ei-admin-nav{display:flex!important;position:fixed!important;z-index:1002!important;left:0!important;top:0!important;bottom:0!important;width:min(82vw,300px)!important;max-width:300px!important;height:100dvh!important;margin:0!important;padding:82px 12px 18px!important;gap:7px!important;overflow-y:auto!important;overflow-x:hidden!important;white-space:normal!important;flex-direction:column!important;border-radius:0 20px 20px 0!important;box-shadow:12px 0 35px rgba(6,59,134,.25)!important;transform:translateX(-110%);visibility:hidden;transition:transform .22s ease,visibility .22s ease}
+ .admin-page .ei-admin-nav.is-open{transform:translateX(0);visibility:visible}
+ .admin-page .ei-admin-nav-link{width:100%!important;min-height:44px!important;justify-content:flex-start!important}
+ #eiNavShade.is-open{display:block;position:fixed;inset:0;z-index:1001;border:0;border-radius:0;background:rgba(12,28,48,.46);padding:0;margin:0;cursor:pointer}
+ body.ei-nav-locked{overflow:hidden}
+ .admin-page .ei-mobile-menu-toggle[aria-expanded="true"] .ei-menu-chevron{transform:rotate(180deg)}
+}
+@media(min-width:901px){.admin-page .ei-admin-nav{transform:none;visibility:visible}}

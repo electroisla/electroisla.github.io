@@ -34,6 +34,7 @@ async function loadCategories(){
   categories=data||[];
   populateCategorySelect();
   renderCategories();
+  updateDashboardQuickCounts();
 }
 
 function populateCategorySelect(){
@@ -231,16 +232,18 @@ function renderCategories(){
       <div class="category-drag" title="Arrastra para cambiar de posición" draggable="true" data-id="${esc(c.id)}">☷</div>
       <div class="category-info">
         <div class="category-name">${esc(c.name)}</div>
-        <span class="category-state">${c.available?"● Visible en la tienda":"○ Oculta en la tienda"}</span>
+        <span class="category-state ${c.available?"is-visible":"is-hidden"}"><span class="category-status-dot" aria-hidden="true"></span><span>${c.available?"Visible en la tienda":"Oculta en la tienda"}</span></span>
       </div>
-      <div class="category-order">
-        <button type="button" class="btn secondary category-move" ${i===0?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',-1)" aria-label="Subir categoría">↑</button>
-        <button type="button" class="btn secondary category-move" ${i===categories.length-1?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',1)" aria-label="Bajar categoría">↓</button>
-      </div>
-      <div class="category-actions">
-        <button type="button" class="btn secondary" onclick="editCategory(${Number(c.id)})">✏️ Editar</button>
-        <button type="button" class="btn secondary" onclick="toggleCategory(${Number(c.id)})">${c.available?"👁️ Ocultar":"👁️ Mostrar"}</button>
-        <button type="button" class="btn secondary" onclick="removeCategory(${Number(c.id)})">🗑️</button>
+      <div class="category-controls">
+        <div class="category-order">
+          <button type="button" class="btn secondary category-move" ${i===0?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',-1)" aria-label="Subir categoría" title="Subir">↑</button>
+          <button type="button" class="btn secondary category-move" ${i===categories.length-1?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',1)" aria-label="Bajar categoría" title="Bajar">↓</button>
+        </div>
+        <div class="category-actions">
+          <button type="button" class="btn secondary" onclick="editCategory(${Number(c.id)})" aria-label="Editar categoría">✏️</button>
+          <button type="button" class="btn secondary" onclick="toggleCategory(${Number(c.id)})" aria-label="${c.available?"Ocultar categoría":"Mostrar categoría"}" title="${c.available?"Ocultar":"Mostrar"}">${c.available?"👁️":"👁️‍🗨️"}</button>
+          <button type="button" class="btn secondary" onclick="removeCategory(${Number(c.id)})" aria-label="Eliminar categoría">🗑️</button>
+        </div>
       </div>
     </div>`).join("");
   initCategoryReorder();
@@ -452,9 +455,33 @@ async function show(){
    alert("No se pudo cargar el catálogo de Supabase.\n\n"+(err.message||err));
  }
 }
+let activeCatalogCategory="";
+function renderCatalogCategories(){
+ const tabs=document.getElementById("catalogCategoryTabs");
+ if(!tabs)return;
+ const names=[...new Set([
+   ...categories.map(c=>String(c.name||"").trim()).filter(Boolean),
+   ...products.map(p=>String(p.category||"Sin categoría").trim()).filter(Boolean)
+ ])];
+ if(!names.includes(activeCatalogCategory))activeCatalogCategory=names[0]||"";
+ tabs.innerHTML=names.map(name=>`<button type="button" class="catalog-category-tab ${name===activeCatalogCategory?"is-active":""}" data-category="${esc(name)}" aria-pressed="${name===activeCatalogCategory}">${esc(name)}</button>`).join("");
+ tabs.querySelectorAll(".catalog-category-tab").forEach(btn=>btn.addEventListener("click",()=>{
+   activeCatalogCategory=btn.dataset.category||"";
+   render();
+ }));
+}
+function updateDashboardQuickCounts(){
+ const p=document.getElementById("quickProductsCount");if(p)p.textContent=String(products.length);
+ const c=document.getElementById("quickCategoriesCount");if(c)c.textContent=String(categories.length);
+ const o=document.getElementById("quickOrdersCount");if(o)o.textContent=String(salesRows.length);
+}
 function render(){
  const box=document.getElementById("adminProducts");
- box.innerHTML=products.length?products.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):"<p>No hay productos. Agrega el primero.</p>";
+ updateDashboardQuickCounts();
+ if(!box)return;
+ renderCatalogCategories();
+ const filtered=products.filter(p=>String(p.category||"Sin categoría").trim()===activeCatalogCategory);
+ box.innerHTML=filtered.length?filtered.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):`<p class="catalog-empty">No hay productos en «${esc(activeCatalogCategory)}».</p>`;
 }
 function edit(id){
  const p=products.find(x=>x.id===id);if(!p)return;
@@ -556,12 +583,33 @@ async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acci�
 function salesEscape(v){
   return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
-function salesRangeStart(range){
-  if(range==="all")return null;
-  const d=new Date(); d.setHours(0,0,0,0);
-  if(range==="7d")d.setDate(d.getDate()-6);
-  if(range==="30d")d.setDate(d.getDate()-29);
-  return d.toISOString();
+function salesRangeBounds(range){
+  const now=new Date();
+  const end=new Date(now); end.setHours(23,59,59,999);
+  if(range==="all")return {start:null,end:null};
+  if(range==="custom"){
+    const from=document.getElementById("salesDateFrom")?.value;
+    const to=document.getElementById("salesDateTo")?.value;
+    if(!from||!to)throw new Error("Selecciona la fecha inicial y la fecha final.");
+    const start=new Date(from+"T00:00:00");
+    const finish=new Date(to+"T23:59:59.999");
+    if(Number.isNaN(start.getTime())||Number.isNaN(finish.getTime())||start>finish)throw new Error("El rango de fechas no es válido. La fecha inicial debe ser anterior o igual a la final.");
+    return {start:start.toISOString(),end:finish.toISOString()};
+  }
+  const start=new Date(now); start.setHours(0,0,0,0);
+  if(range==="today")start.setDate(start.getDate());
+  if(range==="7d")start.setDate(start.getDate()-6);
+  if(range==="30d")start.setDate(start.getDate()-29);
+  if(range==="90d")start.setDate(start.getDate()-89);
+  if(range==="6m")start.setMonth(start.getMonth()-6);
+  if(range==="1y")start.setFullYear(start.getFullYear()-1);
+  if(range==="2y")start.setFullYear(start.getFullYear()-2);
+  return {start:start.toISOString(),end:end.toISOString()};
+}
+function toggleSalesCustomDates(){
+  const custom=document.getElementById("salesRange")?.value==="custom";
+  const panel=document.getElementById("salesCustomDates");
+  if(panel)panel.hidden=!custom;
 }
 function renderSalesList(id,items,empty="Sin datos"){
   const box=document.getElementById(id); if(!box)return;
@@ -573,6 +621,7 @@ function renderSalesReport(){
   const usd=rows.filter(r=>r.currency==="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
   const cup=rows.filter(r=>r.currency!=="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
   const count=document.getElementById("salesOrdersCount"); if(count)count.textContent=String(rows.length);
+  const quickOrders=document.getElementById("quickOrdersCount");if(quickOrders)quickOrders.textContent=String(rows.length);
   const usdBox=document.getElementById("salesUsdTotal"); if(usdBox)usdBox.textContent=salesMoney(usd,"USD");
   const cupBox=document.getElementById("salesCupTotal"); if(cupBox)cupBox.textContent=salesMoney(cup,"CUP");
 
@@ -604,9 +653,10 @@ async function loadSalesReport(){
   status.textContent="☁️ Cargando ventas…";
   const range=document.getElementById("salesRange")?.value||"7d";
   try{
+    const bounds=salesRangeBounds(range);
     let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
-    const start=salesRangeStart(range);
-    if(start)query=query.gte("created_at",start);
+    if(bounds.start)query=query.gte("created_at",bounds.start);
+    if(bounds.end)query=query.lte("created_at",bounds.end);
     const {data,error}=await query;
     if(error)throw error;
     salesRows=Array.isArray(data)?data:[];
@@ -628,10 +678,42 @@ function exportSalesCsv(){
 const reviewsRefreshEl=document.getElementById("reviewsRefresh");
 if(reviewsRefreshEl)reviewsRefreshEl.addEventListener("click",loadAdminReviews);
 const salesRangeEl=document.getElementById("salesRange");
-if(salesRangeEl)salesRangeEl.addEventListener("change",loadSalesReport);
+if(salesRangeEl)salesRangeEl.addEventListener("change",()=>{
+  toggleSalesCustomDates();
+  if(salesRangeEl.value!=="custom")loadSalesReport();
+});
+const salesApplyDates=document.getElementById("salesApplyDates");
+if(salesApplyDates)salesApplyDates.addEventListener("click",loadSalesReport);
 const salesRefreshEl=document.getElementById("salesRefresh");
 if(salesRefreshEl)salesRefreshEl.addEventListener("click",loadSalesReport);
 const salesExportEl=document.getElementById("salesExport");
 if(salesExportEl)salesExportEl.addEventListener("click",exportSalesCsv);
 supabaseClient.channel("reviews-admin").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},()=>loadAdminReviews()).subscribe();
 supabaseClient.channel("orders-admin").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>loadSalesReport()).subscribe();
+
+
+/* Recuperación de acceso: usa el flujo seguro de recuperación de Supabase */
+async function recoverAdminPassword(){
+ const emailInput=document.getElementById("adminEmail");
+ const email=(emailInput?.value||"").trim();
+ if(!email){
+   loginBoxMessage("Escribe tu correo para enviarte el enlace de recuperación.");
+   emailInput?.focus();
+   return;
+ }
+ const button=document.getElementById("eiForgotPassword");
+ if(button){button.disabled=true;button.textContent="Enviando enlace…";}
+ loginBoxMessage("Solicitando enlace de recuperación…");
+ try{
+   const redirectTo=window.location.origin+window.location.pathname;
+   const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+   if(error) throw error;
+   loginBoxMessage("Si el correo está registrado, recibirás un enlace para recuperar el acceso. Revisa también el correo no deseado.");
+ }catch(error){
+   loginBoxMessage("No se pudo solicitar la recuperación. Comprueba el correo e inténtalo de nuevo.");
+ }finally{
+   if(button){button.disabled=false;button.textContent="¿Olvidaste tu contraseña?";}
+ }
+}
+const eiForgotPasswordButton=document.getElementById("eiForgotPassword");
+if(eiForgotPasswordButton)eiForgotPasswordButton.addEventListener("click",recoverAdminPassword);

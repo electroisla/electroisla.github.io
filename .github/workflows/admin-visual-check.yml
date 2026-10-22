@@ -1,0 +1,48 @@
+name: ElectroIsla admin visual checks
+
+on:
+  push:
+    branches:
+      - catalogo-recuperacion
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Start static test server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/electroisla-http.log 2>&1 &
+          echo $! > /tmp/electroisla-http.pid
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/admin.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/electroisla-http.log
+          exit 1
+      - name: Run mobile and desktop checks
+        run: npx playwright test
+      - name: Upload screenshots and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electroisla-admin-visual-results
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
