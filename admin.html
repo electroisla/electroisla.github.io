@@ -1134,3 +1134,23 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::after{
  .admin-page .ei-login-field input,.admin-page #loginBtn{transition:none!important}
 }
 </style>
+
+<style id="ei-login-static-card-orange-overlap">
+/* Ajuste solicitado: autenticación fija en pantalla y curva naranja superpuesta ligeramente */
+html:has(body.admin-page #loginBox:not(.hidden)),
+html:has(body.admin-page #loginBox:not(.hidden)) body{height:100%;min-height:100%;overflow:hidden!important;overscroll-behavior:none}
+body.admin-page:has(#loginBox:not(.hidden)){height:100svh!important;min-height:100svh!important;overflow:hidden!important;padding:0!important}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{position:fixed!important;inset:0!important;width:100%!important;height:100svh!important;min-height:100svh!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px 14px!important}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox{z-index:1!important;max-height:calc(100svh - 28px)!important;overflow-y:auto!important;overscroll-behavior:contain;transform:translateY(-3px)}
+body.admin-page:has(#loginBox:not(.hidden))::before{z-index:2!important;position:fixed!important;left:-12%!important;right:-12%!important;bottom:-112px!important;height:clamp(145px,24svh,220px)!important;pointer-events:none!important}
+body.admin-page:has(#loginBox:not(.hidden)) #loginBox::after{z-index:3!important;bottom:-1px!important;height:7px!important}
+@media(max-height:650px){
+ body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap{padding:8px 12px!important}
+ body.admin-page:has(#loginBox:not(.hidden)) #loginBox{padding-top:16px!important;padding-bottom:17px!important;max-height:calc(100svh - 16px)!important}
+ .admin-page .login-logo-wrap{margin-bottom:9px!important}
+ .admin-page .ei-login-cart{width:54px!important;height:54px!important}
+ .admin-page .ei-login-cart svg{width:30px!important;height:30px!important}
+ .admin-page .ei-login-subtitle{margin-bottom:10px!important}
+ .admin-page .ei-login-field{margin:9px 0!important}
+}
+</style>
