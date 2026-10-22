@@ -573,7 +573,7 @@ body.admin-page .topbar .ei-logo-brand .ei-brand-name{
   <a href="#reviewNotifications" class="ei-admin-nav-link"><span>♧</span> Avisos</a>
   <a href="#logoutBtn" class="ei-admin-nav-link"><span>↪</span> Cerrar sesión</a>
 </nav>
-<div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary">Salir</button></div>
+<div class="admin-title"><div><p class="eyebrow">PANEL</p><h1>Productos</h1></div><button id="logoutBtn" class="btn secondary" hidden aria-hidden="true" tabindex="-1">Salir</button></div>
 <section class="ei-admin-quick-grid" aria-label="Resumen y accesos rápidos">
   <a class="ei-admin-quick-card ei-quick-product" href="#catalogPanel"><span class="ei-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg></span><span class="ei-quick-info"><strong>Productos</strong><b class="ei-quick-count" id="quickProductsCount">—</b><small>Productos en el catálogo</small></span></a>
   <a class="ei-admin-quick-card ei-quick-categories" href="#categoryManager"><span class="ei-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5Z"/><path d="M3 11h18"/></svg></span><span class="ei-quick-info"><strong>Categorías</strong><b class="ei-quick-count" id="quickCategoriesCount">—</b><small>Categorías creadas</small></span></a>
@@ -823,6 +823,12 @@ function initRouter(){
     window.scrollTo({top:0,behavior:'auto'});
   }
   nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{
+    if(a.getAttribute('href')==='#logoutBtn'){
+      e.preventDefault();
+      const logout=document.getElementById('logoutBtn');
+      if(logout)logout.click();
+      return;
+    }
     const name=routes[a.getAttribute('href')];
     if(!name)return;
     e.preventDefault();openView(name);
