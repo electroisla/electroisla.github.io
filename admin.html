@@ -410,6 +410,32 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;justify-self:end}
 }
 
+
+/* Controles de categoría inmediatamente después del nombre, en una sola línea */
+.admin-page #categoryManager .category-item{display:grid;grid-template-columns:20px minmax(90px,auto) minmax(0,1fr);align-items:center;gap:7px;padding:6px 8px}
+.admin-page #categoryManager .category-info{min-width:90px}
+.admin-page #categoryManager .category-controls{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0}
+.admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{display:flex;align-items:center;justify-content:flex-start;flex-wrap:nowrap;gap:3px;padding:0;border:0}
+.admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn{width:27px;min-width:27px;height:27px;min-height:27px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:.76rem;line-height:1;border-radius:6px}
+.admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;height:25px;min-height:25px}
+@media(max-width:700px){
+ .admin-page #categoryManager .category-item{grid-template-columns:17px minmax(78px,auto) minmax(0,1fr);gap:5px;padding:6px}
+ .admin-page #categoryManager .category-info{min-width:78px}
+ .admin-page #categoryManager .category-name{font-size:.78rem;overflow-wrap:anywhere}
+ .admin-page #categoryManager .category-state{font-size:.64rem}
+ .admin-page #categoryManager .category-controls{gap:3px}
+ .admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{gap:2px}
+ .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn{width:24px;min-width:24px;height:25px;min-height:25px;font-size:.68rem}
+ .admin-page #categoryManager .category-actions .btn:last-child{width:23px;min-width:23px;height:23px;min-height:23px}
+}
+@media(max-width:390px){
+ .admin-page #categoryManager .category-item{grid-template-columns:15px minmax(68px,auto) minmax(0,1fr);gap:4px;padding:5px}
+ .admin-page #categoryManager .category-info{min-width:68px}
+ .admin-page #categoryManager .category-name{font-size:.73rem}
+ .admin-page #categoryManager .category-state{font-size:.59rem}
+ .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn{width:22px;min-width:22px;height:23px;min-height:23px}
+}
+
 </style>
 </head>
 <body class="admin-page">
