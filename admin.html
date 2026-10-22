@@ -345,6 +345,60 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #categoryManager .category-actions{grid-template-columns:minmax(0,1fr)}
 }
 
+
+/* Ajuste compacto general: menos espacio vacío y tarjetas más proporcionadas */
+.admin-page #dashboard{padding:14px 18px 24px}
+.admin-page .admin-title{padding:10px 14px;margin-bottom:9px}
+.admin-page .admin-title h1{font-size:1.3rem}
+.admin-page .admin-card,.admin-page #deliveryZonesPanel{padding:12px;margin-bottom:9px;border-radius:9px}
+.admin-page .admin-card h2,.admin-page #deliveryZonesPanel h2{margin-bottom:8px;font-size:.98rem}
+.admin-page .ei-admin-quick-grid{gap:8px;margin-bottom:9px}
+.admin-page .ei-admin-quick-card{min-height:58px;padding:8px 10px;gap:8px}
+.admin-page .ei-quick-icon{flex-basis:30px;width:30px;height:30px;font-size:.95rem}
+.admin-page .ei-admin-quick-card small{font-size:.68rem}
+.admin-page .admin-grid{gap:9px}
+.admin-page #categoryManager .category-help{margin:0 0 7px;font-size:.78rem}
+.admin-page #categoryManager .category-form{padding:9px;gap:8px;margin-top:8px}
+.admin-page #categoryManager .category-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:6px;margin-top:9px}
+.admin-page #categoryManager .category-item{grid-template-columns:24px minmax(0,1fr) auto;gap:7px;padding:7px 9px;border-radius:8px;box-shadow:none}
+.admin-page #categoryManager .category-drag{width:24px;height:28px}
+.admin-page #categoryManager .category-name{font-size:.84rem}
+.admin-page #categoryManager .category-state{font-size:.68rem;margin-top:1px}
+.admin-page #categoryManager .category-order{gap:3px}
+.admin-page #categoryManager .category-order .btn{width:28px;min-width:28px;min-height:28px;padding:3px}
+.admin-page #categoryManager .category-actions{gap:3px}
+.admin-page #categoryManager .category-actions .btn{min-height:28px;padding:4px 6px;font-size:.7rem}
+.admin-page #categoryManager .category-actions .btn:last-child{min-width:29px}
+.admin-page #adminProducts{grid-template-columns:repeat(auto-fill,minmax(min(100%,285px),1fr));gap:7px}
+.admin-page #adminProducts .admin-product{grid-template-columns:48px minmax(0,1fr) auto;gap:7px;padding:7px;border-radius:8px}
+.admin-page #adminProducts .admin-product>div:first-child{width:48px;height:48px}
+.admin-page #adminProducts .admin-product h4{font-size:.82rem;margin-bottom:2px}
+.admin-page #adminProducts .admin-product small{font-size:.68rem;line-height:1.3}
+.admin-page #adminProducts .admin-actions{gap:3px}
+.admin-page #adminProducts .admin-actions button{min-width:27px;min-height:27px;padding:3px 5px;font-size:.75rem}
+.admin-page .catalog-category-tabs{gap:5px;margin-bottom:7px;padding-bottom:5px}
+.admin-page .catalog-category-tab{min-height:30px;padding:6px 10px;font-size:.75rem}
+.admin-page .sales-summary-grid{gap:7px;margin:7px 0}
+.admin-page .sales-kpi{padding:8px 10px}
+.admin-page .sales-report-grid,.admin-page .reviews-admin-list{gap:7px}
+.admin-page .review-admin-item{padding:9px}
+@media(max-width:700px){
+ .admin-page #dashboard{padding:9px 8px 18px}
+ .admin-page .admin-title{padding:9px 10px;margin-bottom:7px}
+ .admin-page .ei-admin-quick-grid{gap:6px;margin-bottom:7px}
+ .admin-page .ei-admin-quick-card{min-height:52px;padding:7px;gap:6px}
+ .admin-page .admin-card,.admin-page #deliveryZonesPanel{padding:9px;margin-bottom:7px}
+ .admin-page #categoryManager .category-list{grid-template-columns:minmax(0,1fr);gap:5px}
+ .admin-page #categoryManager .category-item{grid-template-columns:22px minmax(0,1fr);gap:6px 8px;padding:7px}
+ .admin-page #categoryManager .category-drag{width:22px;height:26px}
+ .admin-page #categoryManager .category-order{grid-row:2;grid-column:1/-1;padding:5px 0}
+ .admin-page #categoryManager .category-actions{grid-row:3;gap:4px;padding-top:5px}
+ .admin-page #categoryManager .category-actions .btn{min-height:31px;padding:4px 3px;font-size:.7rem}
+ .admin-page #adminProducts{grid-template-columns:minmax(0,1fr);gap:5px}
+ .admin-page #adminProducts .admin-product{grid-template-columns:44px minmax(0,1fr) auto;gap:6px;padding:6px}
+ .admin-page #adminProducts .admin-product>div:first-child{width:44px;height:44px}
+}
+
 </style>
 </head>
 <body class="admin-page">
