@@ -34,6 +34,7 @@ async function loadCategories(){
   categories=data||[];
   populateCategorySelect();
   renderCategories();
+  updateDashboardQuickCounts();
 }
 
 function populateCategorySelect(){
@@ -469,8 +470,14 @@ function renderCatalogCategories(){
    render();
  }));
 }
+function updateDashboardQuickCounts(){
+ const p=document.getElementById("quickProductsCount");if(p)p.textContent=String(products.length);
+ const c=document.getElementById("quickCategoriesCount");if(c)c.textContent=String(categories.length);
+ const o=document.getElementById("quickOrdersCount");if(o)o.textContent=String(salesRows.length);
+}
 function render(){
  const box=document.getElementById("adminProducts");
+ updateDashboardQuickCounts();
  if(!box)return;
  renderCatalogCategories();
  const filtered=products.filter(p=>String(p.category||"Sin categoría").trim()===activeCatalogCategory);
@@ -614,6 +621,7 @@ function renderSalesReport(){
   const usd=rows.filter(r=>r.currency==="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
   const cup=rows.filter(r=>r.currency!=="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
   const count=document.getElementById("salesOrdersCount"); if(count)count.textContent=String(rows.length);
+  const quickOrders=document.getElementById("quickOrdersCount");if(quickOrders)quickOrders.textContent=String(rows.length);
   const usdBox=document.getElementById("salesUsdTotal"); if(usdBox)usdBox.textContent=salesMoney(usd,"USD");
   const cupBox=document.getElementById("salesCupTotal"); if(cupBox)cupBox.textContent=salesMoney(cup,"CUP");
 
