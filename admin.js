@@ -452,9 +452,27 @@ async function show(){
    alert("No se pudo cargar el catálogo de Supabase.\n\n"+(err.message||err));
  }
 }
+let activeCatalogCategory="";
+function renderCatalogCategories(){
+ const tabs=document.getElementById("catalogCategoryTabs");
+ if(!tabs)return;
+ const names=[...new Set([
+   ...categories.map(c=>String(c.name||"").trim()).filter(Boolean),
+   ...products.map(p=>String(p.category||"Sin categoría").trim()).filter(Boolean)
+ ])];
+ if(!names.includes(activeCatalogCategory))activeCatalogCategory=names[0]||"";
+ tabs.innerHTML=names.map(name=>`<button type="button" class="catalog-category-tab ${name===activeCatalogCategory?"is-active":""}" data-category="${esc(name)}" aria-pressed="${name===activeCatalogCategory}">${esc(name)}</button>`).join("");
+ tabs.querySelectorAll(".catalog-category-tab").forEach(btn=>btn.addEventListener("click",()=>{
+   activeCatalogCategory=btn.dataset.category||"";
+   render();
+ }));
+}
 function render(){
  const box=document.getElementById("adminProducts");
- box.innerHTML=products.length?products.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):"<p>No hay productos. Agrega el primero.</p>";
+ if(!box)return;
+ renderCatalogCategories();
+ const filtered=products.filter(p=>String(p.category||"Sin categoría").trim()===activeCatalogCategory);
+ box.innerHTML=filtered.length?filtered.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):`<p class="catalog-empty">No hay productos en «${esc(activeCatalogCategory)}».</p>`;
 }
 function edit(id){
  const p=products.find(x=>x.id===id);if(!p)return;
