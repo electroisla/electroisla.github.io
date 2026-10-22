@@ -350,7 +350,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 (()=>{const b=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;let shade=document.getElementById('eiNavShade');if(!shade){shade=document.createElement('button');shade.id='eiNavShade';shade.type='button';shade.setAttribute('aria-label','Cerrar menú');document.body.appendChild(shade)}function close(){b.setAttribute('aria-expanded','false');n.classList.remove('is-open');shade.classList.remove('is-open');document.body.classList.remove('ei-nav-locked')}function open(){b.setAttribute('aria-expanded','true');n.classList.add('is-open');shade.classList.add('is-open');document.body.classList.add('ei-nav-locked')}b.addEventListener('click',()=>b.getAttribute('aria-expanded')==='true'?close():open());shade.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches)close()}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})();
 </script>
 
-<script>
+<script id="ei-admin-view-router">
 (()=> {
   const dash=document.getElementById('dashboard');
   if(!dash)return;
@@ -367,63 +367,60 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
   const nav=document.getElementById('eiAdminNav');
   const toggle=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');
   const groups={
-    resumen:{label:'Panel de administración',show:[quick,settings]},
-    productos:{label:'Agregar producto',show:[productForm]},
-    catalogo:{label:'Catálogo actual',show:[catalog]},
-    categorias:{label:'Categorías',show:[categories]},
-    ventas:{label:'Ventas y pedidos',show:[sales]},
-    resenas:{label:'Reseñas de productos',show:[alerts,reviews]},
-    avisos:{label:'Notificaciones',show:[alerts]},
-    zonas:{label:'Zonas y costos de domicilio',show:[zones]}
+    resumen:{label:'Panel de administración',show:[quick,settings],href:'#dashboard'},
+    productos:{label:'Agregar producto',show:[productForm],href:'#productForm'},
+    catalogo:{label:'Catálogo actual',show:[catalog],href:'#catalogPanel'},
+    categorias:{label:'Categorías',show:[categories],href:'#categoryManager'},
+    ventas:{label:'Ventas y pedidos',show:[sales],href:'#salesReport'},
+    resenas:{label:'Reseñas de productos',show:[reviews],href:'#reviewsAdmin'},
+    avisos:{label:'Notificaciones',show:[alerts],href:'#reviewNotifications'},
+    zonas:{label:'Zonas y costos de domicilio',show:[zones],href:'#deliveryZonesPanel'}
   };
   const all=[quick,settings,categories,productForm,catalog,sales,alerts,reviews,zones].filter(Boolean);
-  function openView(name, target){
+  const routes={
+    '#dashboard':'resumen',
+    '#productForm':'productos',
+    '#catalogPanel':'catalogo',
+    '#categoryManager':'categorias',
+    '#salesReport':'ventas',
+    '#reviewsAdmin':'resenas',
+    '#reviewNotifications':'avisos',
+    '#deliveryZonesPanel':'zonas'
+  };
+  function openView(name, updateUrl=true){
     const cfg=groups[name]||groups.resumen;
-    all.forEach(el=>el.classList.add('ei-view-hidden'));
+    all.forEach(el=>el&&el.classList.add('ei-view-hidden'));
     cfg.show.forEach(el=>el&&el.classList.remove('ei-view-hidden'));
     if(title)title.textContent=cfg.label;
     nav?.querySelectorAll('a').forEach(a=>{
-      const href=a.getAttribute('href')||'';
-      const active=(name==='resumen'&&href==='#dashboard')||
-        (name==='productos'&&href==='#productForm')||
-        (name==='catalogo'&&href==='#catalogPanel')||
-        (name==='categorias'&&href==='#categoryManager')||
-        (name==='ventas'&&href==='#salesReport')||
-        (name==='resenas'&&href==='#reviewsAdmin')||
-        (name==='avisos'&&href==='#reviewNotifications')||
-      (name==='zonas'&&href==='#deliveryZonesPanel');
+      const active=a.getAttribute('href')===cfg.href;
       a.classList.toggle('is-current',active);
+      if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
     });
     if(toggle&&window.matchMedia('(max-width:900px)').matches){
-      toggle.setAttribute('aria-expanded','false');nav?.classList.remove('is-open');document.getElementById('eiNavShade')?.classList.remove('is-open');document.body.classList.remove('ei-nav-locked');
+      toggle.setAttribute('aria-expanded','false');
+      nav?.classList.remove('is-open');
+      document.getElementById('eiNavShade')?.classList.remove('is-open');
+      document.body.classList.remove('ei-nav-locked');
     }
-    if(name!=='resumen'&&target){
-      const el=document.getElementById(target);
-      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
-    }else window.scrollTo({top:0,behavior:'smooth'});
+    if(updateUrl&&location.hash!==cfg.href)history.replaceState(null,'',cfg.href);
+    window.scrollTo({top:0,behavior:'auto'});
   }
-  const routes={
-    '#dashboard':['resumen',null],
-    '#productForm':['productos','productForm'],
-    '#catalogPanel':['catalogo','catalogPanel'],
-    '#categoryManager':['categorias','categoryManager'],
-    '#salesReport':['ventas','salesReport'],
-    '#reviewsAdmin':['resenas','reviewsAdmin'],
-    '#reviewNotifications':['avisos','reviewNotifications'],
-    '#deliveryZonesPanel':['zonas','deliveryZonesPanel']
-  };
   nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{
-    const route=routes[a.getAttribute('href')];
-    if(!route)return;
-    e.preventDefault();openView(route[0],route[1]);
+    const name=routes[a.getAttribute('href')];
+    if(!name)return;
+    e.preventDefault();openView(name);
   }));
   dash.querySelectorAll('.ei-admin-quick-card').forEach(a=>a.addEventListener('click',e=>{
-    const route=routes[a.getAttribute('href')];
-    if(!route)return;
-    e.preventDefault();openView(route[0],route[1]);
+    const name=routes[a.getAttribute('href')];
+    if(!name)return;
+    e.preventDefault();openView(name);
   }));
-  // Inicio compacto: muestra accesos directos y configuración, sin desplegar todo el administrador.
-  openView('resumen',null);
+  window.addEventListener('hashchange',()=>{
+    const name=routes[location.hash];
+    if(name)openView(name,false);
+  });
+  openView(routes[location.hash]||'resumen',false);
 })();
 </script>
 
