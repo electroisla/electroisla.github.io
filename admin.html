@@ -1247,3 +1247,35 @@ body.admin-page .topbar .ei-header-account:focus-visible{
 
 
 
+
+
+<style id="ei-login-summary-shapes">
+/* Reutilizar en el acceso las formas tenues de las tarjetas del Resumen */
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::before,
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::after{
+  content:""!important;display:block!important;position:fixed!important;z-index:0!important;
+  pointer-events:none!important;opacity:1!important;
+}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::before{
+  width:210px!important;height:210px!important;right:-68px!important;bottom:-72px!important;
+  border:30px solid rgba(6,75,150,.075)!important;border-radius:50%!important;
+  background:transparent!important;transform:none!important;
+}
+body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::after{
+  width:118px!important;height:118px!important;left:clamp(18px,9vw,110px)!important;top:clamp(18px,8vh,90px)!important;
+  border:0!important;border-radius:24px!important;background:rgba(244,122,24,.055)!important;
+  transform:rotate(28deg)!important;
+}
+@media(max-width:600px){
+  body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::before{
+    width:150px!important;height:150px!important;right:-56px!important;bottom:-45px!important;border-width:22px!important;
+  }
+  body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::after{
+    width:78px!important;height:78px!important;left:14px!important;top:28px!important;border-radius:18px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::before,
+  body.admin-page:has(#loginBox:not(.hidden)) .admin-wrap::after{transition:none!important}
+}
+</style>
