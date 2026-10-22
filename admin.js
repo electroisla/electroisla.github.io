@@ -576,12 +576,33 @@ async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acci�
 function salesEscape(v){
   return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
-function salesRangeStart(range){
-  if(range==="all")return null;
-  const d=new Date(); d.setHours(0,0,0,0);
-  if(range==="7d")d.setDate(d.getDate()-6);
-  if(range==="30d")d.setDate(d.getDate()-29);
-  return d.toISOString();
+function salesRangeBounds(range){
+  const now=new Date();
+  const end=new Date(now); end.setHours(23,59,59,999);
+  if(range==="all")return {start:null,end:null};
+  if(range==="custom"){
+    const from=document.getElementById("salesDateFrom")?.value;
+    const to=document.getElementById("salesDateTo")?.value;
+    if(!from||!to)throw new Error("Selecciona la fecha inicial y la fecha final.");
+    const start=new Date(from+"T00:00:00");
+    const finish=new Date(to+"T23:59:59.999");
+    if(Number.isNaN(start.getTime())||Number.isNaN(finish.getTime())||start>finish)throw new Error("El rango de fechas no es válido. La fecha inicial debe ser anterior o igual a la final.");
+    return {start:start.toISOString(),end:finish.toISOString()};
+  }
+  const start=new Date(now); start.setHours(0,0,0,0);
+  if(range==="today")start.setDate(start.getDate());
+  if(range==="7d")start.setDate(start.getDate()-6);
+  if(range==="30d")start.setDate(start.getDate()-29);
+  if(range==="90d")start.setDate(start.getDate()-89);
+  if(range==="6m")start.setMonth(start.getMonth()-6);
+  if(range==="1y")start.setFullYear(start.getFullYear()-1);
+  if(range==="2y")start.setFullYear(start.getFullYear()-2);
+  return {start:start.toISOString(),end:end.toISOString()};
+}
+function toggleSalesCustomDates(){
+  const custom=document.getElementById("salesRange")?.value==="custom";
+  const panel=document.getElementById("salesCustomDates");
+  if(panel)panel.hidden=!custom;
 }
 function renderSalesList(id,items,empty="Sin datos"){
   const box=document.getElementById(id); if(!box)return;
@@ -624,9 +645,10 @@ async function loadSalesReport(){
   status.textContent="☁️ Cargando ventas…";
   const range=document.getElementById("salesRange")?.value||"7d";
   try{
+    const bounds=salesRangeBounds(range);
     let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
-    const start=salesRangeStart(range);
-    if(start)query=query.gte("created_at",start);
+    if(bounds.start)query=query.gte("created_at",bounds.start);
+    if(bounds.end)query=query.lte("created_at",bounds.end);
     const {data,error}=await query;
     if(error)throw error;
     salesRows=Array.isArray(data)?data:[];
@@ -648,7 +670,12 @@ function exportSalesCsv(){
 const reviewsRefreshEl=document.getElementById("reviewsRefresh");
 if(reviewsRefreshEl)reviewsRefreshEl.addEventListener("click",loadAdminReviews);
 const salesRangeEl=document.getElementById("salesRange");
-if(salesRangeEl)salesRangeEl.addEventListener("change",loadSalesReport);
+if(salesRangeEl)salesRangeEl.addEventListener("change",()=>{
+  toggleSalesCustomDates();
+  if(salesRangeEl.value!=="custom")loadSalesReport();
+});
+const salesApplyDates=document.getElementById("salesApplyDates");
+if(salesApplyDates)salesApplyDates.addEventListener("click",loadSalesReport);
 const salesRefreshEl=document.getElementById("salesRefresh");
 if(salesRefreshEl)salesRefreshEl.addEventListener("click",loadSalesReport);
 const salesExportEl=document.getElementById("salesExport");
