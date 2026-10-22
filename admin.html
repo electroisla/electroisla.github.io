@@ -399,6 +399,17 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #adminProducts .admin-product>div:first-child{width:44px;height:44px}
 }
 
+
+/* Aprovechar mejor el ancho: botón de eliminar compacto y acciones sin huecos */
+.admin-page #categoryManager .category-item{grid-template-columns:22px minmax(0,1fr) auto;column-gap:6px;padding:6px 8px}
+.admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{gap:3px}
+.admin-page #categoryManager .category-actions .btn{min-height:26px;padding:3px 5px}
+.admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;height:25px;min-height:25px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;line-height:1;border-radius:6px}
+@media(max-width:700px){
+ .admin-page #categoryManager .category-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px;gap:5px}
+ .admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;justify-self:end}
+}
+
 </style>
 </head>
 <body class="admin-page">
