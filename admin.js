@@ -485,10 +485,12 @@ async function show(){
    const source=await loadCloud();
    render();
    if(status) status.textContent=source==="cloud"?`☁️ Sincronizado con Supabase · ${products.length} productos`:source==="migrated"?`☁️ Catálogo local enviado a Supabase · ${products.length} productos`:"☁️ Supabase conectado · catálogo vacío";
+   clearAdminNotice("catalog-load");
    await loadSalesReport();
    await loadAdminReviews();
  }catch(err){
    console.error(err);
+   setAdminNotice("catalog-load","No se pudo cargar el catálogo o la configuración de Supabase: "+(err.message||err),"#catalogPanel","Revisar catálogo");
    render();
    if(status) status.textContent="⚠️ No se pudo leer Supabase: "+(err.message||err);
    alert("No se pudo cargar el catálogo de Supabase.\n\n"+(err.message||err));
@@ -509,10 +511,47 @@ function renderCatalogCategories(){
    render();
  }));
 }
+const eiAdminNotices=new Map();
+let eiZoneStats={total:null,available:null};
+function setAdminNotice(key,message,href,label){eiAdminNotices.set(key,{message,href:href||"#dashboard",label:label||"Ver detalles"});renderAdminNotices();}
+function clearAdminNotice(key){eiAdminNotices.delete(key);renderAdminNotices();}
+function updateReviewSummary(){
+ const total=document.getElementById("summaryReviewsTotal"),pending=document.getElementById("summaryReviewsPending");
+ const count=reviewRows.length,waiting=reviewRows.filter(r=>r.approved!==true).length;
+ if(total)total.textContent=String(count);
+ if(pending)pending.textContent="Pendientes de aprobar: "+waiting;
+ const badge=document.getElementById("adminReviewNavBadge");
+ if(badge){badge.textContent=String(waiting);badge.hidden=waiting===0;}
+ if(waiting>0)setAdminNotice("reviews-pending",waiting+" reseña(s) pendiente(s) de aprobación.","#reviewsAdmin","Revisar reseñas");
+ else clearAdminNotice("reviews-pending");
+ renderAdminNotices();
+}
+function updateZoneSummary(stats){
+ if(stats&&Number.isFinite(Number(stats.total)))eiZoneStats={total:Number(stats.total),available:Number(stats.available)||0};
+ const total=document.getElementById("summaryZonesTotal"),available=document.getElementById("summaryZonesAvailable");
+ if(total)total.textContent=eiZoneStats.total===null?"—":String(eiZoneStats.total);
+ if(available)available.textContent=eiZoneStats.available===null?"Disponibles en tienda: —":"Disponibles en tienda: "+eiZoneStats.available;
+ if(stats?.error)setAdminNotice("zones-load","No se pudieron cargar las zonas de domicilio: "+stats.error,"#deliveryZonesPanel","Revisar zonas");
+ else if(stats)clearAdminNotice("zones-load");
+}
+function renderAdminNotices(){
+ const list=document.getElementById("summaryAlertsList"),count=document.getElementById("summaryAlertsCount"),caption=document.getElementById("summaryAlertsCaption");
+ const total=eiAdminNotices.size;
+ if(count)count.textContent=String(total);
+ if(caption)caption.textContent=total?"Avisos que requieren atención: "+total:"Sin errores detectados en las comprobaciones realizadas.";
+ const navBadge=document.querySelector('#eiAdminNav a[href="#reviewNotifications"] .ei-admin-nav-badge');
+ if(navBadge){navBadge.textContent=String(total);navBadge.hidden=total===0;}
+ if(!list)return;
+ const items=[...eiAdminNotices.entries()];
+ if(!items.length){list.innerHTML='<p class="ei-summary-empty">✓ No hay avisos pendientes ni errores detectados.</p>';return;}
+ list.innerHTML=items.map(([key,n])=>'<div class="ei-summary-alert-item"><span aria-hidden="true">'+(key==="reviews-pending"?'⭐':'⚠️')+'</span><div>'+salesEscape(n.message)+' <a href="'+salesEscape(n.href)+'">'+salesEscape(n.label)+'</a></div></div>').join("");
+}
+window.addEventListener("ei:delivery-zones-updated",e=>updateZoneSummary(e.detail||{}));
 function updateDashboardQuickCounts(){
  const p=document.getElementById("quickProductsCount");if(p)p.textContent=String(products.length);
  const c=document.getElementById("quickCategoriesCount");if(c)c.textContent=String(categories.length);
  const o=document.getElementById("quickOrdersCount");if(o)o.textContent=String(salesRows.length);
+ updateReviewSummary();updateZoneSummary();renderAdminNotices();
 }
 function render(){
  const box=document.getElementById("adminProducts");
@@ -615,7 +654,7 @@ function renderAdminReviews(){
 }
 async function loadAdminReviews(){
  const status=document.getElementById("reviewsStatus"); if(status)status.textContent="☁️ Cargando reseñas…";
- try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
+ try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();updateReviewSummary();clearAdminNotice("reviews-load");if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();updateReviewSummary();setAdminNotice("reviews-load","No se pudieron cargar las reseñas: "+(err.message||err),"#reviewsAdmin","Reintentar reseñas");if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
 async function setReviewApproved(id,approved){try{const {error}=await supabaseClient.from("reviews").update({approved}).eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo actualizar la reseña: "+(err.message||err))}}
 async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acción no se puede deshacer."))return;try{const {error}=await supabaseClient.from("reviews").delete().eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo eliminar la reseña: "+(err.message||err))}}
 
