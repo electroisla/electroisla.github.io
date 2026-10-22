@@ -516,10 +516,10 @@ let eiZoneStats={total:null,available:null};
 function setAdminNotice(key,message,href,label){eiAdminNotices.set(key,{message,href:href||"#dashboard",label:label||"Ver detalles"});renderAdminNotices();}
 function clearAdminNotice(key){eiAdminNotices.delete(key);renderAdminNotices();}
 function updateReviewSummary(){
- const total=document.getElementById("summaryReviewsTotal"),pending=document.getElementById("summaryReviewsPending");
  const count=reviewRows.length,waiting=reviewRows.filter(r=>r.approved!==true).length;
- if(total)total.textContent=String(count);
- if(pending)pending.textContent="Pendientes de aprobar: "+waiting;
+ const totalEl=document.getElementById("quickReviewsCount"),pendingEl=document.getElementById("quickReviewsPending");
+ if(totalEl)totalEl.textContent=String(count);
+ if(pendingEl)pendingEl.textContent="Pendientes de aprobar: "+waiting;
  const badge=document.getElementById("adminReviewNavBadge");
  if(badge){badge.textContent=String(waiting);badge.hidden=waiting===0;}
  if(waiting>0)setAdminNotice("reviews-pending",waiting+" reseña(s) pendiente(s) de aprobación.","#reviewsAdmin","Revisar reseñas");
@@ -528,25 +528,22 @@ function updateReviewSummary(){
 }
 function updateZoneSummary(stats){
  if(stats&&Number.isFinite(Number(stats.total)))eiZoneStats={total:Number(stats.total),available:Number(stats.available)||0};
- const total=document.getElementById("summaryZonesTotal"),available=document.getElementById("summaryZonesAvailable");
- if(total)total.textContent=eiZoneStats.total===null?"—":String(eiZoneStats.total);
- if(available)available.textContent=eiZoneStats.available===null?"Disponibles en tienda: —":"Disponibles en tienda: "+eiZoneStats.available;
+ const totalEl=document.getElementById("quickZonesCount"),availableEl=document.getElementById("quickZonesAvailable");
+ if(totalEl)totalEl.textContent=eiZoneStats.total===null?"—":String(eiZoneStats.total);
+ if(availableEl)availableEl.textContent=eiZoneStats.available===null?"Disponibles en tienda: —":"Disponibles en tienda: "+eiZoneStats.available;
  if(stats?.error)setAdminNotice("zones-load","No se pudieron cargar las zonas de domicilio: "+stats.error,"#deliveryZonesPanel","Revisar zonas");
  else if(stats)clearAdminNotice("zones-load");
+ renderAdminNotices();
 }
 function renderAdminNotices(){
- const list=document.getElementById("summaryAlertsList"),count=document.getElementById("summaryAlertsCount"),caption=document.getElementById("summaryAlertsCaption");
+ const countEl=document.getElementById("quickNotificationsCount"),summaryEl=document.getElementById("quickNotificationsSummary");
  const pendingReviews=Array.isArray(reviewRows)?reviewRows.filter(r=>r.approved!==true).length:0;
  const otherNotices=[...eiAdminNotices.keys()].filter(key=>key!=="reviews-pending").length;
  const total=pendingReviews+otherNotices;
- if(count)count.textContent=String(total);
- if(caption)caption.textContent=total?"Avisos que requieren atención: "+total:"Sin errores detectados en las comprobaciones realizadas.";
+ if(countEl)countEl.textContent=String(total);
+ if(summaryEl)summaryEl.textContent=total?"Avisos que requieren atención":"Sin avisos pendientes";
  const navBadge=document.querySelector('#eiAdminNav a[href="#reviewNotifications"] .ei-admin-nav-badge');
  if(navBadge){navBadge.textContent=String(total);navBadge.hidden=total===0;}
- if(!list)return;
- const items=[...eiAdminNotices.entries()];
- if(!items.length){list.innerHTML='<p class="ei-summary-empty">✓ No hay avisos pendientes ni errores detectados.</p>';return;}
- list.innerHTML=items.map(([key,n])=>'<div class="ei-summary-alert-item"><span aria-hidden="true">'+(key==="reviews-pending"?'⭐':'⚠️')+'</span><div>'+salesEscape(n.message)+' <a href="'+salesEscape(n.href)+'">'+salesEscape(n.label)+'</a></div></div>').join("");
 }
 window.addEventListener("ei:delivery-zones-updated",e=>updateZoneSummary(e.detail||{}));
 function updateDashboardQuickCounts(){
