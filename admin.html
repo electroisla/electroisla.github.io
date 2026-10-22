@@ -299,6 +299,13 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #adminProducts .admin-actions{gap:3px}
  .admin-page #adminProducts .admin-actions button{min-width:29px;min-height:29px;padding:3px}
 }
+
+/* Categorías horizontales del catálogo; las pestañas se generan desde las categorías actuales */
+.admin-page .catalog-category-tabs{display:flex;align-items:center;gap:7px;max-width:100%;margin:0 0 12px;padding:3px 1px 9px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.admin-page .catalog-category-tab{flex:0 0 auto;min-height:36px;padding:8px 14px;border:1px solid var(--ei-line);border-radius:999px;background:#fff;color:var(--ei-blue);font-size:.82rem;font-weight:750;white-space:nowrap}
+.admin-page .catalog-category-tab:hover{border-color:#f2ad70;background:var(--ei-soft)}
+.admin-page .catalog-category-tab.is-active{border-color:var(--ei-orange);background:var(--ei-orange);color:#fff}
+.admin-page .catalog-empty{margin:0;padding:15px;border:1px dashed var(--ei-line);border-radius:9px;color:var(--ei-muted);text-align:center}
 </style>
 </head>
 <body class="admin-page">
@@ -433,7 +440,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 <label class="check"><input type="checkbox" id="pAvailable" checked> Disponible</label>
 <div class="row"><button class="btn primary" type="submit">Guardar producto</button><button class="btn secondary" type="button" id="cancelEdit">Limpiar</button></div>
 </form>
-<div class="admin-card" id="catalogPanel"><h2>📦 Catálogo actual</h2><p id="cloudStatus" style="font-size:.9rem;color:#5b6670;margin-top:-6px;margin-bottom:12px">☁️ Esperando conexión…</p><button type="button" class="btn secondary" id="refreshCloud" style="margin-bottom:12px">🔄 Actualizar catálogo</button><div id="adminProducts"></div></div>
+<div class="admin-card" id="catalogPanel"><h2>📦 Catálogo actual</h2><p id="cloudStatus" style="font-size:.9rem;color:#5b6670;margin-top:-6px;margin-bottom:12px">☁️ Esperando conexión…</p><button type="button" class="btn secondary" id="refreshCloud" style="margin-bottom:12px">🔄 Actualizar catálogo</button><div id="catalogCategoryTabs" class="catalog-category-tabs" aria-label="Categorías del catálogo"></div><div id="adminProducts"></div></div>
 </div>
 
 <section class="admin-card sales-report" id="salesReport">
