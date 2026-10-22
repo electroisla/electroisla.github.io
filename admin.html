@@ -1180,3 +1180,20 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::after{z-index:3!important
  .admin-page .ei-login-field{margin:9px 0!important}
 }
 </style>
+
+<style id="ei-login-wave-precise-v3">
+/* Curva naranja asimétrica: esquina derecha junto a recuperar contraseña; izquierda junto al acceso seguro */
+body.admin-page:has(#loginBox:not(.hidden))::before{
+  left:-10%!important;right:-10%!important;bottom:-78px!important;height:clamp(150px,22svh,205px)!important;
+  border-radius:0 0 48% 52% / 0 0 30% 25%!important;
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%)!important;
+  transform:rotate(-3deg)!important;
+  background:linear-gradient(100deg,#ff6900 0%,#ff8a22 70%,#ffad57 100%)!important;
+}
+/* Mantener el pie legible y fijar la marca a 1.5 px bajo el lema */
+.admin-page .ei-login-tagline{margin-bottom:1.5px!important}
+.admin-page .ei-login-wordmark{margin-bottom:0!important}
+@media(max-width:480px){
+ body.admin-page:has(#loginBox:not(.hidden))::before{bottom:-70px!important;height:clamp(135px,20svh,180px)!important}
+}
+</style>
