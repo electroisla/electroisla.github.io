@@ -973,3 +973,29 @@ body.admin-page .topbar .ei-header-account svg{width:32px!important;height:32px!
  body.admin-page .topbar .ei-logo-brand .ei-brand-name{font-size:.84rem!important}
 }
 </style>
+
+
+<style id="ei-store-button-restore">
+/* Mantener visible y utilizable el botón Ver tienda tras centrar la marca */
+body.admin-page .topbar .ei-header-account{
+ position:relative!important;z-index:5!important;display:inline-flex!important;
+ flex:0 0 auto!important;width:auto!important;min-width:112px!important;height:40px!important;
+ margin:0 0 0 auto!important;padding:0 12px!important;gap:7px!important;
+ align-items:center!important;justify-content:center!important;border:1px solid #fff!important;
+ border-radius:10px!important;background:#fff!important;color:#064b96!important;
+ text-decoration:none!important;white-space:nowrap!important;overflow:visible!important;
+}
+body.admin-page .topbar .ei-header-account .ei-store-label{display:inline!important;visibility:visible!important;color:#064b96!important}
+body.admin-page .topbar .ei-header-account .ei-store-icon{display:inline!important;color:#f47a18!important;font-size:1.15rem!important}
+body.admin-page .topbar .ei-header-account .ei-store-arrow{display:inline!important;color:#f47a18!important;font-size:.95rem!important}
+@media(max-width:900px){
+ body.admin-page .topbar .ei-header-account{min-width:0!important;height:36px!important;padding:0 8px!important;gap:5px!important}
+ body.admin-page .topbar .ei-header-account .ei-store-label{font-size:.75rem!important}
+ body.admin-page .topbar .ei-header-account .ei-store-icon{font-size:1rem!important}
+ body.admin-page .topbar .ei-header-account .ei-store-arrow{display:none!important}
+}
+@media(max-width:360px){
+ body.admin-page .topbar .ei-header-account{height:35px!important;padding:0 6px!important;gap:4px!important}
+ body.admin-page .topbar .ei-header-account .ei-store-label{font-size:.7rem!important}
+}
+</style>
