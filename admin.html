@@ -306,6 +306,45 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 .admin-page .catalog-category-tab:hover{border-color:#f2ad70;background:var(--ei-soft)}
 .admin-page .catalog-category-tab.is-active{border-color:var(--ei-orange);background:var(--ei-orange);color:#fff}
 .admin-page .catalog-empty{margin:0;padding:15px;border:1px dashed var(--ei-line);border-radius:9px;color:var(--ei-muted);text-align:center}
+
+/* Categorías: controles alineados y presentación limpia */
+.admin-page #categoryManager .category-form{grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px;padding:14px;background:#f8fafd;border:1px solid var(--ei-line);border-radius:10px}
+.admin-page #categoryManager .category-form>label:first-of-type{min-width:0}
+.admin-page #categoryManager .category-form .check{display:flex;align-items:center;gap:7px;min-height:41px;margin:0;padding:0 4px;white-space:normal}
+.admin-page #categoryManager .category-form .check input{flex:0 0 auto;margin:0}
+.admin-page #categoryManager .category-form>.row{display:flex;align-items:center;gap:8px}
+.admin-page #categoryManager .category-list{gap:9px;margin-top:14px}
+.admin-page #categoryManager .category-item{display:grid;grid-template-columns:30px minmax(130px,1fr) auto auto;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e1e8f0;border-radius:10px;box-shadow:0 2px 7px #173b6008;transition:border-color .15s,background .15s}
+.admin-page #categoryManager .category-item:hover{border-color:#f0bd91}
+.admin-page #categoryManager .category-drag{display:grid;place-items:center;width:30px;height:34px;border-radius:7px;background:#f0f5fb;color:#71849a;cursor:grab}
+.admin-page #categoryManager .category-info{min-width:0;overflow-wrap:anywhere}
+.admin-page #categoryManager .category-name{font-size:.91rem;line-height:1.3}
+.admin-page #categoryManager .category-state{margin-top:3px;line-height:1.35}
+.admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:nowrap;gap:6px}
+.admin-page #categoryManager .category-order .btn{width:34px;min-width:34px;min-height:34px;padding:5px}
+.admin-page #categoryManager .category-actions .btn{min-height:34px;padding:6px 9px;white-space:nowrap}
+.admin-page #categoryManager .category-actions .btn:last-child{min-width:36px}
+.admin-page #categoryManager .category-item.is-hidden{background:#f7f8fa;opacity:1}
+.admin-page #categoryManager .category-item.is-hidden .category-name{color:#69798b}
+.admin-page #categoryManager .category-editing{margin-top:10px;padding:10px 12px;border-left:3px solid var(--ei-orange)}
+@media(max-width:700px){
+ .admin-page #categoryManager .category-form{grid-template-columns:minmax(0,1fr);gap:9px;padding:11px}
+ .admin-page #categoryManager .category-form .check{min-height:30px}
+ .admin-page #categoryManager .category-form>.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+ .admin-page #categoryManager .category-form>.row .btn{width:100%;padding:8px 7px}
+ .admin-page #categoryManager .category-item{grid-template-columns:25px minmax(0,1fr);gap:8px 10px;padding:10px}
+ .admin-page #categoryManager .category-drag{grid-row:1;grid-column:1;width:25px;height:30px}
+ .admin-page #categoryManager .category-info{grid-row:1;grid-column:2}
+ .admin-page #categoryManager .category-order{grid-row:2;grid-column:1 / -1;justify-content:flex-start;padding:7px 0;border-top:1px solid #edf1f5}
+ .admin-page #categoryManager .category-actions{grid-row:3;grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding-top:7px;border-top:1px solid #edf1f5}
+ .admin-page #categoryManager .category-actions .btn{width:100%;min-width:0;min-height:36px;padding:6px 4px;font-size:.75rem}
+ .admin-page #categoryManager .category-actions .btn:last-child{min-width:0}
+}
+@media(max-width:360px){
+ .admin-page #categoryManager .category-form>.row{grid-template-columns:minmax(0,1fr)}
+ .admin-page #categoryManager .category-actions{grid-template-columns:minmax(0,1fr)}
+}
+
 </style>
 </head>
 <body class="admin-page">
