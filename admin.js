@@ -233,14 +233,16 @@ function renderCategories(){
         <div class="category-name">${esc(c.name)}</div>
         <span class="category-state">${c.available?"● Visible en la tienda":"○ Oculta en la tienda"}</span>
       </div>
-      <div class="category-order">
-        <button type="button" class="btn secondary category-move" ${i===0?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',-1)" aria-label="Subir categoría">↑</button>
-        <button type="button" class="btn secondary category-move" ${i===categories.length-1?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',1)" aria-label="Bajar categoría">↓</button>
-      </div>
-      <div class="category-actions">
-        <button type="button" class="btn secondary" onclick="editCategory(${Number(c.id)})">✏️ Editar</button>
-        <button type="button" class="btn secondary" onclick="toggleCategory(${Number(c.id)})">${c.available?"👁️ Ocultar":"👁️ Mostrar"}</button>
-        <button type="button" class="btn secondary" onclick="removeCategory(${Number(c.id)})">🗑️</button>
+      <div class="category-controls">
+        <div class="category-order">
+          <button type="button" class="btn secondary category-move" ${i===0?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',-1)" aria-label="Subir categoría" title="Subir">↑</button>
+          <button type="button" class="btn secondary category-move" ${i===categories.length-1?"disabled":""} onclick="moveCategory('${String(c.id).replace("'","&#039;")}',1)" aria-label="Bajar categoría" title="Bajar">↓</button>
+        </div>
+        <div class="category-actions">
+          <button type="button" class="btn secondary" onclick="editCategory(${Number(c.id)})" aria-label="Editar categoría">✏️</button>
+          <button type="button" class="btn secondary" onclick="toggleCategory(${Number(c.id)})" aria-label="${c.available?"Ocultar categoría":"Mostrar categoría"}" title="${c.available?"Ocultar":"Mostrar"}">${c.available?"👁️":"👁️‍🗨️"}</button>
+          <button type="button" class="btn secondary" onclick="removeCategory(${Number(c.id)})" aria-label="Eliminar categoría">🗑️</button>
+        </div>
       </div>
     </div>`).join("");
   initCategoryReorder();
