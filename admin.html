@@ -999,3 +999,30 @@ body.admin-page .topbar .ei-header-account .ei-store-arrow{display:inline!import
  body.admin-page .topbar .ei-header-account .ei-store-label{font-size:.7rem!important}
 }
 </style>
+
+
+<style id="ei-store-button-decoration">
+/* Detalle decorativo ElectroIsla: acento naranja y brillo sutil sin alterar el enlace */
+body.admin-page .topbar .ei-header-account{
+ position:relative!important;
+ border:1px solid rgba(244,122,24,.42)!important;
+ box-shadow:0 3px 10px rgba(4,75,150,.12), inset 0 -2px 0 rgba(244,122,24,.14)!important;
+ transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease!important;
+}
+body.admin-page .topbar .ei-header-account::after{
+ content:""!important;position:absolute!important;left:12px!important;right:12px!important;bottom:3px!important;
+ height:2px!important;border-radius:3px!important;
+ background:linear-gradient(90deg,#f47a18 0%,#ffb15c 55%,#064b96 100%)!important;
+ opacity:.9!important;pointer-events:none!important;
+}
+body.admin-page .topbar .ei-header-account:hover{
+ border-color:#f47a18!important;box-shadow:0 5px 14px rgba(4,75,150,.17)!important;
+ transform:translateY(-1px)!important;
+}
+body.admin-page .topbar .ei-header-account:focus-visible{
+ outline:2px solid #f47a18!important;outline-offset:3px!important;
+}
+@media(prefers-reduced-motion:reduce){
+ body.admin-page .topbar .ei-header-account{transition:none!important}
+}
+</style>
