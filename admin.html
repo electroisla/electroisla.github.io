@@ -941,3 +941,35 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
  .admin-page .ei-admin-quick-card .ei-quick-icon{flex-basis:36px;width:36px;height:36px;font-size:1.25rem}
 }
 </style>
+
+
+<style id="ei-header-logo-name-final-compact">
+/* ElectroIsla: marca compacta, centrada respecto a toda la pantalla */
+body.admin-page .topbar{position:sticky!important;display:flex!important;align-items:center!important;justify-content:space-between!important;min-width:0!important}
+body.admin-page .topbar .ei-logo-brand{
+ position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;
+ z-index:2!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+ gap:7px!important;width:max-content!important;max-width:calc(100% - 112px)!important;min-width:0!important;margin:0!important;
+}
+body.admin-page .topbar .ei-logo-brand .ei-admin-logo{
+ display:block!important;flex:0 0 34px!important;width:34px!important;height:34px!important;min-width:34px!important;
+ max-width:34px!important;max-height:34px!important;object-fit:cover!important;
+}
+body.admin-page .topbar .ei-logo-brand .ei-brand-name{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ font-size:1rem!important;line-height:1!important;letter-spacing:-.025em!important;font-weight:850!important;white-space:nowrap!important;
+}
+body.admin-page .topbar .ei-header-menu-toggle{position:relative!important;z-index:4!important;flex:0 0 38px!important}
+body.admin-page .topbar .ei-header-account{position:relative!important;z-index:4!important;flex:0 0 38px!important;width:38px!important;height:38px!important;margin-left:auto!important}
+body.admin-page .topbar .ei-header-account svg{width:32px!important;height:32px!important}
+@media(min-width:901px){
+ body.admin-page .topbar .ei-logo-brand{max-width:calc(100% - 150px)!important;gap:8px!important}
+ body.admin-page .topbar .ei-logo-brand .ei-admin-logo{flex-basis:38px!important;width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;max-height:38px!important}
+ body.admin-page .topbar .ei-logo-brand .ei-brand-name{font-size:1.1rem!important}
+}
+@media(max-width:390px){
+ body.admin-page .topbar .ei-logo-brand{max-width:calc(100% - 94px)!important;gap:5px!important}
+ body.admin-page .topbar .ei-logo-brand .ei-admin-logo{flex-basis:29px!important;width:29px!important;height:29px!important;min-width:29px!important;max-width:29px!important;max-height:29px!important}
+ body.admin-page .topbar .ei-logo-brand .ei-brand-name{font-size:.84rem!important}
+}
+</style>
