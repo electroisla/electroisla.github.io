@@ -737,7 +737,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <p class="eyebrow ei-login-kicker">ADMINISTRACIÓN</p><h1>Administración</h1>
 <p class="ei-login-subtitle">Inicia sesión para continuar</p>
 <label class="ei-login-field">Usuario o correo<input type="email" id="adminEmail" placeholder="Usuario o correo" autocomplete="username"></label>
-<label class="ei-login-field">Contraseña<span class="ei-password-wrap"><input type="password" id="adminPass" placeholder="Contraseña" autocomplete="current-password"><button type="button" id="eiPasswordToggle" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></span></label>
+<label class="ei-login-field">Contraseña<span class="ei-password-wrap"><input type="password" id="adminPass" placeholder="Contraseña" autocomplete="current-password"><button type="button" id="eiPasswordToggle" aria-label="Mostrar contraseña" aria-pressed="false"><svg class="ei-password-eye" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg></button></span></label>
 <p class="login-status" style="min-height:1.2em;font-size:.9rem;color:#5b6670"></p>
 <button class="btn primary full" id="loginBtn">Iniciar sesión</button><button type="button" class="ei-forgot-password" id="eiForgotPassword">¿Olvidaste tu contraseña?</button><p class="ei-login-footer">Acceso seguro · ElectroIsla 360</p>
 </section>
@@ -1034,7 +1034,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 
 
 <script id="ei-password-toggle-script">
-(()=>{const b=document.getElementById('eiPasswordToggle'),p=document.getElementById('adminPass');if(!b||!p)return;b.addEventListener('click',()=>{const show=p.type==='password';p.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña');b.textContent=show?'⊘':'◉';});})();
+(()=>{const b=document.getElementById('eiPasswordToggle'),p=document.getElementById('adminPass');if(!b||!p)return;b.addEventListener('click',()=>{const show=p.type==='password';p.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña');b.innerHTML=show?'<svg class="ei-password-eye" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3 21 21"/><path d="M10.6 6.2A10.8 10.8 0 0 1 12 6c6.1 0 9.5 6 9.5 6a16.8 16.8 0 0 1-3 3.7M6.2 6.3C3.8 8 2.5 12 2.5 12s3.4 6 9.5 6c1.4 0 2.6-.3 3.7-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>':'<svg class="ei-password-eye" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg>';});})();
 </script>
 
 <style id="ei-sidebar-summary-icons">
@@ -1082,6 +1082,17 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </style>
 
 
+
+
+<style id="ei-password-eye-inline-v1">
+/* Icono de ojo delineado gris, integrado dentro del campo de contraseña */
+body.admin-page .ei-password-wrap{position:relative!important;display:block!important;width:100%!important;margin-top:7px!important}
+body.admin-page .ei-password-wrap input{display:block!important;width:100%!important;min-width:0!important;margin-top:0!important;padding-right:48px!important}
+body.admin-page #eiPasswordToggle{position:absolute!important;z-index:2!important;top:50%!important;right:5px!important;transform:translateY(-50%)!important;display:grid!important;place-items:center!important;flex:none!important;width:36px!important;height:36px!important;min-height:36px!important;padding:0!important;border:0!important;border-radius:7px!important;background:transparent!important;color:#858b94!important;box-shadow:none!important}
+body.admin-page #eiPasswordToggle:hover{background:#eef1f4!important;color:#606873!important}
+body.admin-page #eiPasswordToggle:focus-visible{outline:2px solid #aab1ba!important;outline-offset:1px!important}
+body.admin-page #eiPasswordToggle .ei-password-eye{display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+</style>
 
 </html>
 
