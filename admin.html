@@ -436,6 +436,44 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
  .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn{width:22px;min-width:22px;height:23px;min-height:23px}
 }
 
+
+/* Pulido visual de la lista de categorías: filas compactas y controles alineados */
+.admin-page #categoryManager #categoryList{display:flex;flex-direction:column;gap:8px}
+.admin-page #categoryManager .category-item{display:grid;grid-template-columns:34px minmax(230px,300px) auto;justify-content:start;align-items:center;column-gap:12px;row-gap:0;padding:10px 12px;min-height:68px;background:#fff;border:1px solid #e2e8ef;border-radius:12px;box-shadow:0 1px 3px rgba(25,55,85,.04)}
+.admin-page #categoryManager .category-drag{width:34px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#f0f5fb;color:#73849a;font-size:20px;cursor:grab}
+.admin-page #categoryManager .category-info{min-width:0;display:flex;flex-direction:column;gap:3px}
+.admin-page #categoryManager .category-name{font-size:.94rem;line-height:1.25;font-weight:750;color:#203449;overflow-wrap:anywhere}
+.admin-page #categoryManager .category-state{font-size:.73rem;line-height:1.25;color:#78899a}
+.admin-page #categoryManager .category-controls{display:flex;align-items:center;justify-content:flex-start;gap:8px;min-width:0}
+.admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{display:flex;align-items:center;gap:5px;margin:0;padding:0;border:0}
+.admin-page #categoryManager .category-actions{padding-left:8px;border-left:1px solid #e7edf3}
+.admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn{width:34px;min-width:34px;height:34px;min-height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dce5ed;border-radius:9px;background:#f9fbfd;color:#31516b;font-size:.92rem;line-height:1;box-shadow:none}
+.admin-page #categoryManager .category-order .btn:hover,.admin-page #categoryManager .category-actions .btn:hover{background:#fff4eb;border-color:#f1b27f;color:#b85d1d}
+.admin-page #categoryManager .category-order .btn:disabled{opacity:.35}
+.admin-page #categoryManager .category-actions .btn:last-child{width:34px;min-width:34px;height:34px;min-height:34px}
+.admin-page #categoryManager .category-item.is-hidden{background:#f8fafc;border-color:#e7ebf0}
+@media(max-width:700px){
+ .admin-page #categoryManager #categoryList{gap:7px}
+ .admin-page #categoryManager .category-item{grid-template-columns:28px minmax(105px,1fr) auto;column-gap:8px;padding:8px;min-height:58px}
+ .admin-page #categoryManager .category-drag{width:28px;height:32px;font-size:17px}
+ .admin-page #categoryManager .category-name{font-size:.82rem}
+ .admin-page #categoryManager .category-state{font-size:.64rem}
+ .admin-page #categoryManager .category-controls{gap:5px}
+ .admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{gap:3px}
+ .admin-page #categoryManager .category-actions{padding-left:5px}
+ .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn,.admin-page #categoryManager .category-actions .btn:last-child{width:29px;min-width:29px;height:30px;min-height:30px;border-radius:8px;font-size:.78rem}
+}
+@media(max-width:420px){
+ .admin-page #categoryManager .category-item{grid-template-columns:24px minmax(85px,1fr) auto;column-gap:6px;padding:7px}
+ .admin-page #categoryManager .category-drag{width:24px;height:29px;font-size:15px}
+ .admin-page #categoryManager .category-name{font-size:.76rem}
+ .admin-page #categoryManager .category-state{font-size:.59rem}
+ .admin-page #categoryManager .category-controls{gap:3px}
+ .admin-page #categoryManager .category-order,.admin-page #categoryManager .category-actions{gap:2px}
+ .admin-page #categoryManager .category-actions{padding-left:3px}
+ .admin-page #categoryManager .category-order .btn,.admin-page #categoryManager .category-actions .btn,.admin-page #categoryManager .category-actions .btn:last-child{width:25px;min-width:25px;height:27px;min-height:27px;font-size:.7rem}
+}
+
 </style>
 </head>
 <body class="admin-page">
