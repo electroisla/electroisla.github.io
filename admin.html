@@ -942,6 +942,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 
 <script id="eiOfficialQuickSummary">
 (()=> {
+ const put=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
  const update=()=>{
    const reviewItems=[...document.querySelectorAll("#reviewsList .review-admin-item")];
    const pending=reviewItems.filter(el=>el.classList.contains("pending")).length;
@@ -953,12 +954,12 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
    const available=zoneRows.filter(el=>!el.classList.contains("is-hidden-zone")).length;
    const zoneCount=document.getElementById("quickZonesCount");
    const zoneAvailable=document.getElementById("quickZonesAvailable");
-   if(reviewCount)reviewCount.textContent=String(reviewItems.length);
-   if(reviewPending)reviewPending.textContent="Pendientes de aprobar: "+pending;
-   if(notificationCount)notificationCount.textContent=String(pending);
-   if(notificationSummary)notificationSummary.textContent=pending===1?"1 reseña pendiente":pending+" reseñas pendientes";
-   if(zoneCount)zoneCount.textContent=String(zoneRows.length);
-   if(zoneAvailable)zoneAvailable.textContent="Disponibles en tienda: "+available;
+   put(reviewCount,String(reviewItems.length));
+   put(reviewPending,"Pendientes de aprobar: "+pending);
+   put(notificationCount,String(pending));
+   put(notificationSummary,pending===1?"1 reseña pendiente":pending+" reseñas pendientes");
+   put(zoneCount,String(zoneRows.length));
+   put(zoneAvailable,"Disponibles en tienda: "+available);
  };
  const start=()=>{
    update();
