@@ -231,7 +231,7 @@ function renderCategories(){
       <div class="category-drag" title="Arrastra para cambiar de posición" draggable="true" data-id="${esc(c.id)}">☷</div>
       <div class="category-info">
         <div class="category-name">${esc(c.name)}</div>
-        <span class="category-state">${c.available?"● Visible en la tienda":"○ Oculta en la tienda"}</span>
+        <span class="category-state ${c.available?"is-visible":"is-hidden"}"><span class="category-status-dot" aria-hidden="true"></span><span>${c.available?"Visible en la tienda":"Oculta en la tienda"}</span></span>
       </div>
       <div class="category-controls">
         <div class="category-order">
