@@ -488,6 +488,13 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 .admin-page #categoryManager .category-state.is-hidden .category-status-dot{background:#a8b2bd;border-color:#929eaa;box-shadow:none}
 .admin-page #categoryManager .category-state.is-hidden{color:#8793a0}
 
+
+/* Filtros de fechas del reporte de ventas */
+.admin-page .sales-custom-dates{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 16px;padding:12px;background:#f5f9ff;border:1px solid #dce8f5;border-radius:12px}
+.admin-page .sales-custom-dates[hidden]{display:none!important}
+.admin-page .sales-custom-dates label{font-size:13px;font-weight:700;color:#34465a}
+.admin-page .sales-custom-dates input[type=date]{min-height:40px;border:1px solid #cbd8e6;border-radius:9px;padding:7px 9px;background:#fff;color:#1d2939;max-width:100%}
+@media(max-width:600px){.admin-page .sales-custom-dates{align-items:stretch}.admin-page .sales-custom-dates label{width:100%}.admin-page .sales-custom-dates input[type=date],.admin-page .sales-custom-dates .btn{width:100%}}
 </style>
 </head>
 <body class="admin-page">
@@ -627,7 +634,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 
 <section class="admin-card sales-report" id="salesReport">
   <div class="sales-report-head">
-    <div><p class="eyebrow">VENTAS</p><h2>📊 Reporte de ventas</h2></div>
+    <div><p class="eyebrow">VENTAS Y PEDIDOS</p><h2>📊 Reporte de ventas y pedidos</h2></div>
     <button type="button" class="btn secondary" id="salesRefresh">🔄 Actualizar</button>
   </div>
   <div class="sales-filters">
@@ -642,10 +649,20 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
         <option value="today">Hoy</option>
         <option value="7d" selected>Últimos 7 días</option>
         <option value="30d">Últimos 30 días</option>
-        <option value="all">Todo</option>
+        <option value="90d">Últimos 90 días</option>
+        <option value="6m">Últimos 6 meses</option>
+        <option value="1y">Último año</option>
+        <option value="2y">Últimos 2 años</option>
+        <option value="custom">Personalizar fechas</option>
+        <option value="all">Todo el historial</option>
       </select>
     </label>
     <button type="button" class="btn primary" id="salesExport">⬇️ Exportar CSV</button>
+  </div>
+  <div class="sales-custom-dates" id="salesCustomDates" hidden>
+    <label for="salesDateFrom">Desde</label><input type="date" id="salesDateFrom">
+    <label for="salesDateTo">Hasta</label><input type="date" id="salesDateTo">
+    <button type="button" class="btn primary" id="salesApplyDates">Aplicar período</button>
   </div>
   <p id="salesStatus" class="sales-status">☁️ Cargando ventas…</p>
   <div class="sales-summary-grid">
@@ -660,7 +677,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
     <div><h3>Ventas por día</h3><div id="salesDaily" class="sales-list"></div></div>
   </div>
   <div class="sales-table-wrap">
-    <h3>Pedidos</h3>
+    <h3>Pedidos del período seleccionado</h3>
     <div id="salesOrdersTable"></div>
   </div>
 </section>
