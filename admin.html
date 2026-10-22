@@ -1182,21 +1182,22 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::after{z-index:3!important
 </style>
 
 <style id="ei-login-wave-precise-v4">
-/* Franja naranja con esquina derecha más alta, izquierda a la altura de Acceso seguro y barriga curva */
+/* Franja naranja alineada con el acceso: derecha a la altura de recuperación,
+   izquierda a la altura de «Acceso seguro» y barriga apenas por debajo. */
 body.admin-page:has(#loginBox:not(.hidden))::before{
   left:-10%!important;right:-10%!important;bottom:-78px!important;height:clamp(150px,22svh,205px)!important;
   border-radius:0!important;
-  clip-path:polygon(0 25%,8% 29%,18% 35%,28% 41%,38% 45%,48% 46%,58% 42%,68% 33%,78% 22%,88% 12%,100% 5%,100% 100%,0 100%)!important;
+  clip-path:polygon(0 24%,12% 27%,24% 30%,36% 33%,48% 35%,58% 33%,68% 28%,78% 21%,89% 13%,100% 8%,100% 100%,0 100%)!important;
   transform:none!important;
   background:linear-gradient(100deg,#ff6900 0%,#ff8a22 70%,#ffad57 100%)!important;
 }
-/* La marca queda pegada al lema con una separación de 1.5 px */
+/* Separación visual solicitada para el lema de marca: 1,5 px */
 .admin-page .ei-login-tagline{margin-bottom:1.5px!important}
 .admin-page .ei-login-wordmark{margin-bottom:0!important}
 @media(max-width:480px){
  body.admin-page:has(#loginBox:not(.hidden))::before{
    bottom:-70px!important;height:clamp(135px,20svh,180px)!important;
-   clip-path:polygon(0 25%,8% 29%,18% 35%,28% 41%,38% 45%,48% 46%,58% 42%,68% 33%,78% 22%,88% 12%,100% 5%,100% 100%,0 100%)!important
+   clip-path:polygon(0 24%,12% 27%,24% 30%,36% 33%,48% 35%,58% 33%,68% 28%,78% 21%,89% 13%,100% 8%,100% 100%,0 100%)!important
  }
 }
 </style>
