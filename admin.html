@@ -799,14 +799,42 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </body></html>
 
 <style id="ei-summary-square-cards">
-.admin-page .ei-admin-quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px}
-.admin-page .ei-admin-quick-card{min-height:190px;aspect-ratio:1/1;max-width:260px;width:100%;padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center;border:1px solid #dce5ef;border-top:4px solid #ff6900;border-radius:15px;box-shadow:0 5px 16px #173b6010}
-.admin-page .ei-admin-quick-card:hover{transform:translateY(-3px);box-shadow:0 9px 22px #173b6018}
-.admin-page .ei-admin-quick-card .ei-quick-icon{flex:0 0 58px;width:58px;height:58px;border-radius:16px;font-size:1.8rem;background:#fff0e4;color:#f06a00}
-.admin-page .ei-admin-quick-card .ei-quick-info{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;width:100%}
-.admin-page .ei-admin-quick-card strong{font-size:1rem;line-height:1.25}
-.admin-page .ei-admin-quick-card small{font-size:.78rem;line-height:1.35}
-.admin-page .ei-admin-quick-card .ei-quick-count{color:#ff6900;font-size:1.85rem;font-weight:850;line-height:1.05}
-@media(max-width:900px){.admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.admin-page .ei-admin-quick-card{max-width:none;min-height:160px;padding:13px 8px;gap:8px}.admin-page .ei-admin-quick-card .ei-quick-icon{flex-basis:48px;width:48px;height:48px;font-size:1.55rem}.admin-page .ei-admin-quick-card .ei-quick-count{font-size:1.65rem}}
-@media(max-width:350px){.admin-page .ei-admin-quick-card{min-height:145px}.admin-page .ei-admin-quick-card strong{font-size:.86rem}.admin-page .ei-admin-quick-card small{font-size:.69rem}}
+/* Resumen ElectroIsla: tarjetas llenas de color y composición tipo mosaico */
+.admin-page .ei-admin-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(118px,auto);grid-auto-flow:dense;gap:14px;margin:0 0 20px}
+.admin-page .ei-admin-quick-card{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:14px;min-width:0;min-height:156px;width:100%;max-width:none;padding:17px 18px;border:0;border-radius:17px;color:#fff;text-decoration:none;box-shadow:0 7px 18px #173b6020;transition:transform .18s,box-shadow .18s}
+.admin-page .ei-admin-quick-card:before{content:"";position:absolute;z-index:-1;width:130px;height:130px;right:-25px;bottom:-42px;border:22px solid #ffffff20;border-radius:50%}
+.admin-page .ei-admin-quick-card:after{content:"";position:absolute;z-index:-1;width:68px;height:68px;right:28px;top:-30px;background:#ffffff12;border-radius:22px;transform:rotate(28deg)}
+.admin-page .ei-admin-quick-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px #173b6030}
+.admin-page .ei-admin-quick-card .ei-quick-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:1px solid #ffffff45;border-radius:14px;background:#ffffff25;color:#fff;font-size:1.65rem}
+.admin-page .ei-admin-quick-card .ei-quick-info{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:5px;min-width:0;width:100%}
+.admin-page .ei-admin-quick-card strong{color:#fff;font-size:1rem;line-height:1.25;font-weight:850}
+.admin-page .ei-admin-quick-card small{color:#ffffffdf;font-size:.78rem;line-height:1.35}
+.admin-page .ei-admin-quick-card .ei-quick-count{color:#fff;font-size:1.9rem;font-weight:900;line-height:1.05}
+.admin-page .ei-admin-quick-card.ei-quick-product{grid-column:span 2;grid-row:span 2;min-height:285px;background:linear-gradient(140deg,#0755a4,#1685d8)}
+.admin-page .ei-admin-quick-card.ei-quick-categories{grid-column:span 1;grid-row:span 2;min-height:285px;background:linear-gradient(150deg,#f07812,#ff9e27)}
+.admin-page .ei-admin-quick-card.ei-quick-sales{grid-column:span 1;grid-row:span 2;min-height:285px;background:linear-gradient(150deg,#07856b,#13b894)}
+.admin-page .ei-admin-quick-card.ei-quick-reviews{grid-column:span 2;min-height:145px;flex-direction:row;align-items:center;justify-content:flex-start;background:linear-gradient(120deg,#7543b5,#a36ae3)}
+.admin-page .ei-admin-quick-card.ei-quick-reviews .ei-quick-info{width:auto;flex:1}
+.admin-page .ei-admin-quick-card.ei-quick-zones{grid-column:span 1;min-height:145px;background:linear-gradient(140deg,#c43e58,#f16b76)}
+.admin-page .ei-admin-quick-card.ei-quick-notifications{grid-column:span 1;min-height:145px;background:linear-gradient(140deg,#34445c,#60758f)}
+.admin-page .ei-admin-quick-card.ei-quick-reviews .ei-quick-icon,.admin-page .ei-admin-quick-card.ei-quick-zones .ei-quick-icon,.admin-page .ei-admin-quick-card.ei-quick-notifications .ei-quick-icon{flex-basis:42px;width:42px;height:42px}
+@media(max-width:900px){
+ .admin-page .ei-admin-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(125px,auto);gap:10px}
+ .admin-page .ei-admin-quick-card{min-height:145px;padding:13px;border-radius:14px;gap:10px}
+ .admin-page .ei-admin-quick-card.ei-quick-product{grid-column:span 2;grid-row:span 1;min-height:178px;flex-direction:row;align-items:center}
+ .admin-page .ei-admin-quick-card.ei-quick-product .ei-quick-info{width:auto;flex:1}
+ .admin-page .ei-admin-quick-card.ei-quick-categories,.admin-page .ei-admin-quick-card.ei-quick-sales{grid-column:span 1;grid-row:span 1;min-height:170px}
+ .admin-page .ei-admin-quick-card.ei-quick-reviews{grid-column:span 2;min-height:112px}
+ .admin-page .ei-admin-quick-card.ei-quick-zones{grid-column:span 1;min-height:145px}
+ .admin-page .ei-admin-quick-card.ei-quick-notifications{grid-column:span 1;min-height:145px}
+ .admin-page .ei-admin-quick-card .ei-quick-count{font-size:1.65rem}
+}
+@media(max-width:350px){
+ .admin-page .ei-admin-quick-grid{gap:7px}
+ .admin-page .ei-admin-quick-card{padding:10px;min-height:132px}
+ .admin-page .ei-admin-quick-card.ei-quick-product{min-height:155px}
+ .admin-page .ei-admin-quick-card strong{font-size:.84rem}
+ .admin-page .ei-admin-quick-card small{font-size:.68rem}
+ .admin-page .ei-admin-quick-card .ei-quick-icon{flex-basis:36px;width:36px;height:36px;font-size:1.25rem}
+}
 </style>
