@@ -783,7 +783,7 @@ function renderSalesReport(){
   const table=document.getElementById("salesOrdersTable");
   if(table){
     if(!rows.length){table.innerHTML='<p class="sales-empty">No hay pedidos registrados en este período.</p>';}
-    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
+    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Modalidad / estado de cobro</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}<small>${salesEscape(r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente de cobro")}${r.payment_due_at?` · Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}`:""}</small></td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
   }
 }
 async function loadSalesReport(){
@@ -793,7 +793,7 @@ async function loadSalesReport(){
   const range=document.getElementById("salesRange")?.value||"7d";
   try{
     const bounds=salesRangeBounds(range);
-    let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
+    let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,payment_timing,payment_due_at,payment_status,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
     if(bounds.start)query=query.gte("created_at",bounds.start);
     if(bounds.end)query=query.lte("created_at",bounds.end);
     const {data,error}=await query;
