@@ -750,6 +750,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
   <a href="#catalogPanel" class="ei-admin-nav-link"><span>▦</span> Catálogo</a>
   <a href="#categoryManager" class="ei-admin-nav-link"><span>▤</span> Categorías</a>
   <a href="#storeSettings" class="ei-admin-nav-link"><span>💱</span> Precios y tasas de cambio</a>
+  <a href="#paymentMethodsPanel" class="ei-admin-nav-link"><span>💳</span> Métodos de pago</a>
   <a href="#salesReport" class="ei-admin-nav-link"><span>▥</span> Ventas y pedidos</a>
   <a href="#deliveryZonesPanel" class="ei-admin-nav-link"><span>🚚</span> Zonas y costos de domicilio</a>
   <a href="#reviewsAdmin" class="ei-admin-nav-link"><span>☆</span> Reseñas <span class="ei-admin-nav-badge" id="adminReviewNavBadge" hidden></span></a>
@@ -777,6 +778,24 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <div class="row settings-actions"><button type="button" class="btn primary" id="saveSettings">💾 Guardar configuración</button><span id="settingsStatus" class="settings-status">☁️ Cargando configuración…</span></div>
 </section>
 
+
+<section class="admin-card settings-card" id="paymentMethodsPanel">
+<h2>💳 Métodos y condiciones de pago</h2>
+<p class="settings-help">Administra las cuentas que verá el cliente, qué modalidades acepta cada método y el plazo permitido para pagar después de la entrega. Solo se muestran en la tienda los métodos activados para la modalidad elegida.</p>
+<form id="paymentMethodForm" class="admin-grid">
+<input type="hidden" id="paymentMethodId">
+<label>Nombre del método<input id="paymentMethodName" required maxlength="80" placeholder="Ej. Zelle"></label>
+<label>Código único<input id="paymentMethodCode" required maxlength="40" pattern="[A-Za-z0-9_]{2,40}" placeholder="Ej. ZELLE"></label>
+<label>Moneda del pedido<select id="paymentMethodCurrency"><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
+<label>Orden de aparición<input id="paymentMethodOrder" type="number" step="1" value="10"></label>
+<label style="grid-column:1/-1">Datos de la cuenta (JSON)<textarea id="paymentMethodDetails" rows="4" placeholder='{"Cuenta":"...","Titular":"...","Banco":"..."}'>{}</textarea></label>
+<label style="grid-column:1/-1">Instrucciones para el cliente<textarea id="paymentMethodInstructions" rows="3" placeholder="Cómo realizar el pago"></textarea></label>
+<label style="grid-column:1/-1">Condiciones y plazo para pago posterior<textarea id="paymentMethodTerms" rows="2" placeholder="Ej. Pagar dentro de los 3 días posteriores a la entrega"></textarea></label>
+<div style="grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap"><label><input type="checkbox" id="paymentMethodEnabled" checked> Método activo</label><label><input type="checkbox" id="paymentMethodPrepaid" checked> Permitir pago anticipado</label><label><input type="checkbox" id="paymentMethodPost"> Permitir pago después de la entrega</label></div>
+<div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit" id="savePaymentMethod">💾 Guardar método</button><button class="btn secondary" type="button" id="resetPaymentMethod">Limpiar formulario</button><span id="paymentMethodsStatus" class="settings-status" aria-live="polite"></span></div>
+</form>
+<div id="paymentMethodsList" class="admin-list" aria-live="polite"><p>Cargando métodos de pago…</p></div>
+</section>
 
 <section class="admin-card category-manager" id="categoryManager">
   <h2>🗂️ Administrar categorías</h2>
@@ -938,7 +957,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="admin.js?v=25"></script>
+<script src="admin.js?v=26"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
 <script>
 (()=>{const b=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;let shade=document.getElementById('eiNavShade');if(!shade){shade=document.createElement('button');shade.id='eiNavShade';shade.type='button';shade.setAttribute('aria-label','Cerrar menú');document.body.appendChild(shade)}function close(){b.setAttribute('aria-expanded','false');n.classList.remove('is-open');shade.classList.remove('is-open');document.body.classList.remove('ei-nav-locked')}function open(){b.setAttribute('aria-expanded','true');n.classList.add('is-open');shade.classList.add('is-open');document.body.classList.add('ei-nav-locked')}b.addEventListener('click',()=>b.getAttribute('aria-expanded')==='true'?close():open());shade.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches)close()}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})();
@@ -953,6 +972,7 @@ function initRouter(){
   const titleBox=dash.querySelector('.admin-title');
   const quick=dash.querySelector('.ei-admin-quick-grid');
   const settings=document.getElementById('storeSettings');
+  const paymentMethods=document.getElementById('paymentMethodsPanel');
   const categories=document.getElementById('categoryManager');
   const productForm=document.getElementById('productForm');
   const catalog=document.getElementById('catalogPanel');
@@ -968,18 +988,20 @@ function initRouter(){
     catalogo:{label:'Catálogo actual',show:[catalog],href:'#catalogPanel'},
     categorias:{label:'Categorías',show:[categories],href:'#categoryManager'},
     precios:{label:'Precios y tasas de cambio',show:[settings],href:'#storeSettings'},
+    pagos:{label:'Métodos de pago',show:[paymentMethods],href:'#paymentMethodsPanel'},
     ventas:{label:'Ventas y pedidos',show:[sales],href:'#salesReport'},
     resenas:{label:'Reseñas de productos',show:[reviews],href:'#reviewsAdmin'},
     avisos:{label:'Notificaciones',show:[alerts],href:'#reviewNotifications'},
     zonas:{label:'Zonas y costos de domicilio',show:[zones],href:'#deliveryZonesPanel'}
   };
-  const all=[quick,settings,categories,productForm,catalog,sales,alerts,reviews,zones].filter(Boolean);
+  const all=[quick,settings,paymentMethods,categories,productForm,catalog,sales,alerts,reviews,zones].filter(Boolean);
   const routes={
     '#dashboard':'resumen',
     '#productForm':'productos',
     '#catalogPanel':'catalogo',
     '#categoryManager':'categorias',
     '#storeSettings':'precios',
+    '#paymentMethodsPanel':'pagos',
     '#salesReport':'ventas',
     '#reviewsAdmin':'resenas',
     '#reviewNotifications':'avisos',
