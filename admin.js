@@ -397,6 +397,64 @@ async function saveSettings(){
    alert("No se pudo guardar la configuración en Supabase.\n\n"+(err.message||err));
  }finally{if(btn) btn.disabled=false}
 }
+
+let adminPaymentMethods=[];
+function paymentAdminEscape(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function resetPaymentMethodForm(){
+ const form=document.getElementById("paymentMethodForm");if(form)form.reset();
+ document.getElementById("paymentMethodId").value="";
+ document.getElementById("paymentMethodCode").disabled=false;
+ document.getElementById("paymentMethodOrder").value="10";
+ document.getElementById("paymentMethodDetails").value="{}";
+ document.getElementById("paymentMethodEnabled").checked=true;
+ document.getElementById("paymentMethodPrepaid").checked=true;
+ document.getElementById("paymentMethodPost").checked=false;
+}
+async function loadPaymentMethods(){
+ const list=document.getElementById("paymentMethodsList");if(!list)return;
+ const {data,error}=await supabaseClient.from("payment_methods").select("*").order("sort_order",{ascending:true}).order("name",{ascending:true});
+ if(error)throw error;
+ adminPaymentMethods=data||[];
+ list.innerHTML=adminPaymentMethods.length?adminPaymentMethods.map(m=>`<article class="admin-card" style="margin-top:10px;padding:14px">
+ <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${paymentAdminEscape(m.name)} <small>(${paymentAdminEscape(m.code)})</small></strong><span>${m.enabled?"🟢 Activo":"⚪ Desactivado"}</span></div>
+ <p style="margin:8px 0;color:var(--ei-muted);font-size:.85rem">Moneda: ${paymentAdminEscape(m.currency)} · Anticipado: ${m.supports_prepaid?"Sí":"No"} · Después de entrega: ${m.supports_postdelivery?"Sí":"No"}</p>
+ <p style="margin:6px 0;font-size:.85rem">Datos de cuenta: ${paymentAdminEscape(JSON.stringify(m.account_details||{}))}</p>
+ <p style="margin:6px 0;font-size:.85rem">${paymentAdminEscape(m.instructions||"Sin instrucciones")}</p>
+ ${m.supports_postdelivery?`<p style="margin:6px 0;font-size:.85rem">Plazo: ${paymentAdminEscape(m.postdelivery_terms||"Pendiente de definir")}</p>`:""}
+ <div class="row" style="margin-top:10px"><button type="button" class="btn secondary" data-payment-edit="${m.id}">Editar</button><button type="button" class="btn secondary" data-payment-toggle="${m.id}">${m.enabled?"Desactivar":"Activar"}</button><button type="button" class="btn danger" data-payment-delete="${m.id}">Eliminar</button></div>
+ </article>`).join(""):"<p>No hay métodos configurados.</p>";
+ const status=document.getElementById("paymentMethodsStatus");if(status)status.textContent=`☁️ ${adminPaymentMethods.length} métodos cargados`;
+}
+async function savePaymentMethodForm(event){
+ event.preventDefault();
+ const id=document.getElementById("paymentMethodId").value||null;
+ const name=document.getElementById("paymentMethodName").value.trim();
+ const code=document.getElementById("paymentMethodCode").value.trim().toUpperCase();
+ const currency=document.getElementById("paymentMethodCurrency").value;
+ let details;
+ try{details=JSON.parse(document.getElementById("paymentMethodDetails").value||"{}");if(!details||Array.isArray(details)||typeof details!=="object")throw new Error("Los datos deben ser un objeto JSON.");}
+ catch(e){alert("Revisa los datos de la cuenta en formato JSON. "+(e.message||""));return}
+ const prepaid=document.getElementById("paymentMethodPrepaid").checked;
+ const post=document.getElementById("paymentMethodPost").checked;
+ if(!prepaid&&!post){alert("Activa al menos una modalidad de pago.");return}
+ if(post&&!document.getElementById("paymentMethodTerms").value.trim()){alert("Especifica el plazo o las condiciones para pagar después de la entrega.");return}
+ const row={code,name,currency,account_details:details,instructions:document.getElementById("paymentMethodInstructions").value.trim(),enabled:document.getElementById("paymentMethodEnabled").checked,supports_prepaid:prepaid,supports_postdelivery:post,postdelivery_terms:document.getElementById("paymentMethodTerms").value.trim(),sort_order:Number(document.getElementById("paymentMethodOrder").value)||0,updated_at:new Date().toISOString()};
+ const status=document.getElementById("paymentMethodsStatus"),btn=document.getElementById("savePaymentMethod");if(btn)btn.disabled=true;if(status)status.textContent="Guardando…";
+ try{
+  const query=id?supabaseClient.from("payment_methods").update(row).eq("id",id):supabaseClient.from("payment_methods").insert(row);
+  const {error}=await query;if(error)throw error;
+  resetPaymentMethodForm();await loadPaymentMethods();if(status)status.textContent="✅ Método guardado.";
+ }catch(e){if(status)status.textContent="⚠️ No se pudo guardar.";alert("No se pudo guardar el método de pago.\n\n"+(e.message||e))}
+ finally{if(btn)btn.disabled=false}
+}
+async function handlePaymentMethodListClick(event){
+ const edit=event.target.closest("[data-payment-edit]"),toggle=event.target.closest("[data-payment-toggle]"),del=event.target.closest("[data-payment-delete]");
+ if(edit){const m=adminPaymentMethods.find(x=>String(x.id)===edit.dataset.paymentEdit);if(!m)return;
+  document.getElementById("paymentMethodId").value=m.id;document.getElementById("paymentMethodName").value=m.name||"";document.getElementById("paymentMethodCode").value=m.code||"";document.getElementById("paymentMethodCode").disabled=true;document.getElementById("paymentMethodCurrency").value=m.currency||"USD";document.getElementById("paymentMethodOrder").value=m.sort_order||0;document.getElementById("paymentMethodDetails").value=JSON.stringify(m.account_details||{},null,2);document.getElementById("paymentMethodInstructions").value=m.instructions||"";document.getElementById("paymentMethodTerms").value=m.postdelivery_terms||"";document.getElementById("paymentMethodEnabled").checked=!!m.enabled;document.getElementById("paymentMethodPrepaid").checked=!!m.supports_prepaid;document.getElementById("paymentMethodPost").checked=!!m.supports_postdelivery;document.getElementById("paymentMethodForm").scrollIntoView({behavior:"smooth",block:"start"});return}
+ if(toggle){const m=adminPaymentMethods.find(x=>String(x.id)===toggle.dataset.paymentToggle);if(!m)return;try{const {error}=await supabaseClient.from("payment_methods").update({enabled:!m.enabled,updated_at:new Date().toISOString()}).eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo cambiar el estado. "+(e.message||e))}return}
+ if(del){const m=adminPaymentMethods.find(x=>String(x.id)===del.dataset.paymentDelete);if(!m||!confirm(`¿Eliminar el método "${m.name}"? Los pedidos anteriores conservarán el código registrado.`))return;try{const {error}=await supabaseClient.from("payment_methods").delete().eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo eliminar el método. "+(e.message||e))}}
+}
+
 async function loadCloud(){
  const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});
  if(error) throw error;
@@ -618,6 +676,9 @@ document.getElementById("productForm").addEventListener("submit",async e=>{
 function reset(){document.getElementById("productForm").reset();document.getElementById("editId").value="";document.getElementById("pImage").value="";document.getElementById("formTitle").textContent="➕ Agregar producto";document.getElementById("pAvailable").checked=true;document.getElementById("pCurrency").value="USD";document.getElementById("pDiscountPrice").value="";document.getElementById("pUnitCustom").value="";document.getElementById("pUnitCustom").style.display="none";syncFancySelects();showPreview("")}
 document.getElementById("cancelEdit").onclick=reset;
 document.getElementById("saveSettings").onclick=saveSettings;
+document.getElementById("paymentMethodForm")?.addEventListener("submit",savePaymentMethodForm);
+document.getElementById("resetPaymentMethod")?.addEventListener("click",resetPaymentMethodForm);
+document.getElementById("paymentMethodsList")?.addEventListener("click",handlePaymentMethodListClick);
 document.getElementById("loginBtn").onclick=login;
 document.getElementById("refreshCloud").onclick=async()=>{
  const status=document.getElementById("cloudStatus");
@@ -628,6 +689,7 @@ document.getElementById("refreshCloud").onclick=async()=>{
 document.getElementById("logoutBtn").onclick=async()=>{await supabaseClient.auth.signOut();location.reload()};
 (async()=>{const {data:{session}}=await supabaseClient.auth.getSession();if(session)await show()})();
 supabaseClient.channel("products-admin").on("postgres_changes",{event:"*",schema:"public",table:"products"},async()=>{try{const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(!error&&data){products=data.map(fromRow);saveLocal();render()}}catch(e){console.warn(e)}}).subscribe();
+supabaseClient.channel("payment-methods-admin").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},async()=>{try{await loadPaymentMethods()}catch(e){console.warn(e)}}).subscribe();
 supabaseClient.channel("settings-admin").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadSettings()}catch(e){console.warn(e)}}).subscribe();
 
 supabaseClient.channel("categories-admin").on("postgres_changes",{event:"*",schema:"public",table:"categories"},async()=>{
