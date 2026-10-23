@@ -1,4 +1,4 @@
-const CACHE_NAME = 'electroisla-v9.8.2-phone-font14';
+const CACHE_NAME = 'electroisla-v9.8.3-phone-font12';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
