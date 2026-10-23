@@ -404,64 +404,7 @@
 <script src="supabase-config.js?v=4"></script>
 <script src="app.js?v=143"></script>
 
-<script>
-/* Reutiliza el estilo y el comportamiento visual del selector de zonas para los prefijos telefónicos. */
-(function(){
-  function initPhonePicker(select){
-    if(!select || select.dataset.eiPickerReady==="1") return;
-    select.dataset.eiPickerReady="1";
-    const picker=document.createElement("div");
-    picker.className="ei-phone-picker";
-    picker.innerHTML='<button type="button" class="ei-phone-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="ei-phone-trigger-label"></span><span class="ei-phone-chevron">⌄</span></button><div class="ei-phone-menu" role="listbox"></div>';
-    select.insertAdjacentElement("afterend",picker);
-    const trigger=picker.querySelector(".ei-phone-trigger");
-    const label=picker.querySelector(".ei-phone-trigger-label");
-    const menu=picker.querySelector(".ei-phone-menu");
-    function render(){
-      const selected=select.options[select.selectedIndex];
-      label.textContent=selected?selected.textContent:"Elige país";
-      menu.innerHTML="";
-      Array.from(select.options).forEach((option,index)=>{
-        const item=document.createElement("button");
-        item.type="button";
-        item.className="ei-phone-option"+(option.selected?" active":"");
-        item.setAttribute("role","option");
-        item.setAttribute("aria-selected",option.selected?"true":"false");
-        item.textContent=option.textContent;
-        item.addEventListener("click",()=>{
-          select.selectedIndex=index;
-          select.dispatchEvent(new Event("change",{bubbles:true}));
-          picker.classList.remove("open");
-          trigger.setAttribute("aria-expanded","false");
-          render();
-        });
-        menu.appendChild(item);
-      });
-    }
-    trigger.addEventListener("click",()=>{
-      const opening=!picker.classList.contains("open");
-      document.querySelectorAll(".ei-phone-picker.open").forEach(other=>{
-        other.classList.remove("open");
-        other.querySelector(".ei-phone-trigger")?.setAttribute("aria-expanded","false");
-      });
-      picker.classList.toggle("open",opening);
-      trigger.setAttribute("aria-expanded",opening?"true":"false");
-    });
-    select.addEventListener("change",render);
-    document.addEventListener("click",event=>{
-      if(!picker.contains(event.target)){
-        picker.classList.remove("open");
-        trigger.setAttribute("aria-expanded","false");
-      }
-    });
-    render();
-  }
-  document.addEventListener("DOMContentLoaded",()=>{
-    initPhonePicker(document.getElementById("customerPhoneCode"));
-    initPhonePicker(document.getElementById("recipientPhoneCode"));
-  });
-})();
-</script>
+
 
   <script src="delivery-zones-store.js?v=2"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
