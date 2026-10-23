@@ -94,32 +94,42 @@
 .ei-phone-row .delivery-chevron{font-size:18px;}
 @media(max-width:360px){.ei-phone-row{gap:0}.ei-phone-row .ei-phone-picker,.ei-phone-row>input[type="tel"]{width:100%;height:44px;min-height:44px}.ei-phone-row .ei-phone-trigger{height:44px;min-height:44px;padding:12px;font-size:16px}.ei-phone-row .ei-phone-trigger .delivery-trigger-main,.ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:16px}.ei-phone-row>input[type="tel"]{font-size:16px}}
 
-/* Corrección definitiva: ambos controles telefónicos al ancho del nombre y con su tipografía. */
+/* Prefijo compacto a la izquierda y número ocupando el espacio restante. */
 .ei-phone-row{
   display:flex!important;
-  flex-direction:column!important;
+  flex-direction:row!important;
   align-items:stretch!important;
-  gap:0!important;
+  gap:8px!important;
   width:100%!important;
   margin-top:0!important;
 }
-.ei-phone-row .ei-phone-picker,
-.ei-phone-row>input[type="tel"]{
+.ei-phone-row .ei-phone-picker{
   display:block!important;
-  flex:0 0 44px!important;
-  width:100%!important;
-  max-width:100%!important;
+  flex:0 0 112px!important;
+  width:112px!important;
+  max-width:40%!important;
   min-width:0!important;
   height:44px!important;
   min-height:44px!important;
   box-sizing:border-box!important;
   margin:7px 0 0!important;
+}
+.ei-phone-row>input[type="tel"]{
+  display:block!important;
+  flex:1 1 0!important;
+  width:0!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:44px!important;
+  min-height:44px!important;
+  box-sizing:border-box!important;
+  margin:7px 0 0!important;
+  padding:12px!important;
   font-family:inherit!important;
   font-size:16px!important;
   line-height:normal!important;
   border-radius:10px!important;
 }
-.ei-phone-row>input[type="tel"]{padding:12px!important;}
 .ei-phone-row .ei-phone-trigger{
   display:flex!important;
   width:100%!important;
@@ -127,7 +137,7 @@
   min-height:44px!important;
   margin:0!important;
   box-sizing:border-box!important;
-  padding:12px!important;
+  padding:10px 8px!important;
   border-radius:10px!important;
   font-family:inherit!important;
   font-size:16px!important;
@@ -141,15 +151,12 @@
 }
 .ei-phone-row .ei-phone-trigger .delivery-chevron{font-size:18px!important}
 @media(max-width:360px){
-  .ei-phone-row .ei-phone-picker,
-  .ei-phone-row>input[type="tel"],
-  .ei-phone-row .ei-phone-trigger{
-    width:100%!important;
-    max-width:100%!important;
-    height:44px!important;
-    min-height:44px!important;
-    font-size:16px!important;
-  }
+  .ei-phone-row{gap:6px!important}
+  .ei-phone-row .ei-phone-picker{flex-basis:100px!important;width:100px!important;max-width:42%!important}
+  .ei-phone-row .ei-phone-trigger{padding:10px 6px!important;font-size:15px!important}
+  .ei-phone-row .ei-phone-trigger .delivery-trigger-main,
+  .ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:15px!important}
+  .ei-phone-row>input[type="tel"]{font-size:16px!important}
 }
 </style>
 </head>
