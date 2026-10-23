@@ -1,10 +1,11 @@
-const CACHE_NAME = 'electroisla-v9.8.4-prefix14';
+const CACHE_NAME = 'electroisla-v9.8.5-payment-flow';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
-  './app.js?v=147',
-  './supabase-config.js?v=4'
+  './app.js?v=148',
+  './supabase-config.js?v=4',
+  './payment-methods-store.js?v=1'
 ];
 
 self.addEventListener('install', event => {
