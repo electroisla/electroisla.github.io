@@ -12,6 +12,8 @@
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <link rel="stylesheet" href="styles.css?v=9.8.128">
 <style>
+.recipient-fields{margin:8px 0 4px;padding:14px;border:1px solid #f3d5bd;border-radius:16px;background:#fff9f4}.recipient-fields-title{margin:0 0 12px;color:#e8781b;font-size:12px;font-weight:800;letter-spacing:.04em}.recipient-fields label{display:block}
+
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
 .zelle-logo-icon svg{display:block;width:18px;height:18px}
 /* Estado visual de carga del catálogo: conserva el espacio de las tarjetas */
@@ -161,8 +163,14 @@
     <button id="closeModal" class="modal-close">✕</button>
     <p class="eyebrow">DATOS DEL PEDIDO</p><h2>Completa tu pedido</h2>
     <form id="orderForm">
-      <label>Nombre<input required id="customerName" placeholder="Tu nombre"></label>
-      <label>Teléfono<input required id="customerPhone" placeholder="Tu teléfono"></label>
+      <label>Nombre de quien realiza el pedido<input required id="customerName" autocomplete="name" placeholder="Tu nombre"></label>
+      <label>Teléfono de quien realiza el pedido<input required id="customerPhone" type="tel" autocomplete="tel" placeholder="Tu teléfono"></label>
+      <div class="recipient-fields">
+        <p class="recipient-fields-title">DATOS DE QUIEN RECIBE EL PEDIDO</p>
+        <label>Nombre de quien recibe<input required id="recipientName" autocomplete="shipping name" placeholder="Nombre del destinatario"></label>
+        <label>Dirección de quien recibe<input required id="recipientAddress" autocomplete="shipping street-address" placeholder="Calle, número, reparto y referencias"></label>
+        <label>Número de teléfono de quien recibe<input required id="recipientPhone" type="tel" autocomplete="shipping tel" placeholder="Teléfono del destinatario"></label>
+      </div>
       <label class="delivery-field">Zona de entrega<select required id="municipality" class="delivery-native-select">
         <option value="">Selecciona...</option>
         <option value="Nueva Gerona" data-fee="0">Nueva Gerona — Gratis</option>
