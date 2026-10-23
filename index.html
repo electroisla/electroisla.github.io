@@ -11,7 +11,7 @@
 <link rel="dns-prefetch" href="//pdvfupvtofpzfllkjhhc.supabase.co">
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <link rel="stylesheet" href="styles.css?v=9.8.128">
-<style>
+.replace-never.ei-phone-row{display:flex;align-items:stretch;gap:8px;width:100%;margin-top:5px}.ei-phone-row input{flex:1;min-width:0}.ei-phone-code{flex:0 0 112px;width:112px;max-width:42%;min-height:44px;padding:0 8px;border:1px solid #d8e0e8;border-radius:12px;background:#fff;color:#173b68;font:inherit;font-size:14px;font-weight:700}.ei-phone-code:focus{outline:2px solid #f58220;outline-offset:1px}@media(max-width:360px){.ei-phone-row{gap:6px}.ei-phone-code{flex-basis:104px;width:104px;font-size:13px;padding:0 5px}}
 .recipient-fields{margin:8px 0 4px;padding:14px;border:1px solid #f3d5bd;border-radius:16px;background:#fff9f4}.recipient-fields-title{margin:0 0 12px;color:#e8781b;font-size:12px;font-weight:800;letter-spacing:.04em}.recipient-fields label{display:block}
 
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
@@ -164,12 +164,60 @@
     <p class="eyebrow">DATOS DEL PEDIDO</p><h2>Completa tu pedido</h2>
     <form id="orderForm">
       <label>Nombre de quien realiza el pedido<input required id="customerName" autocomplete="name" placeholder="Tu nombre"></label>
-      <label>Teléfono de quien realiza el pedido<input required id="customerPhone" type="tel" autocomplete="tel" placeholder="Tu teléfono"></label>
+      
+        <label>Teléfono de quien realiza el pedido
+          <span class="ei-phone-row">
+            <select class="ei-phone-code" id="customerPhoneCode" aria-label="Prefijo internacional de teléfono de quien realiza el pedido" autocomplete="tel-country-code">
+              <option value="+53" selected>🇨🇺 +53</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+57">🇨🇴 +57</option>
+              <option value="+54">🇦🇷 +54</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+51">🇵🇪 +51</option>
+              <option value="+58">🇻🇪 +58</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+39">🇮🇹 +39</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+1-CA">🇨🇦 +1 (Canadá)</option>
+              <option value="+809">🇩🇴 +809</option>
+              <option value="+787">🇵🇷 +787</option>
+            </select>
+            <input required id="customerPhone" type="tel" autocomplete="tel" placeholder="Tu teléfono" inputmode="tel">
+          </span>
+        </label>
       <div class="recipient-fields">
         <p class="recipient-fields-title">DATOS DE QUIEN RECIBE EL PEDIDO</p>
         <label>Nombre de quien recibe<input required id="recipientName" autocomplete="shipping name" placeholder="Nombre del destinatario"></label>
         <label>Dirección de quien recibe<input required id="recipientAddress" autocomplete="shipping street-address" placeholder="Calle, número, reparto y referencias"></label>
-        <label>Número de teléfono de quien recibe<input required id="recipientPhone" type="tel" autocomplete="shipping tel" placeholder="Teléfono del destinatario"></label>
+        
+        <label>Número de teléfono de quien recibe
+          <span class="ei-phone-row">
+            <select class="ei-phone-code" id="recipientPhoneCode" aria-label="Prefijo internacional de número de teléfono de quien recibe" autocomplete="tel-country-code">
+              <option value="+53" selected>🇨🇺 +53</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+57">🇨🇴 +57</option>
+              <option value="+54">🇦🇷 +54</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+51">🇵🇪 +51</option>
+              <option value="+58">🇻🇪 +58</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+39">🇮🇹 +39</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+1-CA">🇨🇦 +1 (Canadá)</option>
+              <option value="+809">🇩🇴 +809</option>
+              <option value="+787">🇵🇷 +787</option>
+            </select>
+            <input required id="recipientPhone" type="tel" autocomplete="shipping tel" placeholder="Teléfono del destinatario" inputmode="tel">
+          </span>
+        </label>
       </div>
       <label class="delivery-field">Zona de entrega<select required id="municipality" class="delivery-native-select">
         <option value="">Selecciona...</option>
