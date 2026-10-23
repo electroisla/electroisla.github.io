@@ -31,7 +31,7 @@
   let out="<strong>Total a pagar: "+escPay(money(amount,m.currency))+"</strong><span>"+(getDeliveryZone()?"Zona: "+escPay(getDeliveryZone()):"Selecciona una zona")+"</span><span>"+(fee>0?"Domicilio: "+escPay(money(fee,m.currency)):"Domicilio: Gratis")+"</span><span>Método seleccionado: "+escPay(m.name)+"</span>";
   if(timing()==="PREPAID")out+="<strong>Pago antes de la entrega</strong>";
   else {const days=Number(byId("paymentDueDays")?.value||3);out+="<strong>Pago después de la entrega</strong><span>Fecha límite elegida: "+new Date(Date.now()+days*86400000).toLocaleDateString("es-ES")+"</span>";}
-  details.forEach(function(x){out+="<span><strong>"+escPay(x[0])+":</strong> "+escPay(x[1])+"</span>"});
+  details.forEach(function(x){const label=m.code==="ZELLE"?(x[0]==="Cuenta"||x[0]==="Número de cuenta"||x[0]==="Numero de cuenta"||x[0]==="Número"||x[0]==="Correo o teléfono"?"Correo/teléfono de Zelle":x[0]==="Titular"||x[0]==="Nombre del titular"||x[0]==="Titular de la cuenta"?"Titular de la cuenta":x[0]):x[0];out+="<span><strong>"+escPay(label)+":</strong> "+escPay(x[1])+"</span>"});
   if(m.instructions)out+="<span><strong>Instrucciones:</strong> "+escPay(m.instructions)+"</span>";
   if(timing()==="POST_DELIVERY"&&m.postdelivery_terms)out+="<span><strong>Condiciones:</strong> "+escPay(m.postdelivery_terms)+"</span>";
   box.innerHTML=out;
