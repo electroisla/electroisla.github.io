@@ -406,6 +406,8 @@ function resetPaymentMethodForm(){
  document.getElementById("paymentMethodCode").disabled=false;
  document.getElementById("paymentMethodOrder").value="10";
  document.getElementById("paymentMethodDetails").value="{}";
+ document.getElementById("paymentMethodAccountNumber").value="";
+ document.getElementById("paymentMethodAccountHolder").value="";
  document.getElementById("paymentMethodEnabled").checked=true;
  document.getElementById("paymentMethodPrepaid").checked=true;
  document.getElementById("paymentMethodPost").checked=false;
@@ -418,7 +420,7 @@ async function loadPaymentMethods(){
  list.innerHTML=adminPaymentMethods.length?adminPaymentMethods.map(m=>`<article class="admin-card" style="margin-top:10px;padding:14px">
  <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${paymentAdminEscape(m.name)} <small>(${paymentAdminEscape(m.code)})</small></strong><span>${m.enabled?"🟢 Activo":"⚪ Desactivado"}</span></div>
  <p style="margin:8px 0;color:var(--ei-muted);font-size:.85rem">Moneda: ${paymentAdminEscape(m.currency)} · Anticipado: ${m.supports_prepaid?"Sí":"No"} · Después de entrega: ${m.supports_postdelivery?"Sí":"No"}</p>
- <p style="margin:6px 0;font-size:.85rem">Datos de cuenta: ${paymentAdminEscape(JSON.stringify(m.account_details||{}))}</p>
+ <p style="margin:6px 0;font-size:.85rem">Datos de cuenta: ${paymentAdminEscape(Object.entries(m.account_details||{}).filter(x=>String(x[1]??"").trim()).map(x=>x[0]+": "+x[1]).join(" · ")||"Sin datos de cuenta")}</p>
  <p style="margin:6px 0;font-size:.85rem">${paymentAdminEscape(m.instructions||"Sin instrucciones")}</p>
  ${m.supports_postdelivery?`<p style="margin:6px 0;font-size:.85rem">Plazo: ${paymentAdminEscape(m.postdelivery_terms||"Pendiente de definir")}</p>`:""}
  <div class="row" style="margin-top:10px"><button type="button" class="btn secondary" data-payment-edit="${m.id}">Editar</button><button type="button" class="btn secondary" data-payment-toggle="${m.id}">${m.enabled?"Desactivar":"Activar"}</button><button type="button" class="btn danger" data-payment-delete="${m.id}">Eliminar</button></div>
@@ -432,8 +434,14 @@ async function savePaymentMethodForm(event){
  const code=document.getElementById("paymentMethodCode").value.trim().toUpperCase();
  const currency=document.getElementById("paymentMethodCurrency").value;
  let details;
- try{details=JSON.parse(document.getElementById("paymentMethodDetails").value||"{}");if(!details||Array.isArray(details)||typeof details!=="object")throw new Error("Los datos deben ser un objeto JSON.");}
- catch(e){alert("Revisa los datos de la cuenta en formato JSON. "+(e.message||""));return}
+ try{
+  details=JSON.parse(document.getElementById("paymentMethodDetails").value||"{}");
+  if(!details||Array.isArray(details)||typeof details!=="object")throw new Error("Los datos de cuenta no son válidos.");
+  const accountNumber=document.getElementById("paymentMethodAccountNumber").value.trim();
+  const accountHolder=document.getElementById("paymentMethodAccountHolder").value.trim();
+  if(accountNumber)details.Cuenta=accountNumber;else delete details.Cuenta;
+  if(accountHolder)details.Titular=accountHolder;else delete details.Titular;
+ }catch(e){alert("Revisa los datos de la cuenta. "+(e.message||""));return}
  const prepaid=document.getElementById("paymentMethodPrepaid").checked;
  const post=document.getElementById("paymentMethodPost").checked;
  if(!prepaid&&!post){alert("Activa al menos una modalidad de pago.");return}
@@ -450,7 +458,7 @@ async function savePaymentMethodForm(event){
 async function handlePaymentMethodListClick(event){
  const edit=event.target.closest("[data-payment-edit]"),toggle=event.target.closest("[data-payment-toggle]"),del=event.target.closest("[data-payment-delete]");
  if(edit){const m=adminPaymentMethods.find(x=>String(x.id)===edit.dataset.paymentEdit);if(!m)return;
-  document.getElementById("paymentMethodId").value=m.id;document.getElementById("paymentMethodName").value=m.name||"";document.getElementById("paymentMethodCode").value=m.code||"";document.getElementById("paymentMethodCode").disabled=true;document.getElementById("paymentMethodCurrency").value=m.currency||"USD";document.getElementById("paymentMethodOrder").value=m.sort_order||0;document.getElementById("paymentMethodDetails").value=JSON.stringify(m.account_details||{},null,2);document.getElementById("paymentMethodInstructions").value=m.instructions||"";document.getElementById("paymentMethodTerms").value=m.postdelivery_terms||"";document.getElementById("paymentMethodEnabled").checked=!!m.enabled;document.getElementById("paymentMethodPrepaid").checked=!!m.supports_prepaid;document.getElementById("paymentMethodPost").checked=!!m.supports_postdelivery;document.getElementById("paymentMethodForm").scrollIntoView({behavior:"smooth",block:"start"});return}
+  document.getElementById("paymentMethodId").value=m.id;document.getElementById("paymentMethodName").value=m.name||"";document.getElementById("paymentMethodCode").value=m.code||"";document.getElementById("paymentMethodCode").disabled=true;document.getElementById("paymentMethodCurrency").value=m.currency||"USD";document.getElementById("paymentMethodOrder").value=m.sort_order||0;document.getElementById("paymentMethodDetails").value=JSON.stringify(m.account_details||{});const accountDetails=m.account_details&&typeof m.account_details==="object"?m.account_details:{};document.getElementById("paymentMethodAccountNumber").value=accountDetails.Cuenta||accountDetails["Número de cuenta"]||accountDetails["Numero de cuenta"]||accountDetails["Número"]||accountDetails["Correo o teléfono"]||"";document.getElementById("paymentMethodAccountHolder").value=accountDetails.Titular||accountDetails["Nombre del titular"]||accountDetails["Titular de la cuenta"]||"";document.getElementById("paymentMethodInstructions").value=m.instructions||"";document.getElementById("paymentMethodTerms").value=m.postdelivery_terms||"";document.getElementById("paymentMethodEnabled").checked=!!m.enabled;document.getElementById("paymentMethodPrepaid").checked=!!m.supports_prepaid;document.getElementById("paymentMethodPost").checked=!!m.supports_postdelivery;document.getElementById("paymentMethodForm").scrollIntoView({behavior:"smooth",block:"start"});return}
  if(toggle){const m=adminPaymentMethods.find(x=>String(x.id)===toggle.dataset.paymentToggle);if(!m)return;try{const {error}=await supabaseClient.from("payment_methods").update({enabled:!m.enabled,updated_at:new Date().toISOString()}).eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo cambiar el estado. "+(e.message||e))}return}
  if(del){const m=adminPaymentMethods.find(x=>String(x.id)===del.dataset.paymentDelete);if(!m||!confirm(`¿Eliminar el método "${m.name}"? Los pedidos anteriores conservarán el código registrado.`))return;try{const {error}=await supabaseClient.from("payment_methods").delete().eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo eliminar el método. "+(e.message||e))}}
 }
