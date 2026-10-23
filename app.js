@@ -85,6 +85,19 @@ function updateDeliveryFields(){
  }
  updatePaymentSummary();
 }
+function setupPhoneCodePicker(selectId,pickerId,triggerId,menuId,textId){
+ const select=document.getElementById(selectId),picker=document.getElementById(pickerId),trigger=document.getElementById(triggerId),menu=document.getElementById(menuId),textBox=document.getElementById(textId);
+ if(!select||!picker||!trigger||!menu||!textBox)return;
+ menu.innerHTML=[...select.options].map(o=>'<button type="button" class="delivery-option" data-value="'+esc(o.value)+'" role="option" aria-selected="'+o.selected+'"><span>'+esc(o.textContent)+'</span></button>').join("");
+ function sync(){const o=select.options[select.selectedIndex];textBox.textContent=o?o.textContent:"Selecciona país";menu.querySelectorAll(".delivery-option").forEach(b=>{const active=b.dataset.value===select.value;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active));});}
+ function close(){picker.classList.remove("open");trigger.setAttribute("aria-expanded","false");}
+ trigger.addEventListener("click",()=>{const open=!picker.classList.contains("open");picker.classList.toggle("open",open);trigger.setAttribute("aria-expanded",String(open));});
+ menu.addEventListener("click",e=>{const b=e.target.closest(".delivery-option");if(!b)return;select.value=b.dataset.value;select.dispatchEvent(new Event("change",{bubbles:true}));sync();close();});
+ select.addEventListener("change",sync);
+ document.addEventListener("click",e=>{if(!picker.contains(e.target))close();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+ sync();
+}
 function setupDeliveryPicker(){
  const select=document.getElementById("municipality");
  const picker=document.getElementById("deliveryPicker");
@@ -930,6 +943,8 @@ document.getElementById("municipality")?.addEventListener("change",updateDeliver
 document.getElementById("otherZone")?.addEventListener("input",updatePaymentSummary);
 
 setupDeliveryPicker();
+ setupPhoneCodePicker("customerPhoneCode","customerPhonePicker","customerPhoneTrigger","customerPhoneMenu","customerPhoneSelectedText");
+ setupPhoneCodePicker("recipientPhoneCode","recipientPhonePicker","recipientPhoneTrigger","recipientPhoneMenu","recipientPhoneSelectedText");
 ensureCategoryMenu();
 startCloud();
 
