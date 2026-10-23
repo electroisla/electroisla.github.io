@@ -85,14 +85,14 @@
 @media(max-width:360px){.ei-phone-picker{flex:1 1 0;width:auto;max-width:none;height:54px}.ei-phone-row input{flex:1 1 0;width:0;height:54px;min-height:54px}.ei-phone-trigger{height:54px;min-height:54px;padding:9px 6px;font-size:13px}.ei-phone-option{font-size:12px;padding:9px 5px}}
 
 
-/* Ajuste final: controles telefónicos con las mismas dimensiones y tipografía que el campo Nombre. */
-.ei-phone-row{display:flex;align-items:stretch;gap:8px;width:100%;}
-.ei-phone-row .ei-phone-picker,.ei-phone-row>input[type="tel"]{flex:1 1 0;width:0;min-width:0;max-width:none;height:44px;min-height:44px;box-sizing:border-box;margin-top:7px;}
-.ei-phone-row .ei-phone-trigger{width:100%;height:44px;min-height:44px;padding:12px 12px;font-family:inherit;font-size:16px;font-weight:700;line-height:normal;box-sizing:border-box;}
+/* Corrección definitiva: cada control telefónico ocupa todo el ancho del campo Nombre. */
+.ei-phone-row{display:flex;flex-direction:column;align-items:stretch;gap:0;width:100%;}
+.ei-phone-row .ei-phone-picker,.ei-phone-row>input[type="tel"]{display:block;flex:0 0 auto;width:100%;min-width:0;max-width:100%;height:44px;min-height:44px;box-sizing:border-box;margin-top:7px;}
+.ei-phone-row .ei-phone-trigger{display:flex;width:100%;height:44px;min-height:44px;padding:12px;font-family:inherit;font-size:16px;font-weight:700;line-height:normal;box-sizing:border-box;}
 .ei-phone-row .ei-phone-trigger .delivery-trigger-main,.ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:16px;line-height:normal;}
 .ei-phone-row>input[type="tel"]{font-family:inherit;font-size:16px;line-height:normal;padding:12px;border-radius:10px;}
-.ei-phone-row .ei-phone-chevron{font-size:18px;}
-@media(max-width:360px){.ei-phone-row{gap:6px}.ei-phone-row .ei-phone-picker,.ei-phone-row>input[type="tel"]{height:44px;min-height:44px}.ei-phone-row .ei-phone-trigger{height:44px;min-height:44px;padding:12px 7px;font-size:16px}.ei-phone-row .ei-phone-trigger .delivery-trigger-main,.ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:16px}.ei-phone-row>input[type="tel"]{font-size:16px}}
+.ei-phone-row .delivery-chevron{font-size:18px;}
+@media(max-width:360px){.ei-phone-row{gap:0}.ei-phone-row .ei-phone-picker,.ei-phone-row>input[type="tel"]{width:100%;height:44px;min-height:44px}.ei-phone-row .ei-phone-trigger{height:44px;min-height:44px;padding:12px;font-size:16px}.ei-phone-row .ei-phone-trigger .delivery-trigger-main,.ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:16px}.ei-phone-row>input[type="tel"]{font-size:16px}}
 
 /* Corrección definitiva: prefijo y teléfono a ancho completo, como el campo de nombre. */
 .ei-phone-row{
