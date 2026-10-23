@@ -43,6 +43,8 @@ body.admin-page{margin:0;min-height:100vh;background:var(--ei-bg);color:var(--ei
 .admin-page .admin-card,.admin-page #deliveryZonesPanel{min-width:0;margin:0 0 14px;padding:17px;background:var(--ei-white);border:1px solid var(--ei-line);border-radius:11px;box-shadow:var(--ei-shadow)}
 .admin-page .admin-card h2,.admin-page #deliveryZonesPanel h2{margin:0 0 12px;color:var(--ei-blue);font-size:1.03rem;font-weight:800;line-height:1.35}
 .admin-page .admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.admin-page .payment-account-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:620px){.admin-page .payment-account-fields{grid-template-columns:minmax(0,1fr)}}
 .admin-page .settings-help,.admin-page .category-help,.admin-page .photo-status{color:var(--ei-muted);font-size:.83rem}
 .admin-page label{display:block;margin:8px 0;color:#30445b;font-size:.85rem;font-weight:650}
 .admin-page .row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
@@ -788,7 +790,12 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <label>Código único<input id="paymentMethodCode" required maxlength="40" pattern="[A-Za-z0-9_]{2,40}" placeholder="Ej. ZELLE"></label>
 <label>Moneda del pedido<select id="paymentMethodCurrency"><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
 <label>Orden de aparición<input id="paymentMethodOrder" type="number" step="1" value="10"></label>
-<label style="grid-column:1/-1">Datos de la cuenta (JSON)<textarea id="paymentMethodDetails" rows="4" placeholder='{"Cuenta":"...","Titular":"...","Banco":"..."}'>{}</textarea></label>
+<div class="payment-account-fields" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+<label>Número de cuenta / correo o teléfono de Zelle<input id="paymentMethodAccountNumber" maxlength="180" placeholder="Ej. correo@ejemplo.com o número asociado a Zelle"></label>
+<label>Nombre del titular de la cuenta<input id="paymentMethodAccountHolder" maxlength="180" placeholder="Nombre y apellidos del titular"></label>
+</div>
+<textarea id="paymentMethodDetails" hidden aria-hidden="true">{}</textarea>
+<p class="settings-help" style="grid-column:1/-1;margin:0">Para Zelle, escribe el correo o teléfono asociado y el nombre exacto del titular. No hace falta introducir código JSON.</p>
 <label style="grid-column:1/-1">Instrucciones para el cliente<textarea id="paymentMethodInstructions" rows="3" placeholder="Cómo realizar el pago"></textarea></label>
 <label style="grid-column:1/-1">Condiciones y plazo para pago posterior<textarea id="paymentMethodTerms" rows="2" placeholder="Ej. Pagar dentro de los 3 días posteriores a la entrega"></textarea></label>
 <div style="grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap"><label><input type="checkbox" id="paymentMethodEnabled" checked> Método activo</label><label><input type="checkbox" id="paymentMethodPrepaid" checked> Permitir pago anticipado</label><label><input type="checkbox" id="paymentMethodPost"> Permitir pago después de la entrega</label></div>
