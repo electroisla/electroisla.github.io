@@ -676,6 +676,16 @@ document.getElementById("productForm").addEventListener("submit",async e=>{
 function reset(){document.getElementById("productForm").reset();document.getElementById("editId").value="";document.getElementById("pImage").value="";document.getElementById("formTitle").textContent="➕ Agregar producto";document.getElementById("pAvailable").checked=true;document.getElementById("pCurrency").value="USD";document.getElementById("pDiscountPrice").value="";document.getElementById("pUnitCustom").value="";document.getElementById("pUnitCustom").style.display="none";syncFancySelects();showPreview("")}
 document.getElementById("cancelEdit").onclick=reset;
 document.getElementById("saveSettings").onclick=saveSettings;
+
+document.getElementById("salesOrdersTable")?.addEventListener("change",async e=>{
+ const control=e.target.closest("select[data-payment-status]");if(!control)return;
+ const id=control.dataset.paymentStatus,value=control.value;
+ control.disabled=true;
+ try{const {error}=await supabaseClient.from("orders").update({payment_status:value}).eq("id",id);if(error)throw error;await loadSalesReport()}
+ catch(err){alert("No se pudo actualizar el estado del cobro.\n\n"+(err.message||err));await loadSalesReport()}
+ finally{control.disabled=false}
+});
+
 document.getElementById("paymentMethodForm")?.addEventListener("submit",savePaymentMethodForm);
 document.getElementById("resetPaymentMethod")?.addEventListener("click",resetPaymentMethodForm);
 document.getElementById("paymentMethodsList")?.addEventListener("click",handlePaymentMethodListClick);
@@ -783,7 +793,7 @@ function renderSalesReport(){
   const table=document.getElementById("salesOrdersTable");
   if(table){
     if(!rows.length){table.innerHTML='<p class="sales-empty">No hay pedidos registrados en este período.</p>';}
-    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Modalidad / estado de cobro</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}<small>${salesEscape(r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente de cobro")}${r.payment_due_at?` · Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}`:""}</small></td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
+    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Modalidad / estado de cobro</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}<small>${salesEscape(r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente de cobro")}${r.payment_due_at?` · Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}`:""}</small><label style="display:block;margin-top:6px;font-size:.75rem">Actualizar cobro<select data-payment-status="${salesEscape(r.id)}"><option value="PENDING" ${(!r.payment_status||r.payment_status==="PENDING")?"selected":""}>Pendiente</option><option value="PAID" ${r.payment_status==="PAID"?"selected":""}>Pagado</option><option value="OVERDUE" ${r.payment_status==="OVERDUE"?"selected":""}>Vencido</option><option value="CANCELLED" ${r.payment_status==="CANCELLED"?"selected":""}>Cancelado</option></select></label></td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
   }
 }
 async function loadSalesReport(){
