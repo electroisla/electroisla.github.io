@@ -791,8 +791,8 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <label>Moneda del pedido<select id="paymentMethodCurrency"><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
 <label>Orden de aparición<input id="paymentMethodOrder" type="number" step="1" value="10"></label>
 <div class="payment-account-fields" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-<label>Número de cuenta / correo o teléfono de Zelle<input id="paymentMethodAccountNumber" maxlength="180" placeholder="Ej. correo@ejemplo.com o número asociado a Zelle"></label>
-<label>Nombre del titular de la cuenta<input id="paymentMethodAccountHolder" maxlength="180" placeholder="Nombre y apellidos del titular"></label>
+<label>Número de cuenta o correo/teléfono de Zelle<input id="paymentMethodAccountNumber" maxlength="180" placeholder="Escribe aquí el número, correo o teléfono"></label>
+<label>Nombre del titular de la cuenta (Zelle)<input id="paymentMethodAccountHolder" maxlength="180" placeholder="Nombre y apellidos del titular"></label>
 </div>
 <textarea id="paymentMethodDetails" hidden aria-hidden="true">{}</textarea>
 <p class="settings-help" style="grid-column:1/-1;margin:0">Para Zelle, escribe el correo o teléfono asociado y el nombre exacto del titular. No hace falta introducir código JSON.</p>
