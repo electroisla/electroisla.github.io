@@ -535,6 +535,9 @@ async function show(){
  document.getElementById("dashboard").classList.remove("hidden");
  loginBoxMessage("");
  await renderAdminIdentity();
+ const paymentStatus=document.getElementById("paymentMethodsStatus");
+ if(paymentStatus)paymentStatus.textContent="Cargando métodos de pago…";
+ loadPaymentMethods().catch(err=>{console.error("Error cargando métodos de pago:",err);const list=document.getElementById("paymentMethodsList");if(list)list.innerHTML="<p>No se pudieron cargar los métodos. Comprueba la conexión y vuelve a entrar.</p>";if(paymentStatus)paymentStatus.textContent="⚠️ Error al cargar";});
  const status=document.getElementById("cloudStatus");
  if(status) status.textContent="☁️ Conectando con Supabase…";
  try{
