@@ -113,7 +113,7 @@ function setupPhoneCodePicker(selectId,pickerId,triggerId,menuId,textId){
   trigger.style.setProperty("min-height","44px","important");
   trigger.style.setProperty("box-sizing","border-box","important");
   trigger.style.setProperty("padding",narrow?"10px 6px":"10px 8px","important");
-  trigger.style.setProperty("font-size","14px","important");
+  trigger.style.setProperty("font-size","12px","important");
   if(phoneInput){
    phoneInput.style.setProperty("display","block","important");
    phoneInput.style.setProperty("flex","1 1 0","important");
@@ -124,7 +124,7 @@ function setupPhoneCodePicker(selectId,pickerId,triggerId,menuId,textId){
    phoneInput.style.setProperty("min-height","44px","important");
    phoneInput.style.setProperty("box-sizing","border-box","important");
    phoneInput.style.setProperty("margin","7px 0 0","important");
-   phoneInput.style.setProperty("font-size","14px","important");
+   phoneInput.style.setProperty("font-size","12px","important");
   }
  }
  applyPhoneLayout();
