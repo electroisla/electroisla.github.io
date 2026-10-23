@@ -41,7 +41,7 @@
   catch(e){console.warn("No se pudieron cargar métodos de pago",e);methods=[]}
   render();
  }
- form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"]'))render();else if(e.target.matches('input[name="paymentMethod"],#paymentDueDays'))summary()});
+ form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"]'))render();else summary()});
  form.addEventListener("submit",async function(e){
   e.preventDefault();e.stopImmediatePropagation();
   const m=current(),t=timing(),totals=getOrderTotals();
@@ -70,5 +70,7 @@
   window.open("https://wa.me/5352017110?text="+encodeURIComponent(msg),"_blank");
  },true);
  load();
+ const cartBox=byId("cartItems");if(cartBox&&typeof MutationObserver!=="undefined")new MutationObserver(function(){render()}).observe(cartBox,{childList:true,subtree:true});
+ byId("municipality")?.addEventListener("change",render);byId("otherZone")?.addEventListener("input",summary);
  try{supabaseClient.channel("payment-methods-checkout").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},load).subscribe()}catch(e){}
 })();
