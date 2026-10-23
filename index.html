@@ -12,7 +12,7 @@
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <link rel="stylesheet" href="styles.css?v=9.8.128">
 <style>
-.ei-phone-row{display:flex;align-items:stretch;gap:8px;width:100%;margin-top:5px}.ei-phone-row input{flex:1;min-width:0}.ei-phone-code{flex:0 0 112px;width:112px;max-width:42%;min-height:44px;padding:0 8px;border:1px solid #d8e0e8;border-radius:12px;background:#fff;color:#173b68;font:inherit;font-size:14px;font-weight:700}.ei-phone-code:focus{outline:2px solid #f58220;outline-offset:1px}@media(max-width:360px){.ei-phone-row{gap:6px}.ei-phone-code{flex-basis:104px;width:104px;font-size:13px;padding:0 5px}}
+.ei-phone-row{display:flex;align-items:stretch;gap:8px;width:100%;margin-top:5px}.ei-phone-row input{flex:1;min-width:0}.ei-phone-picker{flex:0 0 124px;width:124px;max-width:48%;margin:0}.ei-phone-trigger{min-height:44px;height:100%;padding:7px 9px;border-radius:12px;font-size:14px}.ei-phone-trigger .delivery-trigger-main{gap:0}.ei-phone-trigger .delivery-trigger-side{gap:2px}.ei-phone-picker .delivery-menu{max-height:240px}.ei-phone-picker .delivery-option{font-size:13px;padding:10px 8px}.ei-phone-native{display:none!important}@media(max-width:360px){.ei-phone-row{gap:6px}.ei-phone-picker{flex-basis:112px;width:112px}.ei-phone-trigger{padding:6px}.ei-phone-trigger .delivery-chevron{font-size:18px}}
 .recipient-fields{margin:8px 0 4px;padding:14px;border:1px solid #f3d5bd;border-radius:16px;background:#fff9f4}.recipient-fields-title{margin:0 0 12px;color:#e8781b;font-size:12px;font-weight:800;letter-spacing:.04em}.recipient-fields label{display:block}
 
 .zelle-logo-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;vertical-align:middle}
@@ -168,7 +168,7 @@
       
         <label>Teléfono de quien realiza el pedido
           <span class="ei-phone-row">
-            <select class="ei-phone-code" id="customerPhoneCode" aria-label="Prefijo internacional de teléfono de quien realiza el pedido" autocomplete="tel-country-code">
+            <select class="ei-phone-code ei-phone-native" id="customerPhoneCode" aria-label="Prefijo internacional de teléfono de quien realiza el pedido" autocomplete="tel-country-code">
               <option value="+53" selected>🇨🇺 +53</option>
               <option value="+1">🇺🇸 +1</option>
               <option value="+34">🇪🇸 +34</option>
@@ -187,6 +187,7 @@
               <option value="+809">🇩🇴 +809</option>
               <option value="+787">🇵🇷 +787</option>
             </select>
+            <div class="delivery-picker ei-phone-picker" id="customerPhonePicker"><button type="button" class="delivery-trigger ei-phone-trigger" id="customerPhoneTrigger" aria-haspopup="listbox" aria-expanded="false"><span class="delivery-trigger-main"><span id="customerPhoneSelectedText">🇨🇺 +53</span></span><span class="delivery-trigger-side"><span class="delivery-chevron">⌄</span></span></button><div class="delivery-menu" id="customerPhoneMenu" role="listbox" aria-label="País y prefijo telefónico"></div></div>
             <input required id="customerPhone" type="tel" autocomplete="tel" placeholder="Tu teléfono" inputmode="tel">
           </span>
         </label>
@@ -197,7 +198,7 @@
         
         <label>Número de teléfono de quien recibe
           <span class="ei-phone-row">
-            <select class="ei-phone-code" id="recipientPhoneCode" aria-label="Prefijo internacional de número de teléfono de quien recibe" autocomplete="tel-country-code">
+            <select class="ei-phone-code ei-phone-native" id="recipientPhoneCode" aria-label="Prefijo internacional de número de teléfono de quien recibe" autocomplete="tel-country-code">
               <option value="+53" selected>🇨🇺 +53</option>
               <option value="+1">🇺🇸 +1</option>
               <option value="+34">🇪🇸 +34</option>
@@ -216,6 +217,7 @@
               <option value="+809">🇩🇴 +809</option>
               <option value="+787">🇵🇷 +787</option>
             </select>
+            <div class="delivery-picker ei-phone-picker" id="recipientPhonePicker"><button type="button" class="delivery-trigger ei-phone-trigger" id="recipientPhoneTrigger" aria-haspopup="listbox" aria-expanded="false"><span class="delivery-trigger-main"><span id="recipientPhoneSelectedText">🇨🇺 +53</span></span><span class="delivery-trigger-side"><span class="delivery-chevron">⌄</span></span></button><div class="delivery-menu" id="recipientPhoneMenu" role="listbox" aria-label="País y prefijo telefónico"></div></div>
             <input required id="recipientPhone" type="tel" autocomplete="shipping tel" placeholder="Teléfono del destinatario" inputmode="tel">
           </span>
         </label>
