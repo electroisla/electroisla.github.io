@@ -1,9 +1,9 @@
-const CACHE_NAME = 'electroisla-v9.8.1-phone-prefix';
+const CACHE_NAME = 'electroisla-v9.8.2-phone-font14';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
-  './app.js?v=144',
+  './app.js?v=146',
   './supabase-config.js?v=4'
 ];
 
