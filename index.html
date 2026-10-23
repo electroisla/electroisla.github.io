@@ -66,6 +66,23 @@
 .product-detail-review{display:block;width:100%;border:0;background:transparent;color:#1763a6;font-size:13px;font-weight:700;text-align:left;padding:8px 0 16px;cursor:pointer}
 .product-detail-review:active{opacity:.72}
 
+
+/* Selectores telefónicos con el mismo desplegable de zonas de domicilio */
+.ei-phone-row{gap:8px}
+.ei-phone-code{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;margin:0!important;padding:0!important;clip-path:inset(50%)!important}
+.ei-phone-picker{position:relative;flex:0 0 132px;width:132px;max-width:48%;min-width:0}
+.ei-phone-trigger{width:100%;min-height:54px;border:1px solid #c9d8eb;border-radius:14px;background:#fff;color:var(--logo-blue-dark,#173b68);display:flex;align-items:center;justify-content:space-between;gap:5px;padding:10px 9px;box-shadow:0 2px 8px rgba(7,43,121,.04);font:inherit;font-size:14px;font-weight:750;transition:.18s}
+.ei-phone-trigger:hover,.ei-phone-picker.open .ei-phone-trigger{border-color:var(--logo-blue,#0b4ea2);box-shadow:0 0 0 3px rgba(11,78,162,.09)}
+.ei-phone-trigger-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ei-phone-chevron{font-size:20px;line-height:1;color:var(--logo-blue,#0b4ea2);transition:.18s}
+.ei-phone-picker.open .ei-phone-chevron{transform:rotate(180deg)}
+.ei-phone-menu{position:absolute;z-index:100;left:0;right:0;top:calc(100% + 7px);background:#fff;border:1px solid #c9d8eb;border-radius:15px;padding:7px;box-shadow:0 16px 35px rgba(7,43,121,.16);max-height:240px;overflow:auto;display:none}
+.ei-phone-picker.open .ei-phone-menu{display:block}
+.ei-phone-option{width:100%;border:0;border-radius:10px;background:#fff;color:var(--ink,#24364b);padding:10px 7px;display:flex;align-items:center;gap:7px;text-align:left;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.ei-phone-option:hover{background:var(--logo-blue-light,#edf5ff)}
+.ei-phone-option.active{background:#edf5ff;color:var(--logo-blue-dark,#173b68);font-weight:800;box-shadow:inset 3px 0 0 var(--orange,#f58220)}
+@media(max-width:360px){.ei-phone-picker{flex-basis:118px;width:118px}.ei-phone-trigger{padding:9px 6px;font-size:13px}.ei-phone-option{font-size:12px;padding:9px 5px}}
+
 </style>
 </head>
 <body>
@@ -386,6 +403,66 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
 <script src="app.js?v=143"></script>
+
+<script>
+/* Reutiliza el estilo y el comportamiento visual del selector de zonas para los prefijos telefónicos. */
+(function(){
+  function initPhonePicker(select){
+    if(!select || select.dataset.eiPickerReady==="1") return;
+    select.dataset.eiPickerReady="1";
+    const picker=document.createElement("div");
+    picker.className="ei-phone-picker";
+    picker.innerHTML='<button type="button" class="ei-phone-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="ei-phone-trigger-label"></span><span class="ei-phone-chevron">⌄</span></button><div class="ei-phone-menu" role="listbox"></div>';
+    select.insertAdjacentElement("afterend",picker);
+    const trigger=picker.querySelector(".ei-phone-trigger");
+    const label=picker.querySelector(".ei-phone-trigger-label");
+    const menu=picker.querySelector(".ei-phone-menu");
+    function render(){
+      const selected=select.options[select.selectedIndex];
+      label.textContent=selected?selected.textContent:"Elige país";
+      menu.innerHTML="";
+      Array.from(select.options).forEach((option,index)=>{
+        const item=document.createElement("button");
+        item.type="button";
+        item.className="ei-phone-option"+(option.selected?" active":"");
+        item.setAttribute("role","option");
+        item.setAttribute("aria-selected",option.selected?"true":"false");
+        item.textContent=option.textContent;
+        item.addEventListener("click",()=>{
+          select.selectedIndex=index;
+          select.dispatchEvent(new Event("change",{bubbles:true}));
+          picker.classList.remove("open");
+          trigger.setAttribute("aria-expanded","false");
+          render();
+        });
+        menu.appendChild(item);
+      });
+    }
+    trigger.addEventListener("click",()=>{
+      const opening=!picker.classList.contains("open");
+      document.querySelectorAll(".ei-phone-picker.open").forEach(other=>{
+        other.classList.remove("open");
+        other.querySelector(".ei-phone-trigger")?.setAttribute("aria-expanded","false");
+      });
+      picker.classList.toggle("open",opening);
+      trigger.setAttribute("aria-expanded",opening?"true":"false");
+    });
+    select.addEventListener("change",render);
+    document.addEventListener("click",event=>{
+      if(!picker.contains(event.target)){
+        picker.classList.remove("open");
+        trigger.setAttribute("aria-expanded","false");
+      }
+    });
+    render();
+  }
+  document.addEventListener("DOMContentLoaded",()=>{
+    initPhonePicker(document.getElementById("customerPhoneCode"));
+    initPhonePicker(document.getElementById("recipientPhoneCode"));
+  });
+})();
+</script>
+
   <script src="delivery-zones-store.js?v=2"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.15-visual",{updateViaCache:"none"}).catch(()=>{}));}</script>
 </body>
