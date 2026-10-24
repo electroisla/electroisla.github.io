@@ -356,9 +356,19 @@
         <div class="payment-title">💳 ¿Cuándo deseas pagar?</div>
         <label class="payment-option"><input type="radio" name="paymentTiming" value="PREPAID" checked> <span>Antes de la entrega</span></label>
         <label class="payment-option" id="postDeliveryTimingOption" style="display:none"><input type="radio" name="paymentTiming" value="POST_DELIVERY"> <span>Después de la entrega</span></label>
-        <label id="paymentDueWrap" class="hidden">Plazo acordado para pagar después de la entrega
-          <select id="paymentDueDays"><option value="1">Dentro de 1 día</option><option value="3" selected>Dentro de 3 días</option><option value="7">Dentro de 7 días</option><option value="14">Dentro de 14 días</option></select>
-        </label>
+        <div id="paymentDueWrap" class="hidden">
+          <label for="paymentDueHours">¿Cuándo realizarás el pago?</label>
+          <select id="paymentDueHours">
+            <option value="1">Dentro de 1 hora</option>
+            <option value="2">Dentro de 2 horas</option>
+            <option value="3">Dentro de 3 horas</option>
+            <option value="CUSTOM">Personalizado: elegir fecha y hora</option>
+          </select>
+          <label id="paymentDueCustomWrap" class="hidden" for="paymentDueCustom">Fecha y hora exactas (máximo 24 horas desde el pedido)
+            <input id="paymentDueCustom" type="datetime-local" step="60" aria-describedby="paymentDueHelp">
+          </label>
+          <small id="paymentDueHelp" class="payment-help">La fecha y hora elegidas deben estar dentro de las 24 horas posteriores al envío del pedido.</small>
+        </div>
         <div class="payment-title" style="margin-top:12px">💳 Método de pago</div>
         <p class="payment-help">Solo aparecerán los métodos habilitados para la modalidad seleccionada y los productos de tu pedido.</p>
         <div id="paymentMethodsListStore"><p>Cargando métodos de pago…</p></div>
@@ -481,7 +491,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
 <script src="app.js?v=148"></script>
-<script src="payment-methods-store.js?v=2"></script>
+<script src="payment-methods-store.js?v=3"></script>
 
 
 
