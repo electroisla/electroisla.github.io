@@ -957,7 +957,7 @@ function checkWhatsAppReturn(){
  if(!waitingForWhatsAppReturn&&sessionStorage.getItem("electroisla_whatsapp_pending")!=="1")return;
  if(document.visibilityState==="hidden")return;
  waitingForWhatsAppReturn=false;sessionStorage.removeItem("electroisla_whatsapp_pending");
- if(sessionStorage.getItem("electroisla_payment_method")==="ZELLE"&&showZelleAccount())return;
+ if(sessionStorage.getItem("electroisla_payment_method")==="ZELLE"&&sessionStorage.getItem("electroisla_payment_timing")==="PREPAID"&&showZelleAccount())return;
  showThankYou();
 }
 
