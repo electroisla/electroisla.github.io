@@ -4,7 +4,19 @@
  const list=document.getElementById("paymentMethodsListStore");
  if(!form||!list||typeof supabaseClient==="undefined")return;
  let methods=[];
+ let zelleAmountAccounts=[];
  const byId=id=>document.getElementById(id);
+ async function loadZelleAmountAccounts(){
+  const res=await supabaseClient.from("zelle_amount_accounts").select("id,label,max_amount,account_value,account_holder,enabled,sort_order").eq("enabled",true).order("sort_order",{ascending:true});
+  if(res.error)throw res.error;
+  zelleAmountAccounts=Array.isArray(res.data)?res.data:[];
+  return zelleAmountAccounts;
+ }
+ function accountForZelleAmount(amount){
+  const value=Number(amount);if(!Number.isFinite(value)||value<0)return null;
+  const rows=[...zelleAmountAccounts].sort((a,b)=>Number(a.sort_order)-Number(b.sort_order));
+  return rows.find(row=>row.max_amount===null||row.max_amount===undefined||row.max_amount===""||value<=Number(row.max_amount))||null;
+ }
  const escPay=value=>String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});
  const timing=()=>form.querySelector('input[name="paymentTiming"]:checked')?.value||"PREPAID";
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
@@ -72,8 +84,11 @@
   const box=byId("paymentSummary");if(!box)return;
   const m=current();if(!m){box.innerHTML="<span>Selecciona un método de pago disponible.</span>";return}
   const totals=getOrderTotals(),usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA",amount=usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,fee=usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP;
-  const details=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
+  const zelleAccount=m.code==="ZELLE"?accountForZelleAmount(totals.usdTotal):null;
+  const detailsSource=m.code==="ZELLE"?(zelleAccount?{Cuenta:zelleAccount.account_value,Titular:zelleAccount.account_holder}:{}):m.account_details;
+  const details=detailsSource&&typeof detailsSource==="object"?Object.entries(detailsSource).filter(function(x){return String(x[1]??"").trim()}):[];
   let out="<strong>Total a pagar: "+escPay(money(amount,m.currency))+"</strong><span>"+(getDeliveryZone()?"Zona: "+escPay(getDeliveryZone()):"Selecciona una zona")+"</span><span>"+(fee>0?"Domicilio: "+escPay(money(fee,m.currency)):"Domicilio: Gratis")+"</span><span>Método seleccionado: "+escPay(m.name)+"</span>";
+  if(m.code==="ZELLE"&&(!zelleAccount||!String(zelleAccount.account_value||"").trim()))out+="<span><strong>Cuenta Zelle:</strong> Falta configurar una cuenta para este importe.</span>";
   if(timing()==="PREPAID")out+="<strong>Pago antes de la entrega</strong>";
   else {out+="<strong>Pago después de la entrega</strong>";if(m.code==="ZELLE"){const due=selectedDueDate(new Date());out+="<span>Fecha límite de pago: "+(due?escPay(due.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})):"Selecciona una fecha y hora válidas")+"</span>";}}
   details.forEach(function(x){const label=m.code==="ZELLE"?(x[0]==="Cuenta"||x[0]==="Número de cuenta"||x[0]==="Numero de cuenta"||x[0]==="Número"||x[0]==="Correo o teléfono"?"Correo/teléfono de Zelle":x[0]==="Titular"||x[0]==="Nombre del titular"||x[0]==="Titular de la cuenta"?"Titular de la cuenta":x[0]):x[0];out+="<span><strong>"+escPay(label)+":</strong> "+escPay(x[1])+"</span>"});
@@ -84,6 +99,7 @@
  async function load(){
   try{const res=await supabaseClient.from("payment_methods").select("code,name,currency,account_details,instructions,enabled,supports_prepaid,supports_postdelivery,postdelivery_terms,sort_order").eq("enabled",true).order("sort_order",{ascending:true}).order("name",{ascending:true});if(res.error)throw res.error;methods=res.data||[]}
   catch(e){console.warn("No se pudieron cargar métodos de pago",e);methods=[]}
+  try{await loadZelleAmountAccounts()}catch(e){zelleAmountAccounts=[];console.warn("No se pudieron cargar las cuentas Zelle por importe",e)}
   render();
  }
  form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"],input[name="paymentMethod"]'))render();else {if(e.target.id==="paymentDueHours")updateDueUI();summary()}});
@@ -103,7 +119,17 @@
   const zoneName=zone==="Otro"?other:zone,amount=usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,delivery=usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP,subtotal=Math.max(0,amount-delivery);
   const usesDueDate=t==="POST_DELIVERY"&&m.code==="ZELLE",orderCreatedAt=new Date(),dueDate=usesDueDate?selectedDueDate(orderCreatedAt):null,dueAt=dueDate?dueDate.toISOString():null;
   if(usesDueDate&&!dueDate){alert("Selecciona un plazo válido. La fecha y hora personalizadas deben estar entre ahora y las próximas 24 horas.");return}
-  const details=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).map(function(x){return x[0]+": "+x[1]}).join("\n"):"";
+  let orderAccountDetails=m.account_details;
+  if(m.code==="ZELLE"){
+   try{await loadZelleAmountAccounts()}catch(e){alert("No se pudieron cargar las cuentas Zelle por importe. Inténtalo de nuevo.");return}
+   const selectedAccount=accountForZelleAmount(amount);
+   if(!selectedAccount||!String(selectedAccount.account_value||"").trim()){
+    alert("No hay una cuenta Zelle configurada para el total de "+money(amount,"USD")+". En la administración, completa la cuenta correspondiente a ese rango antes de enviar el pedido.");return;
+   }
+   orderAccountDetails={Cuenta:String(selectedAccount.account_value).trim()};
+   if(String(selectedAccount.account_holder||"").trim())orderAccountDetails.Titular=String(selectedAccount.account_holder).trim();
+  }
+  const details=orderAccountDetails&&typeof orderAccountDetails==="object"?Object.entries(orderAccountDetails).filter(function(x){return String(x[1]??"").trim()}).map(function(x){return x[0]+": "+x[1]}).join("\n"):"";
   const lines=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return "";const price=effectivePrice(p),line=usd?money(price*i.qty,"USD"):transfer?money(transferCup(p)*i.qty,"CUP"):money(cashCup(p)*i.qty,"CUP");return "• "+p.name+" — "+i.qty+" "+(p.unit||"unidad")+" — "+line}).filter(Boolean).join("\n");
   const dueChoice=byId("paymentDueHours")?.value||"1",dueLabel=dueChoice==="CUSTOM"?"Personalizado":dueChoice+" hora"+(dueChoice==="1"?"":"s");
   const when=t==="PREPAID"?"Antes de la entrega":usesDueDate?"Después de la entrega ("+dueLabel+", fecha límite "+dueDate.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})+")":"Después de la entrega";
@@ -117,7 +143,7 @@
    sessionStorage.setItem("electroisla_payment_method",String(m.code||""));
    sessionStorage.setItem("electroisla_payment_timing",String(t||"PREPAID"));
    if(m.code==="ZELLE"&&t==="PREPAID"){
-    const accountEntries=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
+    const accountEntries=orderAccountDetails&&typeof orderAccountDetails==="object"?Object.entries(orderAccountDetails).filter(function(x){return String(x[1]??"").trim()}):[];
     const accountDetails=accountEntries.map(function(x){return {label:String(x[0]),value:String(x[1])}});
     const normalizeAccountLabel=function(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()};
     let accountEntry=accountEntries.find(function(x){return ["cuenta","numero","numero de cuenta","correo o telefono","correo/telefono","email","telefono","correo"].includes(normalizeAccountLabel(x[0]))});
@@ -136,4 +162,5 @@
  const cartBox=byId("cartItems");if(cartBox&&typeof MutationObserver!=="undefined")new MutationObserver(function(){render()}).observe(cartBox,{childList:true,subtree:true});
  byId("municipality")?.addEventListener("change",render);byId("otherZone")?.addEventListener("input",summary);byId("paymentDueCustom")?.addEventListener("input",summary);
  try{supabaseClient.channel("payment-methods-checkout").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},load).subscribe()}catch(e){}
+ try{supabaseClient.channel("zelle-amount-accounts-checkout").on("postgres_changes",{event:"*",schema:"public",table:"zelle_amount_accounts"},async()=>{try{await loadZelleAmountAccounts();render()}catch(e){console.warn(e)}}).subscribe()}catch(e){}
 })();
