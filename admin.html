@@ -789,7 +789,15 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <input type="hidden" id="paymentMethodId">
 <label>Nombre del método<input id="paymentMethodName" required maxlength="80" placeholder="Ej. Zelle"></label>
 <label>Código único<input id="paymentMethodCode" required maxlength="40" pattern="[A-Za-z0-9_]{2,40}" placeholder="Ej. ZELLE"></label>
-<label>Moneda o tipo de cuenta<select id="paymentMethodCurrency" required><option value="USD">USD</option><option value="CUP">CUP</option><option value="EUR">EUR</option><option value="TRANSFERENCIA_PREPAGO">TRANSFERENCIA PREPAGO</option><option value="TRANSFERENCIA_CUP">TRANSFERENCIA CUP</option></select></label>
+<label>Moneda o tipo de cuenta
+  <div class="ei-fancy-picker" id="paymentCurrencyPicker">
+    <button type="button" class="ei-fancy-trigger" id="paymentCurrencyPickerTrigger" aria-haspopup="listbox" aria-expanded="false">
+      <span id="paymentCurrencyPickerValue">USD</span><span class="ei-fancy-chevron">⌄</span>
+    </button>
+    <div class="ei-fancy-options" id="paymentCurrencyPickerOptions" role="listbox"></div>
+  </div>
+  <select id="paymentMethodCurrency" class="ei-fancy-native" aria-hidden="true" tabindex="-1" required><option value="USD">USD</option><option value="CUP">CUP</option><option value="EUR">EUR</option><option value="TRANSFERENCIA_PREPAGO">TRANSFERENCIA PREPAGO</option><option value="TRANSFERENCIA_CUP">TRANSFERENCIA CUP</option></select>
+</label>
 <input type="hidden" id="paymentMethodOrder" value="10">
 <div class="payment-account-fields" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
 <label>Número de Cuenta<input id="paymentMethodAccountNumber" maxlength="180" autocomplete="off" placeholder="Número de cuenta, correo o teléfono"></label>
@@ -978,7 +986,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="admin.js?v=30"></script>
+<script src="admin.js?v=31"></script>
   <script src="zelle-amount-accounts-admin.js?v=6"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
 <script>
