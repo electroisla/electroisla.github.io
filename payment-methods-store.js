@@ -27,7 +27,7 @@
   // Después de la entrega, mostrar Zelle una sola vez y todos los demás métodos activos compatibles
   // con la moneda/productos, incluidos efectivo y transferencia y futuros métodos.
   return methods.filter(m=>{
-   if(!m.enabled||(m.currency==="USD"?!totals.usdAvailable:!totals.cupAvailable))return false;
+   const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";if(!m.enabled||(m.currency==="USD"||prepaid?!totals.usdAvailable:!totals.cupAvailable))return false;
    const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
    if(t==="PREPAID")return (m.code==="ZELLE"&&m.supports_prepaid)||m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
    if(isZelle)return m.code==="ZELLE"&&m.supports_postdelivery;
