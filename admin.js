@@ -439,8 +439,16 @@ async function savePaymentMethodForm(event){
   if(!details||Array.isArray(details)||typeof details!=="object")throw new Error("Los datos de cuenta no son válidos.");
   const accountNumber=document.getElementById("paymentMethodAccountNumber").value.trim();
   const accountHolder=document.getElementById("paymentMethodAccountHolder").value.trim();
-  if(accountNumber)details.Cuenta=accountNumber;else delete details.Cuenta;
-  if(accountHolder)details.Titular=accountHolder;else delete details.Titular;
+  if(code==="ZELLE"){
+   // Zelle guarda únicamente los dos campos acordados y elimina claves antiguas equivalentes.
+   details={};
+   if(accountNumber)details.Cuenta=accountNumber;
+   if(accountHolder)details.Titular=accountHolder;
+  }else{
+   // Los demás métodos conservan sus datos bancarios existentes.
+   if(accountNumber)details.Cuenta=accountNumber;else delete details.Cuenta;
+   if(accountHolder)details.Titular=accountHolder;else delete details.Titular;
+  }
  }catch(e){alert("Revisa los datos de la cuenta. "+(e.message||""));return}
  const prepaid=document.getElementById("paymentMethodPrepaid").checked;
  const post=document.getElementById("paymentMethodPost").checked;
@@ -449,7 +457,13 @@ async function savePaymentMethodForm(event){
  const row={code,name,currency,account_details:details,instructions:document.getElementById("paymentMethodInstructions").value.trim(),enabled:document.getElementById("paymentMethodEnabled").checked,supports_prepaid:prepaid,supports_postdelivery:post,postdelivery_terms:document.getElementById("paymentMethodTerms").value.trim(),sort_order:Number(document.getElementById("paymentMethodOrder").value)||0,updated_at:new Date().toISOString()};
  const status=document.getElementById("paymentMethodsStatus"),btn=document.getElementById("savePaymentMethod");if(btn)btn.disabled=true;if(status)status.textContent="Guardando…";
  try{
-  const query=id?supabaseClient.from("payment_methods").update(row).eq("id",id):supabaseClient.from("payment_methods").insert(row);
+  // Si se inicia un registro nuevo con un código ya existente, editar ese registro
+  // en lugar de intentar crear un método duplicado.
+  const existingByCode=id?null:adminPaymentMethods.find(m=>String(m.code||"").toUpperCase()===code);
+  const targetId=id||(existingByCode?.id||null);
+  const query=targetId
+   ?supabaseClient.from("payment_methods").update(row).eq("id",targetId)
+   :supabaseClient.from("payment_methods").insert(row);
   const {error}=await query;if(error)throw error;
   resetPaymentMethodForm();await loadPaymentMethods();if(status)status.textContent="✅ Método guardado.";
  }catch(e){if(status)status.textContent="⚠️ No se pudo guardar.";alert("No se pudo guardar el método de pago.\n\n"+(e.message||e))}
