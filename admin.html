@@ -771,12 +771,12 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 </section>
 <section class="admin-card settings-card" id="storeSettings">
 <h2>💱 Precios y tasa de cambio</h2>
-<p class="settings-help">Configura aquí cuánto vale 1 USD en CUP y el recargo para pagos por transferencia. Los cambios se sincronizan con la tienda pública.</p>
+<p class="settings-help">Configura las tasas de conversión y el importe adicional de cada modalidad de pago. Los cambios se sincronizan con la tienda pública.</p>
 <div class="price-fields">
-<label>1 USD = <span>
-<input id="usdToCup" type="number" min="0" step="0.01" placeholder="700">
-</span> CUP</label>
+<label>1 USD = <span><input id="usdToCup" type="number" min="0" step="0.01" placeholder="700"></span> CUP</label>
 <label>Recargo por transferencia (%)<input id="transferMarkup" type="number" min="0" step="0.01" placeholder="30"></label>
+<label>1 USD = <span><input id="usdToEur" type="number" min="0" step="0.0001" placeholder="0.92"></span> EUR</label>
+<label>1 USD = <span><input id="transferPrepagoRate" type="number" min="0.0001" step="0.01" placeholder="1.04"></span> transferencia prepago</label>
 </div>
 <div class="row settings-actions"><button type="button" class="btn primary" id="saveSettings">💾 Guardar configuración</button><span id="settingsStatus" class="settings-status">☁️ Cargando configuración…</span></div>
 </section>
