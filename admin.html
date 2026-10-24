@@ -799,7 +799,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 
 <label style="grid-column:1/-1">Instrucciones para el cliente<textarea id="paymentMethodInstructions" rows="3" placeholder="Cómo realizar el pago"></textarea></label>
 <label style="grid-column:1/-1">Condiciones y plazos<textarea id="paymentMethodTerms" rows="2" placeholder="Condiciones, plazos y fechas límite"></textarea></label>
-<div hidden aria-hidden="true"><input type="checkbox" id="paymentMethodEnabled" checked><input type="checkbox" id="paymentMethodPrepaid" checked><input type="checkbox" id="paymentMethodPost"></div>
+<div style="grid-column:1/-1;padding:12px;border:1px solid var(--ei-line);border-radius:9px;background:#f8fbff"><strong style="display:block;margin-bottom:8px;color:var(--ei-blue)">Modalidad de pago</strong><label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-weight:600"><input type="checkbox" id="paymentMethodPrepaid" checked> Pago antes de la entrega</label><label style="display:flex;align-items:center;gap:8px;margin:6px 0;font-weight:600"><input type="checkbox" id="paymentMethodPost"> Pago después de la entrega</label></div><div hidden aria-hidden="true"><input type="checkbox" id="paymentMethodEnabled" checked></div>
 <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit" id="savePaymentMethod">💾 Guardar método</button><button class="btn secondary" type="button" id="resetPaymentMethod">Limpiar formulario</button><span id="paymentMethodsStatus" class="settings-status" aria-live="polite"></span></div>
 </form>
 <div id="paymentMethodsList" class="admin-list" aria-live="polite"><p>Cargando métodos de pago…</p></div>
