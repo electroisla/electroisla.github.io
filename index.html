@@ -323,6 +323,20 @@
 .ei-datetime-confirm:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
 @media(max-width:420px){#eiDateTimeModal{padding:10px;align-items:center}#eiDateTimeModal .ei-datetime-card{border-radius:21px}.ei-datetime-day{height:37px}.ei-datetime-weekdays,.ei-datetime-days{gap:3px;padding-left:12px;padding-right:12px}.ei-datetime-time{margin-left:12px;margin-right:12px}.ei-datetime-preview{margin-left:12px;margin-right:12px}.ei-datetime-actions{padding-left:12px;padding-right:12px}}
 
+
+/* ElectroIsla — paso de cuenta Zelle antes del agradecimiento */
+.ei-zelle-card{text-align:left;max-width:440px;padding:28px 22px 24px;border:1px solid #f5d8c1;box-shadow:0 22px 65px rgba(7,43,121,.2)}
+.ei-zelle-brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.ei-zelle-mark{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#fff0e3,#ffe0c4);color:#e8781b;font-size:25px}
+.ei-zelle-card h2{margin:0 0 8px;font-size:23px;color:var(--logo-blue-dark)}
+.ei-zelle-copy{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.5}
+.ei-zelle-details{display:grid;gap:9px;margin:0 0 20px;padding:14px;border:1px solid #e4ebf5;border-radius:16px;background:linear-gradient(135deg,#f7faff,#fff9f4)}
+.ei-zelle-detail{display:flex;flex-direction:column;gap:4px;overflow-wrap:anywhere}
+.ei-zelle-detail-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b}
+.ei-zelle-detail strong{font-size:15px;color:var(--logo-blue-dark);font-weight:800}
+.ei-zelle-card .btn.primary{min-height:50px;background:var(--logo-orange)!important;box-shadow:0 5px 15px rgba(202,98,35,.22)}
+.ei-zelle-card .btn.primary:hover{background:var(--logo-orange-dark)!important}
+@media(max-width:380px){.ei-zelle-card{padding:24px 17px}.ei-zelle-card h2{font-size:21px}}
 </style>
 </head>
 <body>
@@ -599,6 +613,18 @@
   </div>
 </div>
 
+<div id="zelleAccountModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card ei-zelle-card" role="dialog" aria-modal="true" aria-labelledby="zelleAccountTitle">
+    <div class="ei-zelle-brand">
+      <div class="ei-zelle-mark" aria-hidden="true">Ｚ</div>
+      <div><p class="eyebrow" style="margin:0 0 4px">ELECTROISLA 360</p><h2 id="zelleAccountTitle">Datos de la cuenta Zelle</h2></div>
+    </div>
+    <p class="ei-zelle-copy">Antes de continuar, guarda los datos de la cuenta para realizar tu pago. Pulsa el botón y el número o correo principal se copiará automáticamente.</p>
+    <div id="zelleAccountDetails" class="ei-zelle-details"></div>
+    <button id="zelleCopyContinue" class="btn primary full" type="button">📋 Copiar número y continuar</button>
+  </div>
+</div>
+
 <div id="thankYouModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card thank-you-card">
     <div class="thank-you-icon" aria-hidden="true">✓</div>
@@ -668,13 +694,13 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
-<script src="app.js?v=148"></script>
-<script src="payment-methods-store.js?v=7"></script>
+<script src="app.js?v=149"></script>
+<script src="payment-methods-store.js?v=8"></script>
 
 
 
   <script src="delivery-zones-store.js?v=2"></script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.19-remove-receipt-instructions",{updateViaCache:"none"}).catch(()=>{}));}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.20-zelle-copy-thankyou",{updateViaCache:"none"}).catch(()=>{}));}</script>
 
 <div id="eiDateTimeModal" hidden>
   <section class="ei-datetime-card" role="dialog" aria-modal="true" aria-labelledby="eiDateTimeTitle">
