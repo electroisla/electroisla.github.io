@@ -560,6 +560,7 @@ async function show(){
  const paymentStatus=document.getElementById("paymentMethodsStatus");
  if(paymentStatus)paymentStatus.textContent="Cargando métodos de pago…";
  loadPaymentMethods().catch(err=>{console.error("Error cargando métodos de pago:",err);const list=document.getElementById("paymentMethodsList");if(list)list.innerHTML="<p>No se pudieron cargar los métodos. Comprueba la conexión y vuelve a entrar.</p>";if(paymentStatus)paymentStatus.textContent="⚠️ Error al cargar";});
+ if(typeof window.loadZelleAmountAccountsAdmin==="function")window.loadZelleAmountAccountsAdmin().catch(err=>console.error("Error cargando rangos Zelle:",err));
  const status=document.getElementById("cloudStatus");
  if(status) status.textContent="☁️ Conectando con Supabase…";
  try{
