@@ -24,6 +24,21 @@
   if(!items.some(m=>m.code===old)&&items.length){const r=list.querySelector('input[name="paymentMethod"]');if(r)r.checked=true}
   summary();
  }
+ function setupDuePicker(){
+  const select=byId("paymentDueHours"),picker=byId("paymentDuePicker"),trigger=byId("paymentDueTrigger"),menu=byId("paymentDueMenu"),textBox=byId("paymentDueSelectedText");
+  if(!select||!picker||!trigger||!menu||!textBox)return;
+  function rebuild(){
+   menu.innerHTML=Array.from(select.options).map(o=>'<button type="button" class="delivery-option'+(o.value===select.value?' active':'')+'" data-value="'+escPay(o.value)+'" role="option" aria-selected="'+(o.value===select.value)+'"><span>'+escPay(o.textContent)+'</span></button>').join('');
+   const chosen=select.options[select.selectedIndex];if(chosen)textBox.textContent=chosen.textContent;
+  }
+  function close(){picker.classList.remove("open");trigger.setAttribute("aria-expanded","false")}
+  trigger.addEventListener("click",()=>{const open=!picker.classList.contains("open");picker.classList.toggle("open",open);trigger.setAttribute("aria-expanded",String(open))});
+  menu.addEventListener("click",e=>{const btn=e.target.closest(".delivery-option");if(!btn)return;select.value=btn.dataset.value;select.dispatchEvent(new Event("change",{bubbles:true}));rebuild();close()});
+  select.addEventListener("change",rebuild);
+  document.addEventListener("click",e=>{if(!picker.contains(e.target))close()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+  rebuild();
+ }
  function updateDueUI(){
   const eligible=timing()==="POST_DELIVERY"&&current()?.code==="ZELLE";
   const wrap=byId("paymentDueWrap"),customWrap=byId("paymentDueCustomWrap"),choice=byId("paymentDueHours"),custom=byId("paymentDueCustom"),help=byId("paymentDueHelp");
@@ -98,6 +113,7 @@
   if(typeof markWhatsAppPending==="function")markWhatsAppPending();
   window.open("https://wa.me/5352017110?text="+encodeURIComponent(msg),"_blank");
  },true);
+ setupDuePicker();
  load();
  const cartBox=byId("cartItems");if(cartBox&&typeof MutationObserver!=="undefined")new MutationObserver(function(){render()}).observe(cartBox,{childList:true,subtree:true});
  byId("municipality")?.addEventListener("change",render);byId("otherZone")?.addEventListener("input",summary);byId("paymentDueCustom")?.addEventListener("input",summary);
