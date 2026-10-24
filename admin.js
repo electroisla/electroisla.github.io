@@ -404,7 +404,7 @@ function resetPaymentMethodForm(){
  const form=document.getElementById("paymentMethodForm");if(form)form.reset();
  document.getElementById("paymentMethodId").value="";
  document.getElementById("paymentMethodCode").disabled=false;
- document.getElementById("paymentMethodOrder").value="10";
+ document.getElementById("paymentMethodOrder").value=String(Math.max(0,...adminPaymentMethods.map(m=>Number(m.sort_order)||0))+10);
  document.getElementById("paymentMethodDetails").value="{}";
  document.getElementById("paymentMethodAccountNumber").value="";
  document.getElementById("paymentMethodAccountHolder").value="";
@@ -454,7 +454,7 @@ async function savePaymentMethodForm(event){
  const post=document.getElementById("paymentMethodPost").checked;
  if(!prepaid&&!post){alert("Activa al menos una modalidad de pago.");return}
  if(post&&!document.getElementById("paymentMethodTerms").value.trim()){alert("Especifica el plazo o las condiciones para pagar después de la entrega.");return}
- const row={code,name,currency,account_details:details,instructions:document.getElementById("paymentMethodInstructions").value.trim(),enabled:document.getElementById("paymentMethodEnabled").checked,supports_prepaid:prepaid,supports_postdelivery:post,postdelivery_terms:document.getElementById("paymentMethodTerms").value.trim(),sort_order:Number(document.getElementById("paymentMethodOrder").value)||0,updated_at:new Date().toISOString()};
+ const row={code,name,currency,account_details:details,instructions:document.getElementById("paymentMethodInstructions").value.trim(),enabled:document.getElementById("paymentMethodEnabled").checked,supports_prepaid:prepaid,supports_postdelivery:post,postdelivery_terms:document.getElementById("paymentMethodTerms").value.trim(),sort_order:(id?(adminPaymentMethods.find(m=>String(m.id)===String(id))?.sort_order??0):(adminPaymentMethods.find(m=>String(m.code||"").toUpperCase()===code)?.sort_order??(Math.max(0,...adminPaymentMethods.map(m=>Number(m.sort_order)||0))+10))),updated_at:new Date().toISOString()};
  const status=document.getElementById("paymentMethodsStatus"),btn=document.getElementById("savePaymentMethod");if(btn)btn.disabled=true;if(status)status.textContent="Guardando…";
  try{
   // Si se inicia un registro nuevo con un código ya existente, editar ese registro
