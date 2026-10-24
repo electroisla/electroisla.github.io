@@ -283,6 +283,46 @@
   #paymentDueCustom{transition:none}
 }
 
+
+/* ElectroIsla · selector personalizado de fecha y hora */
+#paymentDueCustom{position:absolute!important;width:1px!important;height:1px!important;min-height:1px!important;padding:0!important;margin:0!important;opacity:0!important;pointer-events:none!important;clip-path:inset(50%)!important}
+#paymentDueOpenPicker{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;margin-top:9px;padding:12px 13px;border:1px solid #c9d8eb;border-radius:12px;background:#fff;color:#173b68;font:inherit;text-align:left;cursor:pointer;box-shadow:0 2px 7px rgba(7,43,121,.045);transition:border-color .18s,box-shadow .18s}
+#paymentDueOpenPicker:hover,#paymentDueOpenPicker:focus-visible{outline:none;border-color:#f58220;box-shadow:0 0 0 3px rgba(245,130,32,.14)}
+#paymentDueOpenPicker .ei-datetime-summary{display:flex;flex-direction:column;gap:3px;min-width:0}
+#paymentDueOpenPicker strong{font-size:14px;font-weight:800}
+#paymentDueOpenPicker small{font-size:11px;color:#718096;font-weight:500}
+#paymentDueOpenPicker .ei-calendar-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:#fff0e2;color:#e8781b;font-size:21px}
+#eiDateTimeModal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,31,58,.54);backdrop-filter:blur(4px)}
+#eiDateTimeModal[hidden]{display:none!important}
+#eiDateTimeModal .ei-datetime-card{width:min(390px,100%);max-height:min(90dvh,720px);overflow:auto;border:1px solid #f0d7c3;border-radius:24px;background:#fff;box-shadow:0 24px 70px rgba(7,35,73,.3);color:#173b68}
+.ei-datetime-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 19px 15px;background:linear-gradient(135deg,#fff4e9,#f5f9ff);border-bottom:1px solid #f4e1d2}
+.ei-datetime-eyebrow{margin:0 0 4px;color:#e8781b;font-size:10px;font-weight:900;letter-spacing:.1em}
+.ei-datetime-head h3{margin:0;font-size:19px;line-height:1.2;color:#173b68}
+.ei-datetime-close{display:grid;place-items:center;width:36px;height:36px;border:1px solid #e0e8f1;border-radius:50%;background:#fff;color:#173b68;font-size:20px;cursor:pointer}
+.ei-datetime-monthbar{display:flex;align-items:center;justify-content:space-between;padding:15px 18px 10px}
+.ei-datetime-monthbar strong{font-size:15px;font-weight:850;text-transform:capitalize}
+.ei-datetime-nav{display:flex;gap:7px}
+.ei-datetime-nav button{width:34px;height:34px;border:1px solid #dce6f1;border-radius:10px;background:#fff;color:#174c86;font-size:20px;cursor:pointer}
+.ei-datetime-weekdays,.ei-datetime-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:0 16px}
+.ei-datetime-weekdays span{padding:7px 0;text-align:center;color:#7b8a9d;font-size:11px;font-weight:800}
+.ei-datetime-day{height:39px;border:1px solid transparent;border-radius:11px;background:#fff;color:#263f5b;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.ei-datetime-day:hover{border-color:#f5c69f;background:#fff8f2}
+.ei-datetime-day.is-today{border-color:#f4b47d;color:#c96514}
+.ei-datetime-day.is-selected{border-color:#f58220;background:#f58220;color:#fff;box-shadow:0 4px 10px rgba(245,130,32,.22)}
+.ei-datetime-day:disabled{opacity:.28;cursor:not-allowed}
+.ei-datetime-time{margin:17px 16px 0;padding:13px;border:1px solid #e3ebf4;border-radius:16px;background:#f7faff}
+.ei-datetime-time-title{margin:0 0 10px;font-size:12px;font-weight:850;color:#173b68}
+.ei-datetime-time-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ei-datetime-time label{display:block;color:#728196;font-size:11px;font-weight:700}
+.ei-datetime-time select{width:100%;height:43px;margin-top:5px;padding:0 10px;border:1px solid #c9d8eb;border-radius:10px;background:#fff;color:#173b68;font:inherit;font-size:15px;font-weight:750}
+.ei-datetime-preview{margin:12px 16px 0;padding:11px 12px;border-radius:12px;background:#fff4e9;color:#8a4a16;font-size:12px;font-weight:750;line-height:1.45}
+.ei-datetime-actions{display:flex;gap:9px;padding:15px 16px 17px}
+.ei-datetime-actions button{flex:1;min-height:46px;border-radius:13px;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.ei-datetime-cancel{border:1px solid #d8e2ee;background:#fff;color:#4c6076}
+.ei-datetime-confirm{border:1px solid #f58220;background:#f58220;color:#fff;box-shadow:0 5px 12px rgba(245,130,32,.2)}
+.ei-datetime-confirm:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+@media(max-width:420px){#eiDateTimeModal{padding:10px;align-items:center}#eiDateTimeModal .ei-datetime-card{border-radius:21px}.ei-datetime-day{height:37px}.ei-datetime-weekdays,.ei-datetime-days{gap:3px;padding-left:12px;padding-right:12px}.ei-datetime-time{margin-left:12px;margin-right:12px}.ei-datetime-preview{margin-left:12px;margin-right:12px}.ei-datetime-actions{padding-left:12px;padding-right:12px}}
+
 </style>
 </head>
 <body>
@@ -500,6 +540,10 @@
             <span class="payment-due-custom-title"><span aria-hidden="true">▦</span> Establecer fecha y hora</span>
             <span class="payment-due-custom-caption">Selecciona el momento exacto en que realizarás el pago.</span>
             <input id="paymentDueCustom" type="datetime-local" step="60" aria-describedby="paymentDueHelp">
+            <button id="paymentDueOpenPicker" type="button" aria-haspopup="dialog" aria-controls="eiDateTimeModal">
+              <span class="ei-datetime-summary"><strong id="paymentDueDisplayDate">Seleccionar fecha</strong><small id="paymentDueDisplayTime">Elegir hora exacta</small></span>
+              <span class="ei-calendar-icon" aria-hidden="true">▦</span>
+            </button>
           </label>
           <small id="paymentDueHelp" class="payment-help">La fecha y hora elegidas deben estar dentro de las 24 horas posteriores al envío del pedido.</small>
         </div>
@@ -631,5 +675,92 @@
 
   <script src="delivery-zones-store.js?v=2"></script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.17-payment-flow",{updateViaCache:"none"}).catch(()=>{}));}</script>
+
+<div id="eiDateTimeModal" hidden>
+  <section class="ei-datetime-card" role="dialog" aria-modal="true" aria-labelledby="eiDateTimeTitle">
+    <header class="ei-datetime-head">
+      <div><p class="ei-datetime-eyebrow">ELECTROISLA 360</p><h3 id="eiDateTimeTitle">Establecer fecha y hora</h3></div>
+      <button type="button" class="ei-datetime-close" id="eiDateTimeClose" aria-label="Cerrar">×</button>
+    </header>
+    <div class="ei-datetime-monthbar"><strong id="eiDateTimeMonth"></strong><div class="ei-datetime-nav"><button type="button" id="eiDateTimePrev" aria-label="Mes anterior">‹</button><button type="button" id="eiDateTimeNext" aria-label="Mes siguiente">›</button></div></div>
+    <div class="ei-datetime-weekdays" aria-hidden="true"><span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span></div>
+    <div class="ei-datetime-days" id="eiDateTimeDays"></div>
+    <div class="ei-datetime-time"><p class="ei-datetime-time-title">Hora exacta del pago</p><div class="ei-datetime-time-row"><label>Hora<select id="eiDateTimeHour"></select></label><label>Minutos<select id="eiDateTimeMinute"></select></label></div></div>
+    <div class="ei-datetime-preview" id="eiDateTimePreview">Selecciona una fecha y una hora.</div>
+    <div class="ei-datetime-actions"><button type="button" class="ei-datetime-cancel" id="eiDateTimeCancel">Cancelar</button><button type="button" class="ei-datetime-confirm" id="eiDateTimeConfirm">Confirmar fecha y hora</button></div>
+  </section>
+</div>
+<script>
+/* Selector de calendario propio: evita depender del aspecto del selector nativo del teléfono. */
+(function(){
+  const input=document.getElementById('paymentDueCustom');
+  const open=document.getElementById('paymentDueOpenPicker');
+  const modal=document.getElementById('eiDateTimeModal');
+  if(!input||!open||!modal)return;
+  const daysBox=document.getElementById('eiDateTimeDays'),monthLabel=document.getElementById('eiDateTimeMonth');
+  const hourSelect=document.getElementById('eiDateTimeHour'),minuteSelect=document.getElementById('eiDateTimeMinute');
+  const preview=document.getElementById('eiDateTimePreview'),displayDate=document.getElementById('paymentDueDisplayDate'),displayTime=document.getElementById('paymentDueDisplayTime');
+  const pad=n=>String(n).padStart(2,'0');
+  const dateKey=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const parseVal=v=>{if(!v)return null;const m=v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):null};
+  let selected=new Date(),view=new Date(),previousFocus=null;
+  for(let h=0;h<24;h++){const o=document.createElement('option');o.value=pad(h);o.textContent=pad(h);hourSelect.appendChild(o)}
+  for(let m=0;m<60;m++){const o=document.createElement('option');o.value=pad(m);o.textContent=pad(m);minuteSelect.appendChild(o)}
+  function chosen(){selected.setHours(+hourSelect.value||0,+minuteSelect.value||0,0,0);return selected}
+  function updatePreview(){const d=chosen();preview.textContent='Pago programado: '+new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',month:'long',year:'numeric'}).format(d)+' · '+pad(d.getHours())+':'+pad(d.getMinutes());}
+  function renderCalendar(){
+    monthLabel.textContent=new Intl.DateTimeFormat('es-ES',{month:'long',year:'numeric'}).format(view);
+    daysBox.replaceChildren();
+    const first=new Date(view.getFullYear(),view.getMonth(),1),offset=(first.getDay()+6)%7;
+    const start=new Date(view.getFullYear(),view.getMonth(),1-offset);
+    const now=new Date();now.setHours(0,0,0,0);
+    for(let i=0;i<42;i++){
+      const d=new Date(start);d.setDate(start.getDate()+i);
+      const b=document.createElement('button');b.type='button';b.className='ei-datetime-day';b.textContent=d.getDate();
+      if(d.getMonth()!==view.getMonth())b.style.visibility='hidden';
+      if(dateKey(d)===dateKey(new Date()))b.classList.add('is-today');
+      if(dateKey(d)===dateKey(selected))b.classList.add('is-selected');
+      if(d<now)b.disabled=true;
+      b.setAttribute('aria-label',new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(d));
+      b.addEventListener('click',()=>{selected.setFullYear(d.getFullYear(),d.getMonth(),d.getDate());renderCalendar();updatePreview()});
+      daysBox.appendChild(b);
+    }
+  }
+  function syncDisplay(){
+    const d=parseVal(input.value);
+    if(!d){displayDate.textContent='Seleccionar fecha';displayTime.textContent='Elegir hora exacta';return}
+    displayDate.textContent=new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'long',year:'numeric'}).format(d);
+    displayTime.textContent='Hora del pago: '+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+  function openModal(){
+    previousFocus=document.activeElement;
+    const existing=parseVal(input.value);
+    const start=existing||new Date(Date.now()+60*60*1000);
+    selected=new Date(start);view=new Date(start.getFullYear(),start.getMonth(),1);
+    hourSelect.value=pad(start.getHours());minuteSelect.value=pad(start.getMinutes());
+    renderCalendar();updatePreview();modal.hidden=false;document.body.style.overflow='hidden';
+    document.getElementById('eiDateTimeClose').focus();
+  }
+  function closeModal(){modal.hidden=true;document.body.style.overflow='';if(previousFocus&&previousFocus.focus)previousFocus.focus()}
+  function confirm(){
+    const d=chosen(),now=new Date(),max=new Date(now.getTime()+24*60*60*1000);
+    if(d<now||d>max){preview.textContent='Elige una fecha y hora entre ahora y las próximas 24 horas.';return}
+    input.value=dateKey(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+    input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));
+    syncDisplay();closeModal();
+  }
+  open.addEventListener('click',openModal);
+  document.getElementById('eiDateTimeClose').addEventListener('click',closeModal);
+  document.getElementById('eiDateTimeCancel').addEventListener('click',closeModal);
+  document.getElementById('eiDateTimeConfirm').addEventListener('click',confirm);
+  document.getElementById('eiDateTimePrev').addEventListener('click',()=>{view.setMonth(view.getMonth()-1);renderCalendar()});
+  document.getElementById('eiDateTimeNext').addEventListener('click',()=>{view.setMonth(view.getMonth()+1);renderCalendar()});
+  hourSelect.addEventListener('change',updatePreview);minuteSelect.addEventListener('change',updatePreview);
+  modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+  document.addEventListener('keydown',e=>{if(!modal.hidden&&e.key==='Escape')closeModal()});
+  input.addEventListener('change',syncDisplay);
+  syncDisplay();
+})();
+</script>
 </body>
 </html>
