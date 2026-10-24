@@ -158,6 +158,12 @@
   .ei-phone-row .ei-phone-trigger .delivery-trigger-side{font-size:15px!important}
   .ei-phone-row>input[type="tel"]{font-size:16px!important}
 }
+
+/* El plazo de pago utiliza el mismo desplegable visual que la zona de entrega. */
+.payment-due-picker{margin-top:7px}
+.payment-due-picker .delivery-trigger{min-height:54px;font:inherit;font-size:14px;text-align:left}
+.payment-due-picker .delivery-trigger-main{font-weight:750}
+.payment-due-picker .delivery-menu{max-height:240px}
 </style>
 </head>
 <body>
@@ -358,12 +364,19 @@
         <label class="payment-option" id="postDeliveryTimingOption" style="display:none"><input type="radio" name="paymentTiming" value="POST_DELIVERY"> <span>Después de la entrega</span></label>
         <div id="paymentDueWrap" class="hidden">
           <label for="paymentDueHours">¿Cuándo realizarás el pago?</label>
-          <select id="paymentDueHours">
+          <select id="paymentDueHours" class="delivery-native-select" aria-label="Plazo para realizar el pago">
             <option value="1">Dentro de 1 hora</option>
             <option value="2">Dentro de 2 horas</option>
             <option value="3">Dentro de 3 horas</option>
             <option value="CUSTOM">Personalizado: elegir fecha y hora</option>
           </select>
+          <div class="delivery-picker payment-due-picker" id="paymentDuePicker">
+            <button type="button" class="delivery-trigger" id="paymentDueTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="delivery-trigger-main"><span id="paymentDueSelectedText">Dentro de 1 hora</span></span>
+              <span class="delivery-trigger-side"><span class="delivery-chevron">⌄</span></span>
+            </button>
+            <div class="delivery-menu" id="paymentDueMenu" role="listbox" aria-label="Cuándo realizarás el pago"></div>
+          </div>
           <label id="paymentDueCustomWrap" class="hidden" for="paymentDueCustom">Fecha y hora exactas (máximo 24 horas desde el pedido)
             <input id="paymentDueCustom" type="datetime-local" step="60" aria-describedby="paymentDueHelp">
           </label>
