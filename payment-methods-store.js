@@ -115,7 +115,8 @@
   }catch(err){console.warn("No se pudo registrar el pedido para el reporte:",err)}
   try{
    sessionStorage.setItem("electroisla_payment_method",String(m.code||""));
-   if(m.code==="ZELLE"){
+   sessionStorage.setItem("electroisla_payment_timing",String(t||"PREPAID"));
+   if(m.code==="ZELLE"&&t==="PREPAID"){
     const accountEntries=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
     const accountDetails=accountEntries.map(function(x){return {label:String(x[0]),value:String(x[1])}});
     const normalizeAccountLabel=function(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()};
