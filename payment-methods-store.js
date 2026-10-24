@@ -29,14 +29,14 @@
   return methods.filter(m=>{
    if(!m.enabled||(m.currency==="USD"?!totals.usdAvailable:!totals.cupAvailable))return false;
    const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
-   if(t==="PREPAID")return m.code==="ZELLE"&&m.supports_prepaid;
+   if(t==="PREPAID")return (m.code==="ZELLE"&&m.supports_prepaid)||m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
    if(isZelle)return m.code==="ZELLE"&&m.supports_postdelivery;
    return true;
   });
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
-  const hasPost=methods.some(m=>m.enabled&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  const hasPost=methods.some(m=>m.enabled&&(m.currency==="TRANSFERENCIA_PREPAGO"||m.code==="TRANSFERENCIA_PREPAGO"?totals.usdAvailable:m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
@@ -90,11 +90,11 @@
  function summary(){
   const box=byId("paymentSummary");if(!box)return;
   const m=current();if(!m){box.innerHTML="<span>Selecciona un método de pago disponible.</span>";return}
-  const totals=getOrderTotals(),usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA",amount=usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,fee=usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP;
+  const totals=getOrderTotals(),prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO",usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA",amount=prepago?totals.usdTotal*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,fee=prepago?totals.deliveryFeeUSD*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP;
   const zelleAccount=m.code==="ZELLE"?accountForZelleAmount(totals.usdTotal):null;
   const detailsSource=m.code==="ZELLE"?(zelleAccount?{Cuenta:zelleAccount.account_value,Titular:zelleAccount.account_holder}:{}):m.account_details;
   const details=detailsSource&&typeof detailsSource==="object"?Object.entries(detailsSource).filter(function(x){return String(x[1]??"").trim()}):[];
-  let out="<strong>Total a pagar: "+escPay(money(amount,m.currency))+"</strong><span>"+(getDeliveryZone()?"Zona: "+escPay(getDeliveryZone()):"Selecciona una zona")+"</span><span>"+(fee>0?"Domicilio: "+escPay(money(fee,m.currency)):"Domicilio: Gratis")+"</span><span>Método seleccionado: "+escPay(m.name)+"</span>";
+  let out="<strong>Total a pagar: "+escPay(money(amount,prepago?"USD":m.currency))+"</strong><span>"+(getDeliveryZone()?"Zona: "+escPay(getDeliveryZone()):"Selecciona una zona")+"</span><span>"+(fee>0?"Domicilio: "+escPay(money(fee,prepago?"USD":m.currency)):"Domicilio: Gratis")+"</span><span>Método seleccionado: "+escPay(m.name)+"</span>";
   if(m.code==="ZELLE"&&(!zelleAccount||!String(zelleAccount.account_value||"").trim()))out+="<span><strong>Cuenta Zelle:</strong> Falta configurar una cuenta para este importe.</span>";
   if(timing()==="PREPAID")out+="<strong>Pago antes de la entrega</strong>";
   else {out+="<strong>Pago después de la entrega</strong>";if(m.code==="ZELLE"){const due=selectedDueDate(new Date());out+="<span>Fecha límite de pago: "+(due?escPay(due.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})):"Selecciona una fecha y hora válidas")+"</span>";}}
@@ -117,16 +117,17 @@
   e.preventDefault();e.stopImmediatePropagation();
   const m=current(),t=timing(),totals=getOrderTotals();
   if(!m){alert("No hay un método habilitado para la modalidad elegida.");return}
-  if(t==="PREPAID"&&!(m.code==="ZELLE"&&m.supports_prepaid)){alert("Antes de la entrega solo está disponible Zelle cuando está habilitado para prepago.");return}
+  const prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
+  if(t==="PREPAID"&&!(m.code==="ZELLE"&&m.supports_prepaid)&&!prepago){alert("Antes de la entrega solo están disponibles los métodos habilitados para prepago.");return}
   const usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA";
-  if(usd&&!totals.usdAvailable){alert("Este método en USD no está disponible para estos productos.");return}
+  if((usd||prepago)&&!totals.usdAvailable){alert("Este método en USD no está disponible para estos productos.");return}
   if(!usd&&!totals.cupAvailable){alert("Los métodos en CUP solo están disponibles para pedidos de electrodomésticos.");return}
   const zone=byId("municipality").value,other=byId("otherZone").value.trim();
   if(!zone){alert("Selecciona la zona de entrega.");return}if(zone==="Otro"&&!other){alert("Escribe cuál es tu zona de entrega.");return}
   const name=byId("customerName").value.trim(),phone=(byId("customerPhoneCode").value==="+1-CA"?"+1":byId("customerPhoneCode").value)+byId("customerPhone").value.trim();
   const recipientName=byId("recipientName").value.trim(),recipientAddress=byId("recipientAddress").value.trim(),recipientPhone=(byId("recipientPhoneCode").value==="+1-CA"?"+1":byId("recipientPhoneCode").value)+byId("recipientPhone").value.trim(),note=byId("note").value.trim();
   if(!recipientName||!recipientAddress||!recipientPhone){alert("Completa el nombre, la dirección y el teléfono de quien recibe el pedido.");return}
-  const zoneName=zone==="Otro"?other:zone,amount=usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,delivery=usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP,subtotal=Math.max(0,amount-delivery);
+  const zoneName=zone==="Otro"?other:zone,prepagoRate=Number(storeSettings.transfer_prepago_rate||1.04),amount=prepago?totals.usdTotal*prepagoRate:usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,delivery=prepago?totals.deliveryFeeUSD*prepagoRate:usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP,subtotal=Math.max(0,amount-delivery);
   const usesDueDate=t==="POST_DELIVERY"&&m.code==="ZELLE",orderCreatedAt=new Date(),dueDate=usesDueDate?selectedDueDate(orderCreatedAt):null,dueAt=dueDate?dueDate.toISOString():null;
   if(usesDueDate&&!dueDate){alert("Selecciona un plazo válido. La fecha y hora personalizadas deben estar entre ahora y las próximas 24 horas.");return}
   let orderAccountDetails=m.account_details;
@@ -140,7 +141,7 @@
    if(String(selectedAccount.account_holder||"").trim())orderAccountDetails.Titular=String(selectedAccount.account_holder).trim();
   }
   const details=orderAccountDetails&&typeof orderAccountDetails==="object"?Object.entries(orderAccountDetails).filter(function(x){return String(x[1]??"").trim()}).map(function(x){return x[0]+": "+x[1]}).join("\n"):"";
-  const lines=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return "";const price=effectivePrice(p),line=usd?money(price*i.qty,"USD"):transfer?money(transferCup(p)*i.qty,"CUP"):money(cashCup(p)*i.qty,"CUP");return "• "+p.name+" — "+i.qty+" "+(p.unit||"unidad")+" — "+line}).filter(Boolean).join("\n");
+  const lines=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return "";const price=effectivePrice(p),line=prepago?money(price*i.qty*prepagoRate,"USD"):usd?money(price*i.qty,"USD"):transfer?money(transferCup(p)*i.qty,"CUP"):money(cashCup(p)*i.qty,"CUP");return "• "+p.name+" — "+i.qty+" "+(p.unit||"unidad")+" — "+line}).filter(Boolean).join("\n");
   const dueChoice=byId("paymentDueHours")?.value||"1",dueLabel=dueChoice==="CUSTOM"?"Personalizado":dueChoice+" hora"+(dueChoice==="1"?"":"s");
   const when=t==="PREPAID"?"Antes de la entrega":usesDueDate?"Después de la entrega ("+dueLabel+", fecha límite "+dueDate.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})+")":"Después de la entrega";
   const msg="🛒 NUEVO PEDIDO\n\n👤 PERSONA QUE REALIZA EL PEDIDO\nNombre: "+name+"\nTeléfono: "+phone+"\n\n📦 PERSONA QUE RECIBE EL PEDIDO\nNombre: "+recipientName+"\nDirección: "+recipientAddress+"\nTeléfono: "+recipientPhone+"\n\n🛍️ PRODUCTOS:\n"+lines+"\n\n📍 Zona de entrega: "+zoneName+"\n\n💳 MÉTODO DE PAGO: "+m.name+" ("+m.code+")\n🕒 MOMENTO DE PAGO: "+when+"\n"+(details?"🏦 DATOS DE PAGO:\n"+details+"\n":"")+(t==="POST_DELIVERY"&&m.postdelivery_terms?"📅 CONDICIONES: "+m.postdelivery_terms+"\n":"")+"🧾 Subtotal: "+money(subtotal,m.currency)+"\n🚚 Domicilio: "+(delivery>0?money(delivery,m.currency):"Gratis")+"\n💰 TOTAL A PAGAR: "+money(amount,m.currency)+(note?"\n📝 Nota: "+note:"");
