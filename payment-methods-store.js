@@ -7,7 +7,7 @@
  let zelleAmountAccounts=[];
  const byId=id=>document.getElementById(id);
  async function loadZelleAmountAccounts(){
-  const res=await supabaseClient.from("zelle_amount_accounts").select("id,label,max_amount,account_value,account_holder,enabled,sort_order").eq("enabled",true).order("sort_order",{ascending:true});
+  const res=await supabaseClient.from("zelle_amount_accounts").select("id,label,min_amount,max_amount,account_value,account_holder,enabled,sort_order").eq("enabled",true).order("sort_order",{ascending:true});
   if(res.error)throw res.error;
   zelleAmountAccounts=Array.isArray(res.data)?res.data:[];
   return zelleAmountAccounts;
@@ -15,7 +15,7 @@
  function accountForZelleAmount(amount){
   const value=Number(amount);if(!Number.isFinite(value)||value<0)return null;
   const rows=[...zelleAmountAccounts].sort((a,b)=>Number(a.sort_order)-Number(b.sort_order));
-  return rows.find(row=>row.max_amount===null||row.max_amount===undefined||row.max_amount===""||value<=Number(row.max_amount))||null;
+  return rows.find(row=>(row.min_amount===null||row.min_amount===undefined||row.min_amount===""||value>Number(row.min_amount))&&(row.max_amount===null||row.max_amount===undefined||row.max_amount===""||value<=Number(row.max_amount)))||null;
  }
  const escPay=value=>String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});
  const timing=()=>form.querySelector('input[name="paymentTiming"]:checked')?.value||"PREPAID";
