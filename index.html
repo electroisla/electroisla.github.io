@@ -180,14 +180,35 @@
   box-shadow:0 3px 12px rgba(23,59,104,.045);
 }
 #paymentDueCustomWrap.hidden{display:none!important}
-#paymentDueCustomWrap::before{
-  content:"FECHA Y HORA DE PAGO";
-  display:block;
-  margin:0 0 9px;
-  color:#e8781b;
-  font-size:10px;
+#paymentDueCustomWrap .payment-due-custom-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 4px;
+  color:#173b68;
+  font-size:13px;
   font-weight:850;
-  letter-spacing:.09em;
+}
+#paymentDueCustomWrap .payment-due-custom-title span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:27px;
+  height:27px;
+  flex:0 0 27px;
+  border-radius:9px;
+  background:#fff0e2;
+  color:#e8781b;
+  font-size:19px;
+  line-height:1;
+}
+#paymentDueCustomWrap .payment-due-custom-caption{
+  display:block;
+  margin:0 0 8px;
+  color:#66788c;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.45;
 }
 #paymentDueCustom{
   display:block;
@@ -475,7 +496,9 @@
             </button>
             <div class="delivery-menu" id="paymentDueMenu" role="listbox" aria-label="Cuándo realizarás el pago"></div>
           </div>
-          <label id="paymentDueCustomWrap" class="hidden" for="paymentDueCustom">Fecha y hora exactas (máximo 24 horas desde el pedido)
+          <label id="paymentDueCustomWrap" class="hidden" for="paymentDueCustom">
+            <span class="payment-due-custom-title"><span aria-hidden="true">▦</span> Establecer fecha y hora</span>
+            <span class="payment-due-custom-caption">Selecciona el momento exacto en que realizarás el pago.</span>
             <input id="paymentDueCustom" type="datetime-local" step="60" aria-describedby="paymentDueHelp">
           </label>
           <small id="paymentDueHelp" class="payment-help">La fecha y hora elegidas deben estar dentro de las 24 horas posteriores al envío del pedido.</small>
