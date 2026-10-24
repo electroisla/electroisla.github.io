@@ -118,7 +118,7 @@
    if(m.code==="ZELLE"){
     const accountEntries=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
     const accountDetails=accountEntries.map(function(x){return {label:String(x[0]),value:String(x[1])}});
-    const normalizeAccountLabel=function(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").trim()};
+    const normalizeAccountLabel=function(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()};
     let accountEntry=accountEntries.find(function(x){return ["cuenta","numero","numero de cuenta","correo o telefono","correo/telefono","email","telefono","correo"].includes(normalizeAccountLabel(x[0]))});
     if(!accountEntry)accountEntry=accountEntries.find(function(x){const label=normalizeAccountLabel(x[0]);return !/titular|nombre/.test(label)&&/(cuenta|numero|correo|telefono|email|zelle)/.test(label)});
     if(!accountEntry)accountEntry=accountEntries.find(function(x){return !/titular|nombre/i.test(String(x[0]))});
