@@ -892,28 +892,61 @@ async function submitReview(){
 function showThankYou(){
  const modal=document.getElementById("thankYouModal");
  if(!modal)return;
+ const zelleModal=document.getElementById("zelleAccountModal");
+ if(zelleModal){zelleModal.classList.add("hidden");zelleModal.setAttribute("aria-hidden","true");}
  modal.classList.remove("hidden");
  modal.setAttribute("aria-hidden","false");
 }
-function finishPurchase(){
- cart=[];
- save();
- const form=document.getElementById("orderForm");
- if(form)form.reset();
- const select=document.getElementById("municipality");
- if(select){
-   select.value="";
-   select.dispatchEvent(new Event("change",{bubbles:true}));
+function showZelleAccount(){
+ let data=null;
+ try{data=JSON.parse(sessionStorage.getItem("electroisla_zelle_account")||"null")}catch(e){}
+ if(!data||!data.copyValue)return false;
+ const modal=document.getElementById("zelleAccountModal");
+ const details=document.getElementById("zelleAccountDetails");
+ if(!modal||!details)return false;
+ details.replaceChildren();
+ (Array.isArray(data.details)?data.details:[]).forEach(item=>{
+  const row=document.createElement("div");row.className="ei-zelle-detail";
+  const label=document.createElement("span");label.className="ei-zelle-detail-label";label.textContent=String(item.label||"");
+  const value=document.createElement("strong");value.textContent=String(item.value||"");
+  row.append(label,value);details.append(row);
+ });
+ modal.classList.remove("hidden");modal.setAttribute("aria-hidden","false");
+ return true;
+}
+async function copyZelleAccountAndContinue(){
+ let data=null;
+ try{data=JSON.parse(sessionStorage.getItem("electroisla_zelle_account")||"null")}catch(e){}
+ if(!data||!data.copyValue){showThankYou();return}
+ let copied=false;
+ try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(String(data.copyValue));copied=true}}catch(e){}
+ if(!copied){
+  const field=document.createElement("textarea");field.value=String(data.copyValue);
+  field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";field.style.pointerEvents="none";
+  document.body.appendChild(field);field.select();field.setSelectionRange(0,field.value.length);
+  try{copied=document.execCommand("copy")}catch(e){copied=false}
+  field.remove();
  }
+ if(!copied){alert("No se pudo copiar automáticamente. Mantén pulsado el número o correo de Zelle para copiarlo.");return}
+ const btn=document.getElementById("zelleCopyContinue");if(btn){btn.textContent="✓ Copiado";btn.disabled=true}
+ sessionStorage.removeItem("electroisla_zelle_account");
+ showThankYou();
+}
+function finishPurchase(){
+ cart=[];save();
+ const form=document.getElementById("orderForm");if(form)form.reset();
+ const select=document.getElementById("municipality");
+ if(select){select.value="";select.dispatchEvent(new Event("change",{bubbles:true}))}
  const modal=document.getElementById("thankYouModal");
- if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true");}
+ if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true")}
+ const zelleModal=document.getElementById("zelleAccountModal");
+ if(zelleModal){zelleModal.classList.add("hidden");zelleModal.setAttribute("aria-hidden","true")}
+ sessionStorage.removeItem("electroisla_zelle_account");
+ sessionStorage.removeItem("electroisla_payment_method");
  document.getElementById("checkoutModal")?.classList.add("hidden");
- closeCart();
- currentFilter="Todos";
+ closeCart();currentFilter="Todos";
  document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.filter==="Todos"));
- render("Todos");
- renderCart();
- window.scrollTo({top:0,behavior:"smooth"});
+ render("Todos");renderCart();window.scrollTo({top:0,behavior:"smooth"});
 }
 let waitingForWhatsAppReturn=false;
 function markWhatsAppPending(){
@@ -921,10 +954,10 @@ function markWhatsAppPending(){
  sessionStorage.setItem("electroisla_whatsapp_pending","1");
 }
 function checkWhatsAppReturn(){
- if(!waitingForWhatsAppReturn && sessionStorage.getItem("electroisla_whatsapp_pending")!=="1")return;
+ if(!waitingForWhatsAppReturn&&sessionStorage.getItem("electroisla_whatsapp_pending")!=="1")return;
  if(document.visibilityState==="hidden")return;
- waitingForWhatsAppReturn=false;
- sessionStorage.removeItem("electroisla_whatsapp_pending");
+ waitingForWhatsAppReturn=false;sessionStorage.removeItem("electroisla_whatsapp_pending");
+ if(sessionStorage.getItem("electroisla_payment_method")==="ZELLE"&&showZelleAccount())return;
  showThankYou();
 }
 
