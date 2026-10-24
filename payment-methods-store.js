@@ -113,6 +113,20 @@
    const res=await supabaseClient.from("orders").insert({customer_name:name,customer_phone:phone,delivery_zone:zoneName,payment_method:m.code,payment_timing:t,payment_due_at:dueAt,payment_status:"PENDING",currency:m.currency,subtotal:subtotal,delivery_fee:delivery,total:amount,items:items,note:["DATOS DE QUIEN RECIBE EL PEDIDO: "+recipientName+"; Dirección: "+recipientAddress+"; Teléfono: "+recipientPhone,note].filter(Boolean).join("\n"),status:"sent"});
    if(res.error)console.warn("No se pudo registrar el pedido para el reporte:",res.error);
   }catch(err){console.warn("No se pudo registrar el pedido para el reporte:",err)}
+  try{
+   sessionStorage.setItem("electroisla_payment_method",String(m.code||""));
+   if(m.code==="ZELLE"){
+    const accountEntries=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
+    const accountDetails=accountEntries.map(function(x){return {label:String(x[0]),value:String(x[1])}});
+    const normalizeAccountLabel=function(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").trim()};
+    let accountEntry=accountEntries.find(function(x){return ["cuenta","numero","numero de cuenta","correo o telefono","correo/telefono","email","telefono","correo"].includes(normalizeAccountLabel(x[0]))});
+    if(!accountEntry)accountEntry=accountEntries.find(function(x){const label=normalizeAccountLabel(x[0]);return !/titular|nombre/.test(label)&&/(cuenta|numero|correo|telefono|email|zelle)/.test(label)});
+    if(!accountEntry)accountEntry=accountEntries.find(function(x){return !/titular|nombre/i.test(String(x[0]))});
+    const copyValue=accountEntry?String(accountEntry[1]).trim():"";
+    if(copyValue)sessionStorage.setItem("electroisla_zelle_account",JSON.stringify({details:accountDetails,copyValue:copyValue}));
+    else sessionStorage.removeItem("electroisla_zelle_account");
+   }else sessionStorage.removeItem("electroisla_zelle_account");
+  }catch(storageError){console.warn("No se pudieron guardar temporalmente los datos de Zelle",storageError)}
   if(typeof markWhatsAppPending==="function")markWhatsAppPending();
   window.open("https://wa.me/5352017110?text="+encodeURIComponent(msg),"_blank");
  },true);
