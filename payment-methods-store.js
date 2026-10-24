@@ -10,11 +10,14 @@
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
  function available(){
   const totals=getOrderTotals(),t=timing();
-  return methods.filter(m=>m.enabled&&(t==="PREPAID"?(m.code==="ZELLE"&&m.supports_prepaid):m.supports_postdelivery)&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  // Antes de la entrega: solo Zelle si está habilitado para prepago.
+  // Después de la entrega: todos los métodos activos que sean compatibles con la moneda/productos del pedido.
+  // La lista procede de payment_methods, por lo que también incorpora futuros métodos sin editar este archivo.
+  return methods.filter(m=>m.enabled&&(t==="PREPAID"?(m.code==="ZELLE"&&m.supports_prepaid):true)&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
-  const hasPost=methods.some(m=>m.enabled&&m.supports_postdelivery&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  const hasPost=methods.some(m=>m.enabled&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
@@ -88,7 +91,7 @@
   e.preventDefault();e.stopImmediatePropagation();
   const m=current(),t=timing(),totals=getOrderTotals();
   if(!m){alert("No hay un método habilitado para la modalidad elegida.");return}
-  if(t==="PREPAID"&&!m.supports_prepaid||t==="POST_DELIVERY"&&!m.supports_postdelivery){alert("Este método no está habilitado para esa modalidad.");return}
+  if(t==="PREPAID"&&!(m.code==="ZELLE"&&m.supports_prepaid)){alert("Antes de la entrega solo está disponible Zelle cuando está habilitado para prepago.");return}
   const usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA";
   if(usd&&!totals.usdAvailable){alert("Este método en USD no está disponible para estos productos.");return}
   if(!usd&&!totals.cupAvailable){alert("Los métodos en CUP solo están disponibles para pedidos de electrodomésticos.");return}
