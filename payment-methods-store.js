@@ -10,7 +10,7 @@
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
  function available(){
   const totals=getOrderTotals(),t=timing();
-  return methods.filter(m=>m.enabled&&(t==="PREPAID"?m.supports_prepaid:m.supports_postdelivery)&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  return methods.filter(m=>m.enabled&&(t==="PREPAID"?(m.code==="ZELLE"&&m.supports_prepaid):m.supports_postdelivery)&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
