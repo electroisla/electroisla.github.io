@@ -22,15 +22,16 @@
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
  function available(){
   const totals=getOrderTotals(),t=timing();
-  // Los códigos ZELLE50, ZELLE100, ZELLE200 y ZELLE300 son cuentas antiguas por importe,
-  // no métodos independientes. La cuenta correcta se toma de zelle_amount_accounts.
-  // Mostrar una sola opción Zelle y conservar los demás métodos compatibles.
+  // Los códigos ZELLE50, ZELLE100, ZELLE200, ZELLE300 y ZELLE400 son cuentas
+  // antiguas por importe, no métodos independientes. La cuenta se asigna desde zelle_amount_accounts.
+  // Después de la entrega, mostrar Zelle una sola vez y todos los demás métodos activos compatibles
+  // con la moneda/productos, incluidos efectivo y transferencia y futuros métodos.
   return methods.filter(m=>{
    if(!m.enabled||(m.currency==="USD"?!totals.usdAvailable:!totals.cupAvailable))return false;
    const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
    if(t==="PREPAID")return m.code==="ZELLE"&&m.supports_prepaid;
    if(isZelle)return m.code==="ZELLE"&&m.supports_postdelivery;
-   return m.supports_postdelivery;
+   return true;
   });
  }
  function render(){
