@@ -790,16 +790,16 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <label>Nombre del método<input id="paymentMethodName" required maxlength="80" placeholder="Ej. Zelle"></label>
 <label>Código único<input id="paymentMethodCode" required maxlength="40" pattern="[A-Za-z0-9_]{2,40}" placeholder="Ej. ZELLE"></label>
 <label hidden>Moneda del pedido<select id="paymentMethodCurrency"><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
-<label>Orden de aparición<input id="paymentMethodOrder" type="number" step="1" value="10"></label>
+<input type="hidden" id="paymentMethodOrder" value="10">
 <div class="payment-account-fields" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-<label>Número de cuenta Zelle<input id="paymentMethodAccountNumber" maxlength="180" autocomplete="off" placeholder="Correo electrónico o teléfono asociado a Zelle"></label>
-<label>Nombre del titular de la cuenta (Zelle)<input id="paymentMethodAccountHolder" maxlength="180" placeholder="Nombre y apellidos del titular"></label>
+<label>Número de Cuenta<input id="paymentMethodAccountNumber" maxlength="180" autocomplete="off" placeholder="Número de cuenta, correo o teléfono"></label>
+<label>Titular de la cuenta<input id="paymentMethodAccountHolder" maxlength="180" placeholder="Nombre y apellidos del titular"></label>
 </div>
 <textarea id="paymentMethodDetails" hidden aria-hidden="true">{}</textarea>
-<p class="settings-help" style="grid-column:1/-1;margin:0">Para Zelle, escribe el correo o teléfono asociado y el nombre exacto del titular. No hace falta introducir código JSON.</p>
+
 <label style="grid-column:1/-1">Instrucciones para el cliente<textarea id="paymentMethodInstructions" rows="3" placeholder="Cómo realizar el pago"></textarea></label>
-<label style="grid-column:1/-1">Condiciones y plazo para pago posterior<textarea id="paymentMethodTerms" rows="2" placeholder="Ej. Pagar dentro de los 3 días posteriores a la entrega"></textarea></label>
-<div style="grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap"><label><input type="checkbox" id="paymentMethodEnabled" checked> Método activo</label><label><input type="checkbox" id="paymentMethodPrepaid" checked> Permitir pago anticipado</label><label><input type="checkbox" id="paymentMethodPost"> Permitir pago después de la entrega</label></div>
+<label style="grid-column:1/-1">Condiciones y plazos<textarea id="paymentMethodTerms" rows="2" placeholder="Condiciones, plazos y fechas límite"></textarea></label>
+<div hidden aria-hidden="true"><input type="checkbox" id="paymentMethodEnabled" checked><input type="checkbox" id="paymentMethodPrepaid" checked><input type="checkbox" id="paymentMethodPost"></div>
 <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit" id="savePaymentMethod">💾 Guardar método</button><button class="btn secondary" type="button" id="resetPaymentMethod">Limpiar formulario</button><span id="paymentMethodsStatus" class="settings-status" aria-live="polite"></span></div>
 </form>
 <div id="paymentMethodsList" class="admin-list" aria-live="polite"><p>Cargando métodos de pago…</p></div>
