@@ -802,6 +802,19 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit" id="savePaymentMethod">💾 Guardar método</button><button class="btn secondary" type="button" id="resetPaymentMethod">Limpiar formulario</button><span id="paymentMethodsStatus" class="settings-status" aria-live="polite"></span></div>
 </form>
 <div id="paymentMethodsList" class="admin-list" aria-live="polite"><p>Cargando métodos de pago…</p></div>
+<div class="admin-card" id="zelleAmountAccountsPanel" style="margin-top:14px;padding:14px;border:1px solid #f2c7a6;background:#fffaf6">
+<h2>🏦 Cuentas Zelle por importe de compra</h2>
+<p class="settings-help">La tienda seleccionará automáticamente la cuenta según el total en USD del pedido, incluido el domicilio. Cada límite es inclusivo por arriba; el siguiente rango comienza por encima de ese importe.</p>
+<div class="admin-grid" style="margin:12px 0">
+<label>Límite máximo de la cuenta 1 (USD)<input id="zelleAmountMax1" type="number" min="0.01" step="0.01" value="50" required></label>
+<label>Límite máximo de la cuenta 2 (USD)<input id="zelleAmountMax2" type="number" min="0.01" step="0.01" value="100" required></label>
+<label>Límite máximo de la cuenta 3 (USD)<input id="zelleAmountMax3" type="number" min="0.01" step="0.01" value="200" required></label>
+</div>
+<p class="settings-help">Los límites deben ser positivos y ascendentes. La cuarta cuenta se utiliza para importes superiores al tercer límite.</p>
+<div id="zelleAmountAccountsList" class="admin-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><p>Cargando las cuatro cuentas Zelle…</p></div>
+<div class="row" style="margin-top:12px"><button type="button" class="btn primary" id="saveZelleAmountAccounts">💾 Guardar cuentas y rangos</button><span id="zelleAmountAccountsStatus" class="settings-status" aria-live="polite">Cargando configuración…</span></div>
+<p class="settings-help" style="margin-top:8px">Si el rango elegido no tiene una cuenta configurada, la tienda no enviará el pedido con una cuenta equivocada. La pantalla para copiar Zelle seguirá apareciendo únicamente cuando el cliente elija pagar antes de la entrega.</p>
+</div>
 </section>
 
 <section class="admin-card category-manager" id="categoryManager">
@@ -964,7 +977,8 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="admin.js?v=28"></script>
+<script src="admin.js?v=29"></script>
+  <script src="zelle-amount-accounts-admin.js?v=1"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
 <script>
 (()=>{const b=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;let shade=document.getElementById('eiNavShade');if(!shade){shade=document.createElement('button');shade.id='eiNavShade';shade.type='button';shade.setAttribute('aria-label','Cerrar menú');document.body.appendChild(shade)}function close(){b.setAttribute('aria-expanded','false');n.classList.remove('is-open');shade.classList.remove('is-open');document.body.classList.remove('ei-nav-locked')}function open(){b.setAttribute('aria-expanded','true');n.classList.add('is-open');shade.classList.add('is-open');document.body.classList.add('ei-nav-locked')}b.addEventListener('click',()=>b.getAttribute('aria-expanded')==='true'?close():open());shade.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches)close()}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})();
