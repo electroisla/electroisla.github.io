@@ -17,11 +17,38 @@
   const hasPost=methods.some(m=>m.enabled&&m.supports_postdelivery&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
-  const due=byId("paymentDueWrap");if(due)due.classList.toggle("hidden",!(timing()==="POST_DELIVERY"&&current()?.code==="ZELLE"));
+  updateDueUI();
+
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
   list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'> <span>'+escPay(m.name)+' · '+escPay(m.currency)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
   if(!items.some(m=>m.code===old)&&items.length){const r=list.querySelector('input[name="paymentMethod"]');if(r)r.checked=true}
   summary();
+ }
+ function updateDueUI(){
+  const eligible=timing()==="POST_DELIVERY"&&current()?.code==="ZELLE";
+  const wrap=byId("paymentDueWrap"),customWrap=byId("paymentDueCustomWrap"),choice=byId("paymentDueHours"),custom=byId("paymentDueCustom"),help=byId("paymentDueHelp");
+  if(wrap)wrap.classList.toggle("hidden",!eligible);
+  const isCustom=eligible&&choice?.value==="CUSTOM";
+  if(customWrap)customWrap.classList.toggle("hidden",!isCustom);
+  if(custom){
+   const now=new Date(),max=new Date(now.getTime()+24*60*60*1000);
+   const localValue=d=>{const pad=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())};
+   custom.min=localValue(now);custom.max=localValue(max);
+  }
+  if(help)help.textContent="La fecha y hora deben estar dentro de las 24 horas siguientes al envío del pedido.";
+ }
+ function selectedDueDate(base){
+  const choice=byId("paymentDueHours")?.value||"1";
+  if(choice==="CUSTOM"){
+   const raw=byId("paymentDueCustom")?.value;
+   if(!raw)return null;
+   const chosen=new Date(raw),min=base.getTime(),max=min+24*60*60*1000;
+   if(!Number.isFinite(chosen.getTime())||chosen.getTime()<min||chosen.getTime()>max)return null;
+   return chosen;
+  }
+  const hours=Number(choice);
+  if(![1,2,3].includes(hours))return null;
+  return new Date(base.getTime()+hours*60*60*1000);
  }
  function summary(){
   const box=byId("paymentSummary");if(!box)return;
@@ -30,7 +57,7 @@
   const details=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).filter(function(x){return String(x[1]??"").trim()}):[];
   let out="<strong>Total a pagar: "+escPay(money(amount,m.currency))+"</strong><span>"+(getDeliveryZone()?"Zona: "+escPay(getDeliveryZone()):"Selecciona una zona")+"</span><span>"+(fee>0?"Domicilio: "+escPay(money(fee,m.currency)):"Domicilio: Gratis")+"</span><span>Método seleccionado: "+escPay(m.name)+"</span>";
   if(timing()==="PREPAID")out+="<strong>Pago antes de la entrega</strong>";
-  else {out+="<strong>Pago después de la entrega</strong>";if(m.code==="ZELLE"){const days=Number(byId("paymentDueDays")?.value||3);out+="<span>Fecha límite elegida: "+new Date(Date.now()+days*86400000).toLocaleDateString("es-ES")+"</span>";}}
+  else {out+="<strong>Pago después de la entrega</strong>";if(m.code==="ZELLE"){const due=selectedDueDate(new Date());out+="<span>Fecha límite de pago: "+(due?escPay(due.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})):"Selecciona una fecha y hora válidas")+"</span>";}}
   details.forEach(function(x){const label=m.code==="ZELLE"?(x[0]==="Cuenta"||x[0]==="Número de cuenta"||x[0]==="Numero de cuenta"||x[0]==="Número"||x[0]==="Correo o teléfono"?"Correo/teléfono de Zelle":x[0]==="Titular"||x[0]==="Nombre del titular"||x[0]==="Titular de la cuenta"?"Titular de la cuenta":x[0]):x[0];out+="<span><strong>"+escPay(label)+":</strong> "+escPay(x[1])+"</span>"});
   if(m.instructions)out+="<span><strong>Instrucciones:</strong> "+escPay(m.instructions)+"</span>";
   if(timing()==="POST_DELIVERY"&&m.postdelivery_terms)out+="<span><strong>Condiciones:</strong> "+escPay(m.postdelivery_terms)+"</span>";
@@ -41,7 +68,7 @@
   catch(e){console.warn("No se pudieron cargar métodos de pago",e);methods=[]}
   render();
  }
- form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"],input[name="paymentMethod"]'))render();else summary()});
+ form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"],input[name="paymentMethod"]'))render();else {if(e.target.id==="paymentDueHours")updateDueUI();summary()}});
  form.addEventListener("submit",async function(e){
   e.preventDefault();e.stopImmediatePropagation();
   const m=current(),t=timing(),totals=getOrderTotals();
@@ -56,10 +83,12 @@
   const recipientName=byId("recipientName").value.trim(),recipientAddress=byId("recipientAddress").value.trim(),recipientPhone=(byId("recipientPhoneCode").value==="+1-CA"?"+1":byId("recipientPhoneCode").value)+byId("recipientPhone").value.trim(),note=byId("note").value.trim();
   if(!recipientName||!recipientAddress||!recipientPhone){alert("Completa el nombre, la dirección y el teléfono de quien recibe el pedido.");return}
   const zoneName=zone==="Otro"?other:zone,amount=usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,delivery=usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP,subtotal=Math.max(0,amount-delivery);
-  const usesDueDate=t==="POST_DELIVERY"&&m.code==="ZELLE",days=Number(byId("paymentDueDays")?.value||3),dueAt=usesDueDate?new Date(Date.now()+days*86400000).toISOString():null;
+  const usesDueDate=t==="POST_DELIVERY"&&m.code==="ZELLE",orderCreatedAt=new Date(),dueDate=usesDueDate?selectedDueDate(orderCreatedAt):null,dueAt=dueDate?dueDate.toISOString():null;
+  if(usesDueDate&&!dueDate){alert("Selecciona un plazo válido. La fecha y hora personalizadas deben estar entre ahora y las próximas 24 horas.");return}
   const details=m.account_details&&typeof m.account_details==="object"?Object.entries(m.account_details).map(function(x){return x[0]+": "+x[1]}).join("\n"):"";
   const lines=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return "";const price=effectivePrice(p),line=usd?money(price*i.qty,"USD"):transfer?money(transferCup(p)*i.qty,"CUP"):money(cashCup(p)*i.qty,"CUP");return "• "+p.name+" — "+i.qty+" "+(p.unit||"unidad")+" — "+line}).filter(Boolean).join("\n");
-  const when=t==="PREPAID"?"Antes de la entrega":usesDueDate?"Después de la entrega (plazo de "+days+" día(s), fecha límite "+new Date(dueAt).toLocaleDateString("es-ES")+")":"Después de la entrega";
+  const dueChoice=byId("paymentDueHours")?.value||"1",dueLabel=dueChoice==="CUSTOM"?"Personalizado":dueChoice+" hora"+(dueChoice==="1"?"":"s");
+  const when=t==="PREPAID"?"Antes de la entrega":usesDueDate?"Después de la entrega ("+dueLabel+", fecha límite "+dueDate.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})+")":"Después de la entrega";
   const msg="🛒 NUEVO PEDIDO\n\n👤 PERSONA QUE REALIZA EL PEDIDO\nNombre: "+name+"\nTeléfono: "+phone+"\n\n📦 PERSONA QUE RECIBE EL PEDIDO\nNombre: "+recipientName+"\nDirección: "+recipientAddress+"\nTeléfono: "+recipientPhone+"\n\n🛍️ PRODUCTOS:\n"+lines+"\n\n📍 Zona de entrega: "+zoneName+"\n\n💳 MÉTODO DE PAGO: "+m.name+" ("+m.code+")\n🕒 MOMENTO DE PAGO: "+when+"\n"+(details?"🏦 DATOS DE PAGO:\n"+details+"\n":"")+(m.instructions?"📋 INSTRUCCIONES: "+m.instructions+"\n":"")+(t==="POST_DELIVERY"&&m.postdelivery_terms?"📅 CONDICIONES: "+m.postdelivery_terms+"\n":"")+"🧾 Subtotal: "+money(subtotal,m.currency)+"\n🚚 Domicilio: "+(delivery>0?money(delivery,m.currency):"Gratis")+"\n💰 TOTAL A PAGAR: "+money(amount,m.currency)+(note?"\n📝 Nota: "+note:"");
   try{
    const items=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return null;const price=Number(effectivePrice(p))||0,qty=Number(i.qty)||0;return {id:String(p.id),name:p.name||"",category:p.category||"",qty:qty,unit:p.unit||"",unit_price:price,line_total:price*qty}}).filter(Boolean);
@@ -71,6 +100,6 @@
  },true);
  load();
  const cartBox=byId("cartItems");if(cartBox&&typeof MutationObserver!=="undefined")new MutationObserver(function(){render()}).observe(cartBox,{childList:true,subtree:true});
- byId("municipality")?.addEventListener("change",render);byId("otherZone")?.addEventListener("input",summary);
+ byId("municipality")?.addEventListener("change",render);byId("otherZone")?.addEventListener("input",summary);byId("paymentDueCustom")?.addEventListener("input",summary);
  try{supabaseClient.channel("payment-methods-checkout").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},load).subscribe()}catch(e){}
 })();
