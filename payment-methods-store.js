@@ -22,10 +22,16 @@
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
  function available(){
   const totals=getOrderTotals(),t=timing();
-  // Antes de la entrega: solo Zelle si está habilitado para prepago.
-  // Después de la entrega: todos los métodos activos que sean compatibles con la moneda/productos del pedido.
-  // La lista procede de payment_methods, por lo que también incorpora futuros métodos sin editar este archivo.
-  return methods.filter(m=>m.enabled&&(t==="PREPAID"?(m.code==="ZELLE"&&m.supports_prepaid):true)&&(m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  // Los códigos ZELLE50, ZELLE100, ZELLE200 y ZELLE300 son cuentas antiguas por importe,
+  // no métodos independientes. La cuenta correcta se toma de zelle_amount_accounts.
+  // Mostrar una sola opción Zelle y conservar los demás métodos compatibles.
+  return methods.filter(m=>{
+   if(!m.enabled||(m.currency==="USD"?!totals.usdAvailable:!totals.cupAvailable))return false;
+   const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
+   if(t==="PREPAID")return m.code==="ZELLE"&&m.supports_prepaid;
+   if(isZelle)return m.code==="ZELLE"&&m.supports_postdelivery;
+   return m.supports_postdelivery;
+  });
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
