@@ -789,7 +789,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <input type="hidden" id="paymentMethodId">
 <label>Nombre del método<input id="paymentMethodName" required maxlength="80" placeholder="Ej. Zelle"></label>
 <label>Código único<input id="paymentMethodCode" required maxlength="40" pattern="[A-Za-z0-9_]{2,40}" placeholder="Ej. ZELLE"></label>
-<label hidden>Moneda del pedido<select id="paymentMethodCurrency"><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
+<label>Moneda de la cuenta<select id="paymentMethodCurrency" required><option value="USD">USD</option><option value="CUP">CUP</option></select></label>
 <input type="hidden" id="paymentMethodOrder" value="10">
 <div class="payment-account-fields" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
 <label>Número de Cuenta<input id="paymentMethodAccountNumber" maxlength="180" autocomplete="off" placeholder="Número de cuenta, correo o teléfono"></label>
