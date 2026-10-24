@@ -136,6 +136,7 @@ function initAllFancySelects(){
   initFancySelect("pCurrency","currencyPicker","currencyPickerTrigger","currencyPickerValue","currencyPickerOptions");
   initFancySelect("pUnit","unitPicker","unitPickerTrigger","unitPickerValue","unitPickerOptions");
   initFancySelect("salesRange","salesRangePicker","salesRangePickerTrigger","salesRangePickerValue","salesRangePickerOptions");
+  initFancySelect("paymentMethodCurrency","paymentCurrencyPicker","paymentCurrencyPickerTrigger","paymentCurrencyPickerValue","paymentCurrencyPickerOptions");
 }
 
 function persistCategoryOrder(){
