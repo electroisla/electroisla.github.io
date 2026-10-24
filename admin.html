@@ -979,7 +979,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
 <script src="admin.js?v=29"></script>
-  <script src="zelle-amount-accounts-admin.js?v=4"></script>
+  <script src="zelle-amount-accounts-admin.js?v=5"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
 <script>
 (()=>{const b=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');const n=document.getElementById('eiAdminNav');if(!b||!n)return;let shade=document.getElementById('eiNavShade');if(!shade){shade=document.createElement('button');shade.id='eiNavShade';shade.type='button';shade.setAttribute('aria-label','Cerrar menú');document.body.appendChild(shade)}function close(){b.setAttribute('aria-expanded','false');n.classList.remove('is-open');shade.classList.remove('is-open');document.body.classList.remove('ei-nav-locked')}function open(){b.setAttribute('aria-expanded','true');n.classList.add('is-open');shade.classList.add('is-open');document.body.classList.add('ei-nav-locked')}b.addEventListener('click',()=>b.getAttribute('aria-expanded')==='true'?close():open());shade.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:900px)').matches)close()}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})();
