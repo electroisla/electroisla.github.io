@@ -1546,7 +1546,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   avisos:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
   salir:'<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>'
  };
- const keyByHref={'#dashboard':'resumen','#productForm':'productos','#catalogPanel':'catalogo','#categoryManager':'categorias','#storeSettings':'precios','#zelleAmountAccountsPanel':'zelle','#salesReport':'ventas','#deliveryZonesPanel':'zonas','#reviewsAdmin':'resenas','#reviewNotifications':'avisos','#logoutBtn':'salir'};
+ const keyByHref={'#dashboard':'resumen','#productForm':'productos','#catalogPanel':'catalogo','#categoryManager':'categorias','#storeSettings':'precios','#zelleAmountAccountsPanel':'zelle','#salesReport':'reportes','#deliveryZonesPanel':'zonas','#reviewsAdmin':'resenas','#reviewNotifications':'avisos','#logoutBtn':'salir'};
  function apply(){
   document.querySelectorAll('#eiAdminNav a.ei-admin-nav-link').forEach(a=>{
    const key=keyByHref[a.getAttribute('href')], path=icons[key];
