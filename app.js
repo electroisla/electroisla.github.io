@@ -25,7 +25,7 @@ const localCategories=readLocalJSON("electroisla_categories",null);
 let products=Array.isArray(localProducts)?localProducts:[];
 let cart=Array.isArray(localCart)?localCart:[];
 let categories=Array.isArray(localCategories)?localCategories:[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
-let storeSettings={usd_to_cup:700,transfer_markup_percent:0};
+let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
 const effectivePrice=p=>Number.isFinite(Number(p.discountPrice))&&Number(p.discountPrice)>0&&Number(p.discountPrice)<Number(p.price)?Number(p.discountPrice):Number(p.price);
@@ -85,6 +85,61 @@ function updateDeliveryFields(){
  }
  updatePaymentSummary();
 }
+function setupPhoneCodePicker(selectId,pickerId,triggerId,menuId,textId){
+ const select=document.getElementById(selectId),picker=document.getElementById(pickerId),trigger=document.getElementById(triggerId),menu=document.getElementById(menuId),textBox=document.getElementById(textId);
+ if(!select||!picker||!trigger||!menu||!textBox)return;
+ const row=picker.closest(".ei-phone-row");
+ const phoneInput=row?.querySelector('input[type="tel"]');
+ // Aplica el tamaño al componente real, no solo a las reglas CSS generales.
+ function applyPhoneLayout(){
+  if(!row)return;
+  const narrow=window.matchMedia("(max-width: 360px)").matches;
+  row.style.setProperty("display","flex","important");
+  row.style.setProperty("flex-direction","row","important");
+  row.style.setProperty("align-items","stretch","important");
+  row.style.setProperty("gap",narrow?"6px":"8px","important");
+  row.style.setProperty("width","100%","important");
+  picker.style.setProperty("display","block","important");
+  picker.style.setProperty("position","relative","important");
+  picker.style.setProperty("flex",narrow?"0 0 100px":"0 0 112px","important");
+  picker.style.setProperty("width",narrow?"100px":"112px","important");
+  picker.style.setProperty("max-width",narrow?"42%":"40%","important");
+  picker.style.setProperty("min-width","0","important");
+  picker.style.setProperty("height","44px","important");
+  picker.style.setProperty("min-height","44px","important");
+  picker.style.setProperty("margin","7px 0 0","important");
+  trigger.style.setProperty("width","100%","important");
+  trigger.style.setProperty("height","44px","important");
+  trigger.style.setProperty("min-height","44px","important");
+  trigger.style.setProperty("box-sizing","border-box","important");
+  trigger.style.setProperty("padding",narrow?"10px 6px":"10px 8px","important");
+  trigger.style.setProperty("font-size","14px","important");
+  if(phoneInput){
+   phoneInput.style.setProperty("display","block","important");
+   phoneInput.style.setProperty("flex","1 1 0","important");
+   phoneInput.style.setProperty("width","0","important");
+   phoneInput.style.setProperty("max-width","none","important");
+   phoneInput.style.setProperty("min-width","0","important");
+   phoneInput.style.setProperty("height","44px","important");
+   phoneInput.style.setProperty("min-height","44px","important");
+   phoneInput.style.setProperty("box-sizing","border-box","important");
+   phoneInput.style.setProperty("margin","7px 0 0","important");
+   phoneInput.style.setProperty("font-size","12px","important");
+  }
+ }
+ applyPhoneLayout();
+ window.addEventListener("resize",applyPhoneLayout,{passive:true});
+ const countries={"+53":"Cuba","+1":"Estados Unidos","+34":"España","+52":"México","+57":"Colombia","+54":"Argentina","+56":"Chile","+51":"Perú","+58":"Venezuela","+55":"Brasil","+44":"Reino Unido","+49":"Alemania","+39":"Italia","+33":"Francia","+1-CA":"Canadá","+809":"República Dominicana","+787":"Puerto Rico"};
+ menu.innerHTML=[...select.options].map(o=>{const flag=(o.textContent.trim().split(/\s+/)[0]||"");const code=o.value==="+1-CA"?"+1":o.value;return '<button type="button" class="delivery-option" data-value="'+esc(o.value)+'" role="option" aria-selected="'+o.selected+'"><span>'+esc(flag+" "+(countries[o.value]||"País"))+'</span><b>'+esc(code)+'</b></button>';}).join("");
+ function sync(){const o=select.options[select.selectedIndex];textBox.textContent=o?o.textContent:"Selecciona país";menu.querySelectorAll(".delivery-option").forEach(b=>{const active=b.dataset.value===select.value;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active));});}
+ function close(){picker.classList.remove("open");trigger.setAttribute("aria-expanded","false");}
+ trigger.addEventListener("click",()=>{const open=!picker.classList.contains("open");picker.classList.toggle("open",open);trigger.setAttribute("aria-expanded",String(open));});
+ menu.addEventListener("click",e=>{const b=e.target.closest(".delivery-option");if(!b)return;select.value=b.dataset.value;select.dispatchEvent(new Event("change",{bubbles:true}));sync();close();});
+ select.addEventListener("change",sync);
+ document.addEventListener("click",e=>{if(!picker.contains(e.target))close();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+ sync();
+}
 function setupDeliveryPicker(){
  const select=document.getElementById("municipality");
  const picker=document.getElementById("deliveryPicker");
@@ -128,7 +183,7 @@ function setupDeliveryPicker(){
 
 function priceMarkup(p){const cur=p.currency||"USD",sym=currencySymbols[cur]||"";const discounted=effectivePrice(p)<Number(p.price);const original=discounted?`<span class="old-price">${sym}${Number(p.price).toFixed(2)} ${cur}</span> `:"";return `${original}<span class="discount-price">${sym}${effectivePrice(p).toFixed(2)} ${cur}</span>`;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-async function loadStoreSettings(){const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent").eq("id",1).maybeSingle();if(error)throw error;if(data){storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0}}}
+async function loadStoreSettings(){const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent,usd_to_eur,transfer_prepago_rate").eq("id",1).maybeSingle();if(error)throw error;if(data){storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04}}}
 async function loadCloudCategories(){const {data,error}=await supabaseClient.from("categories").select("id,name,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;categories=(data||[]).filter(c=>c.available!==false&&String(c.name||"").trim()).map(c=>({id:c.id,name:String(c.name).trim(),sort_order:Number(c.sort_order)||0,available:true}));saveCategories();return true}
 function saveCategories(){localStorage.setItem("electroisla_categories",JSON.stringify(categories))}
 function save(){
@@ -837,28 +892,61 @@ async function submitReview(){
 function showThankYou(){
  const modal=document.getElementById("thankYouModal");
  if(!modal)return;
+ const zelleModal=document.getElementById("zelleAccountModal");
+ if(zelleModal){zelleModal.classList.add("hidden");zelleModal.setAttribute("aria-hidden","true");}
  modal.classList.remove("hidden");
  modal.setAttribute("aria-hidden","false");
 }
-function finishPurchase(){
- cart=[];
- save();
- const form=document.getElementById("orderForm");
- if(form)form.reset();
- const select=document.getElementById("municipality");
- if(select){
-   select.value="";
-   select.dispatchEvent(new Event("change",{bubbles:true}));
+function showZelleAccount(){
+ let data=null;
+ try{data=JSON.parse(sessionStorage.getItem("electroisla_zelle_account")||"null")}catch(e){}
+ if(!data||!data.copyValue)return false;
+ const modal=document.getElementById("zelleAccountModal");
+ const details=document.getElementById("zelleAccountDetails");
+ if(!modal||!details)return false;
+ details.replaceChildren();
+ (Array.isArray(data.details)?data.details:[]).forEach(item=>{
+  const row=document.createElement("div");row.className="ei-zelle-detail";
+  const label=document.createElement("span");label.className="ei-zelle-detail-label";label.textContent=String(item.label||"");
+  const value=document.createElement("strong");value.textContent=String(item.value||"");
+  row.append(label,value);details.append(row);
+ });
+ modal.classList.remove("hidden");modal.setAttribute("aria-hidden","false");
+ return true;
+}
+async function copyZelleAccountAndContinue(){
+ let data=null;
+ try{data=JSON.parse(sessionStorage.getItem("electroisla_zelle_account")||"null")}catch(e){}
+ if(!data||!data.copyValue){showThankYou();return}
+ let copied=false;
+ try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(String(data.copyValue));copied=true}}catch(e){}
+ if(!copied){
+  const field=document.createElement("textarea");field.value=String(data.copyValue);
+  field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";field.style.pointerEvents="none";
+  document.body.appendChild(field);field.select();field.setSelectionRange(0,field.value.length);
+  try{copied=document.execCommand("copy")}catch(e){copied=false}
+  field.remove();
  }
+ if(!copied){alert("No se pudo copiar automáticamente. Mantén pulsado el número o correo de Zelle para copiarlo.");return}
+ const btn=document.getElementById("zelleCopyContinue");if(btn){btn.textContent="✓ Copiado";btn.disabled=true}
+ sessionStorage.removeItem("electroisla_zelle_account");
+ showThankYou();
+}
+function finishPurchase(){
+ cart=[];save();
+ const form=document.getElementById("orderForm");if(form)form.reset();
+ const select=document.getElementById("municipality");
+ if(select){select.value="";select.dispatchEvent(new Event("change",{bubbles:true}))}
  const modal=document.getElementById("thankYouModal");
- if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true");}
+ if(modal){modal.classList.add("hidden");modal.setAttribute("aria-hidden","true")}
+ const zelleModal=document.getElementById("zelleAccountModal");
+ if(zelleModal){zelleModal.classList.add("hidden");zelleModal.setAttribute("aria-hidden","true")}
+ sessionStorage.removeItem("electroisla_zelle_account");
+ sessionStorage.removeItem("electroisla_payment_method");
  document.getElementById("checkoutModal")?.classList.add("hidden");
- closeCart();
- currentFilter="Todos";
+ closeCart();currentFilter="Todos";
  document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.filter==="Todos"));
- render("Todos");
- renderCart();
- window.scrollTo({top:0,behavior:"smooth"});
+ render("Todos");renderCart();window.scrollTo({top:0,behavior:"smooth"});
 }
 let waitingForWhatsAppReturn=false;
 function markWhatsAppPending(){
@@ -866,15 +954,15 @@ function markWhatsAppPending(){
  sessionStorage.setItem("electroisla_whatsapp_pending","1");
 }
 function checkWhatsAppReturn(){
- if(!waitingForWhatsAppReturn && sessionStorage.getItem("electroisla_whatsapp_pending")!=="1")return;
+ if(!waitingForWhatsAppReturn&&sessionStorage.getItem("electroisla_whatsapp_pending")!=="1")return;
  if(document.visibilityState==="hidden")return;
- waitingForWhatsAppReturn=false;
- sessionStorage.removeItem("electroisla_whatsapp_pending");
+ waitingForWhatsAppReturn=false;sessionStorage.removeItem("electroisla_whatsapp_pending");
+ if(sessionStorage.getItem("electroisla_payment_method")==="ZELLE"&&sessionStorage.getItem("electroisla_payment_timing")==="PREPAID"&&showZelleAccount())return;
  showThankYou();
 }
 
 // ElectroIsla — registro de pedidos para el reporte de ventas.
-async function recordOrderForReport({name,phone,zoneName,note,method,totals}){
+async function recordOrderForReport({name,phone,recipientName,recipientAddress,recipientPhone,zoneName,note,method,totals}){
   try{
     const orderItems=cart.map(i=>{
       const p=products.find(x=>x.id===i.id);
@@ -905,7 +993,7 @@ async function recordOrderForReport({name,phone,zoneName,note,method,totals}){
       delivery_fee:delivery,
       total,
       items:orderItems,
-      note:note||"",
+      note:[`DATOS DE QUIEN RECIBE EL PEDIDO: ${recipientName||""}; Dirección: ${recipientAddress||""}; Teléfono: ${recipientPhone||""}`,note||""].filter(Boolean).join("\n"),
       status:"sent"
     });
     if(error)console.warn("No se pudo registrar el pedido para el reporte de ventas:",error);
@@ -914,9 +1002,10 @@ async function recordOrderForReport({name,phone,zoneName,note,method,totals}){
   }
 }
 
-document.getElementById("orderForm").addEventListener("submit",e=>{e.preventDefault();const totals=getOrderTotals();const method=document.querySelector('input[name="paymentMethod"]:checked')?.value;if(!method){alert("Selecciona un método de pago.");return}if((method==="USD"||method==="ZELLE")&&!totals.usdAvailable){alert("El pago en USD/Zelle no está disponible para este pedido.");return}if((method==="CUP"||method==="TRANSFERENCIA")&&!totals.cupAvailable){alert("CUP y Transferencia solo están disponibles para pedidos de electrodomésticos.");return}const zone=document.getElementById("municipality").value,other=document.getElementById("otherZone").value.trim();if(!zone){alert("Selecciona la zona de entrega.");return}if(zone==="Otro"&&!other){alert("Escribe cuál es tu zona de entrega.");return}const lines=cart.map(i=>{const p=products.find(x=>x.id===i.id);if(!p)return"";const cur=p.currency||"USD",unitPrice=effectivePrice(p),lineTotal=unitPrice*i.qty,cash=cashCup(p),transfer=transferCup(p);let selectedLine="";if(method==="USD"||method==="ZELLE")selectedLine=money(lineTotal,"USD");else if(method==="CUP")selectedLine=money(cash*i.qty,"CUP");else selectedLine=money(transfer*i.qty,"CUP");return `• ${p.name} — ${i.qty} ${p.unit||"unidad"} — ${selectedLine}`}).join("\n");const name=document.getElementById("customerName").value.trim(),phone=document.getElementById("customerPhone").value.trim(),zoneName=zone==="Otro"?other:zone,note=document.getElementById("note").value.trim();const paymentLabel=method==="USD"?"USD":method==="ZELLE"?"ZELLE":method==="CUP"?"CUP (efectivo)":"TRANSFERENCIA";const subtotalSelected=(method==="USD"||method==="ZELLE")?money(totals.usdTotal-totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.cashTotal-totals.deliveryFeeCUP,"CUP"):money(totals.transferTotal-totals.deliveryFeeTransfer,"CUP");const paymentTotal=(method==="USD"||method==="ZELLE")?money(totals.usdTotal,"USD"):method==="CUP"?money(totals.cashTotal,"CUP"):money(totals.transferTotal,"CUP");const deliverySelected=(method==="USD"||method==="ZELLE")?money(totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.deliveryFeeCUP,"CUP"):money(totals.deliveryFeeTransfer,"CUP");const deliveryText=totals.deliveryFeeUSD>0?deliverySelected:"Gratis";const msg=`🛒 NUEVO PEDIDO\n\n👤 Cliente: ${name}\n📱 Teléfono: ${phone}\n\n🛍️ PRODUCTOS:\n${lines}\n\n📍 Zona de entrega: ${zoneName}\n\n💳 MÉTODO DE PAGO: ${paymentLabel}\n🧾 Subtotal: ${subtotalSelected}\n🚚 Domicilio: ${deliveryText}\n💰 TOTAL A PAGAR: ${paymentTotal}${note?`\n📝 Nota: ${note}`:""}`;recordOrderForReport({name,phone,zoneName,note,method,totals});markWhatsAppPending();window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,"_blank")});
+document.getElementById("orderForm").addEventListener("submit",e=>{e.preventDefault();const totals=getOrderTotals();const method=document.querySelector('input[name="paymentMethod"]:checked')?.value;if(!method){alert("Selecciona un método de pago.");return}if((method==="USD"||method==="ZELLE")&&!totals.usdAvailable){alert("El pago en USD/Zelle no está disponible para este pedido.");return}if((method==="CUP"||method==="TRANSFERENCIA")&&!totals.cupAvailable){alert("CUP y Transferencia solo están disponibles para pedidos de electrodomésticos.");return}const zone=document.getElementById("municipality").value,other=document.getElementById("otherZone").value.trim();if(!zone){alert("Selecciona la zona de entrega.");return}if(zone==="Otro"&&!other){alert("Escribe cuál es tu zona de entrega.");return}const lines=cart.map(i=>{const p=products.find(x=>x.id===i.id);if(!p)return"";const cur=p.currency||"USD",unitPrice=effectivePrice(p),lineTotal=unitPrice*i.qty,cash=cashCup(p),transfer=transferCup(p);let selectedLine="";if(method==="USD"||method==="ZELLE")selectedLine=money(lineTotal,"USD");else if(method==="CUP")selectedLine=money(cash*i.qty,"CUP");else selectedLine=money(transfer*i.qty,"CUP");return `• ${p.name} — ${i.qty} ${p.unit||"unidad"} — ${selectedLine}`}).join("\n");const name=document.getElementById("customerName").value.trim(),phone=(document.getElementById("customerPhoneCode").value==="+1-CA"?"+1":document.getElementById("customerPhoneCode").value)+document.getElementById("customerPhone").value.trim(),recipientName=document.getElementById("recipientName").value.trim(),recipientAddress=document.getElementById("recipientAddress").value.trim(),recipientPhone=(document.getElementById("recipientPhoneCode").value==="+1-CA"?"+1":document.getElementById("recipientPhoneCode").value)+document.getElementById("recipientPhone").value.trim(),zoneName=zone==="Otro"?other:zone,note=document.getElementById("note").value.trim();if(!recipientName||!recipientAddress||!recipientPhone){alert("Completa el nombre, la dirección y el teléfono de quien recibe el pedido.");return}const paymentLabel=method==="USD"?"USD":method==="ZELLE"?"ZELLE":method==="CUP"?"CUP (efectivo)":"TRANSFERENCIA";const subtotalSelected=(method==="USD"||method==="ZELLE")?money(totals.usdTotal-totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.cashTotal-totals.deliveryFeeCUP,"CUP"):money(totals.transferTotal-totals.deliveryFeeTransfer,"CUP");const paymentTotal=(method==="USD"||method==="ZELLE")?money(totals.usdTotal,"USD"):method==="CUP"?money(totals.cashTotal,"CUP"):money(totals.transferTotal,"CUP");const deliverySelected=(method==="USD"||method==="ZELLE")?money(totals.deliveryFeeUSD,"USD"):method==="CUP"?money(totals.deliveryFeeCUP,"CUP"):money(totals.deliveryFeeTransfer,"CUP");const deliveryText=totals.deliveryFeeUSD>0?deliverySelected:"Gratis";const msg=`🛒 NUEVO PEDIDO\n\n👤 PERSONA QUE REALIZA EL PEDIDO\nNombre: ${name}\nTeléfono: ${phone}\n\n📦 PERSONA QUE RECIBE EL PEDIDO\nNombre: ${recipientName}\nDirección: ${recipientAddress}\nTeléfono: ${recipientPhone}\n\n🛍️ PRODUCTOS:\n${lines}\n\n📍 Zona de entrega: ${zoneName}\n\n💳 MÉTODO DE PAGO: ${paymentLabel}\n🧾 Subtotal: ${subtotalSelected}\n🚚 Domicilio: ${deliveryText}\n💰 TOTAL A PAGAR: ${paymentTotal}${note?`\n📝 Nota: ${note}`:""}`;recordOrderForReport({name,phone,recipientName,recipientAddress,recipientPhone,zoneName,note,method,totals});markWhatsAppPending();window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,"_blank")});
 
 document.getElementById("thankYouAccept")?.addEventListener("click",finishPurchase);
+document.getElementById("zelleCopyContinue")?.addEventListener("click",copyZelleAccountAndContinue);
 document.getElementById("reviewClose")?.addEventListener("click",closeReviewModal);
 document.getElementById("reviewCancel")?.addEventListener("click",closeReviewModal);
 document.getElementById("submitReview")?.addEventListener("click",submitReview);
@@ -930,6 +1019,8 @@ document.getElementById("municipality")?.addEventListener("change",updateDeliver
 document.getElementById("otherZone")?.addEventListener("input",updatePaymentSummary);
 
 setupDeliveryPicker();
+ setupPhoneCodePicker("customerPhoneCode","customerPhonePicker","customerPhoneTrigger","customerPhoneMenu","customerPhoneSelectedText");
+ setupPhoneCodePicker("recipientPhoneCode","recipientPhonePicker","recipientPhoneTrigger","recipientPhoneMenu","recipientPhoneSelectedText");
 ensureCategoryMenu();
 startCloud();
 
