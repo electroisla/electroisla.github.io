@@ -919,7 +919,7 @@ async function loadSalesReport(){
 function exportSalesCsv(){
  const headers=["ID","Fecha","Cliente","Teléfono","Zona","Método de pago","Modalidad de pago","Estado de cobro","Moneda","Subtotal","Domicilio","Total","Estado del pedido","Productos","Nota"];
  const lines=[headers,...salesRows.map(r=>[r.id,r.created_at,r.customer_name,r.customer_phone,r.delivery_zone,r.payment_method,r.payment_timing,salesPaymentLabel(r),r.currency,r.subtotal,r.delivery_fee,r.total,r.status,(Array.isArray(r.items)?r.items:[]).map(i=>`${i.qty||0} x ${i.name||"Producto"}`).join("; "),r.note])].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(","));
- const blob=new Blob(["\\ufeff"+lines.join("\\n")],{type:"text/csv;charset=utf-8"});
+ const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-reporte-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
