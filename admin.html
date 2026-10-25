@@ -1134,6 +1134,25 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </script>
 
 
+<script id="ei-tactile-feedback-v2">
+/* ElectroIsla 360: vibración breve al pulsar controles. No bloquea ni reemplaza sus acciones. */
+(function(){
+  if (!('vibrate' in navigator) || typeof navigator.vibrate !== 'function') return;
+  let lastPulse = 0;
+  document.addEventListener('click', function(event){
+    const el = event.target && event.target.closest
+      ? event.target.closest('button, a[role="button"], [role="button"], .btn, input[type="button"], input[type="submit"], input[type="reset"]')
+      : null;
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+    if (el.closest('[data-no-haptic], .no-haptic')) return;
+    const now = Date.now();
+    if (now - lastPulse < 90) return;
+    lastPulse = now;
+    const important = el.matches('#addToCart, .add-to-cart, [data-action*="cart"], [data-action*="order"], .checkout-button, #checkoutButton, #loginBtn, [type="submit"]');
+    try { navigator.vibrate(important ? 26 : 18); } catch (_) {}
+  }, true);
+})();
+</script>
 </body>
 <style id="ei-summary-outline-icons">
 .admin-page .ei-admin-quick-card .ei-quick-icon{color:#fff}
