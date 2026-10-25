@@ -114,7 +114,7 @@
   box.innerHTML=out;
  }
  async function load(){
-  try{const res=await supabaseClient.from("payment_methods").select("code,name,currency,account_details,instructions,enabled,supports_prepaid,supports_postdelivery,postdelivery_terms,sort_order").eq("enabled",true).order("sort_order",{ascending:true}).order("name",{ascending:true});if(res.error)throw res.error;methods=res.data||[];const legacyZelle=methods.filter(m=>/^ZELLE(?:50|100|200|300|400)$/i.test(String(m.code||"")));if(!methods.some(m=>String(m.code||"").toUpperCase()==="ZELLE")&&legacyZelle.length){const base=legacyZelle[0];methods=methods.filter(m=>!/^ZELLE(?:50|100|200|300|400)$/i.test(String(m.code||"")));methods.push({...base,code:"ZELLE",name:"Zelle"});}}
+  try{const res=await supabaseClient.from("payment_methods").select("code,name,currency,account_details,instructions,enabled,supports_prepaid,supports_postdelivery,postdelivery_terms,sort_order").eq("enabled",true).order("sort_order",{ascending:true}).order("name",{ascending:true});if(res.error)throw res.error;methods=res.data||[];const legacyZelle=methods.filter(m=>/^ZELLE\d+$/i.test(String(m.code||"")));if(!methods.some(m=>String(m.code||"").toUpperCase()==="ZELLE")&&legacyZelle.length){const base=legacyZelle[0];methods=methods.filter(m=>!/^ZELLE\d+$/i.test(String(m.code||"")));methods.push({...base,code:"ZELLE",name:"Zelle"});}}
   catch(e){console.warn("No se pudieron cargar métodos de pago",e);methods=[]}
   try{await loadZelleAmountAccounts()}catch(e){zelleAmountAccounts=[];console.warn("No se pudieron cargar las cuentas Zelle por importe",e)}
   render();
