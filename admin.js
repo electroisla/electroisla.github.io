@@ -743,6 +743,7 @@ supabaseClient.channel("categories-admin").on("postgres_changes",{event:"*",sche
 
 // ===== Reporte de ventas ElectroIsla =====
 let salesRows=[];
+let salesFetchedRows=[];
 function salesMoney(v,currency){
   const n=Number(v)||0;
   return new Intl.NumberFormat("en-US",{style:"currency",currency:currency||"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
@@ -798,65 +799,128 @@ function renderSalesList(id,items,empty="Sin datos"){
   if(!items.length){box.innerHTML=`<p class="sales-empty">${salesEscape(empty)}</p>`;return}
   box.innerHTML=items.map(x=>`<div class="sales-row"><span>${salesEscape(x.label)}</span><strong>${salesEscape(x.value)}</strong></div>`).join("");
 }
+function salesCurrencyTotals(rows,field){
+ const sums={USD:0,CUP:0};
+ rows.forEach(r=>{const cur=String(r.currency||"USD").toUpperCase()==="CUP"?"CUP":"USD";sums[cur]+=Number(r[field])||0;});
+ return `USD ${salesMoney(sums.USD,"USD")} · CUP ${salesMoney(sums.CUP,"CUP")}`;
+}
+function salesPaymentLabel(r){return r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente";}
+function salesFillFilterOptions(id,values,placeholder,current){
+ const el=document.getElementById(id);if(!el)return;
+ const prior=current!==undefined?current:el.value;
+ const unique=[...new Set(values.map(v=>String(v||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+ el.innerHTML=`<option value="">${salesEscape(placeholder)}</option>`+unique.map(v=>`<option value="${salesEscape(v)}">${salesEscape(v)}</option>`).join("");
+ if(unique.includes(prior))el.value=prior;
+}
+function salesApplyFilters(){
+ const search=(document.getElementById("salesSearch")?.value||"").trim().toLocaleLowerCase("es");
+ const orderStatus=document.getElementById("salesOrderStatusFilter")?.value||"";
+ const paymentStatus=document.getElementById("salesPaymentStatusFilter")?.value||"";
+ const method=document.getElementById("salesMethodFilter")?.value||"";
+ const currency=document.getElementById("salesCurrencyFilter")?.value||"";
+ const zone=document.getElementById("salesZoneFilter")?.value||"";
+ salesRows=salesFetchedRows.filter(r=>{
+  if(orderStatus&&String(r.status||"")!==orderStatus)return false;
+  if(paymentStatus&&(r.payment_status||"PENDING")!==paymentStatus)return false;
+  if(method&&(r.payment_method||"Sin método")!==method)return false;
+  if(currency&&(r.currency||"USD").toUpperCase()!==currency)return false;
+  if(zone&&(r.delivery_zone||"Sin zona")!==zone)return false;
+  if(search){
+   const items=Array.isArray(r.items)?r.items.map(i=>i.name||"").join(" "):"";
+   const hay=[r.id,r.customer_name,r.customer_phone,r.payment_method,r.delivery_zone,r.status,r.note,items].join(" ").toLocaleLowerCase("es");
+   if(!hay.includes(search))return false;
+  }
+  return true;
+ });
+ renderSalesReport();
+ const status=document.getElementById("salesStatus");
+ if(status)status.textContent=`☁️ ${salesRows.length} de ${salesFetchedRows.length} pedido(s) · filtros aplicados`;
+}
 function renderSalesReport(){
-  const rows=salesRows;
-  const usd=rows.filter(r=>r.currency==="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
-  const cup=rows.filter(r=>r.currency!=="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
-  const count=document.getElementById("salesOrdersCount"); if(count)count.textContent=String(rows.length);
-  const quickOrders=document.getElementById("quickOrdersCount");if(quickOrders)quickOrders.textContent=String(rows.length);
-  const usdBox=document.getElementById("salesUsdTotal"); if(usdBox)usdBox.textContent=salesMoney(usd,"USD");
-  const cupBox=document.getElementById("salesCupTotal"); if(cupBox)cupBox.textContent=salesMoney(cup,"CUP");
-
-  const products={}; const payments={}; const cats={}; const days={};
-  rows.forEach(r=>{
-    const items=Array.isArray(r.items)?r.items:[];
-    items.forEach(i=>{
-      const name=i.name||"Producto"; const qty=Number(i.qty)||0;
-      products[name]=(products[name]||0)+qty;
-      const cat=i.category||"Sin categoría"; cats[cat]=(cats[cat]||0)+(Number(i.line_total)||0);
-    });
-    const pm=r.payment_method||"Sin método"; payments[pm]=(payments[pm]||0)+(Number(r.total)||0);
-    const day=r.created_at?new Date(r.created_at).toLocaleDateString("es-ES"):"Sin fecha"; days[day]=(days[day]||0)+(Number(r.total)||0);
+ const rows=salesRows;
+ const usdRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="USD");
+ const cupRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="CUP");
+ const usd=usdRows.reduce((a,r)=>a+(Number(r.total)||0),0);
+ const cup=cupRows.reduce((a,r)=>a+(Number(r.total)||0),0);
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+ set("salesOrdersCount",String(rows.length));set("salesTableCount",`${rows.length} pedido(s)`);
+ set("quickOrdersCount",String(rows.length));set("salesUsdTotal",salesMoney(usd,"USD"));set("salesCupTotal",salesMoney(cup,"CUP"));
+ set("salesOrdersCountHint",`De ${salesFetchedRows.length} en el período`);
+ set("salesSubtotalSummary",salesCurrencyTotals(rows,"subtotal"));
+ set("salesDeliverySummary",salesCurrencyTotals(rows,"delivery_fee"));
+ set("salesAverageSummary",`USD ${salesMoney(usdRows.length?usd/usdRows.length:0,"USD")} · CUP ${salesMoney(cupRows.length?cup/cupRows.length:0,"CUP")}`);
+ const paid=rows.filter(r=>r.payment_status==="PAID");
+ const pending=rows.filter(r=>!r.payment_status||r.payment_status==="PENDING");
+ const overdue=rows.filter(r=>r.payment_status==="OVERDUE");
+ set("salesPaidSummary",salesCurrencyTotals(paid,"total"));set("salesPaidCount",`${paid.length} pedido(s) pagado(s)`);
+ set("salesPendingSummary",salesCurrencyTotals(pending,"total"));set("salesPendingCount",`${pending.length} pedido(s) pendiente(s)`);
+ set("salesOverdueSummary",salesCurrencyTotals(overdue,"total"));set("salesOverdueCount",`${overdue.length} pedido(s) vencido(s)`);
+ const products={},payments={},cats={},days={},zones={},orderStates={},payStates={},delivery={};
+ rows.forEach(r=>{
+  const cur=(r.currency||"USD").toUpperCase()==="CUP"?"CUP":"USD";
+  const items=Array.isArray(r.items)?r.items:[];
+  items.forEach(i=>{
+   const name=i.name||"Producto",qty=Number(i.qty)||0;
+   if(!products[name])products[name]={qty:0,USD:0,CUP:0};
+   products[name].qty+=qty;products[name][cur]+=Number(i.line_total)||0;
+   const cat=i.category||"Sin categoría";if(!cats[cat])cats[cat]={USD:0,CUP:0};cats[cat][cur]+=Number(i.line_total)||0;
   });
-  renderSalesList("salesTopProducts",Object.entries(products).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([label,v])=>({label,value:`${v} uds.`})));
-  renderSalesList("salesPayments",Object.entries(payments).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:salesMoney(v,rows.find(r=>r.payment_method===label)?.currency||"USD")})));
-  renderSalesList("salesCategories",Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:salesMoney(v,"USD")})));
-  renderSalesList("salesDaily",Object.entries(days).sort((a,b)=>b[0].localeCompare(a[0])).map(([label,v])=>({label,value:salesMoney(v,rows.find(r=>r.created_at&&new Date(r.created_at).toLocaleDateString("es-ES")===label)?.currency||"USD")})));
+  const pm=r.payment_method||"Sin método";if(!payments[pm])payments[pm]={USD:0,CUP:0};payments[pm][cur]+=Number(r.total)||0;
+  const day=r.created_at?new Date(r.created_at).toLocaleDateString("es-ES"):"Sin fecha";if(!days[day])days[day]={USD:0,CUP:0};days[day][cur]+=Number(r.total)||0;
+  const zone=r.delivery_zone||"Sin zona";if(!zones[zone])zones[zone]={USD:0,CUP:0,count:0};zones[zone][cur]+=Number(r.total)||0;zones[zone].count++;
+  const os=r.status||"Sin estado";orderStates[os]=(orderStates[os]||0)+1;
+  const ps=salesPaymentLabel(r);if(!payStates[ps])payStates[ps]={USD:0,CUP:0,count:0};payStates[ps][cur]+=Number(r.total)||0;payStates[ps].count++;
+  if(!delivery[cur])delivery[cur]=0;delivery[cur]+=Number(r.delivery_fee)||0;
+ });
+ const twoCur=o=>`USD ${salesMoney(o.USD||0,"USD")} · CUP ${salesMoney(o.CUP||0,"CUP")}`;
+ renderSalesList("salesTopProducts",Object.entries(products).sort((a,b)=>b[1].qty-a[1].qty).slice(0,15).map(([label,v])=>({label,value:`${v.qty} uds. · ${twoCur(v)}`})));
+ renderSalesList("salesPayments",Object.entries(payments).sort((a,b)=>(b[1].USD+b[1].CUP)-(a[1].USD+a[1].CUP)).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesCategories",Object.entries(cats).sort((a,b)=>(b[1].USD+b[1].CUP)-(a[1].USD+a[1].CUP)).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesDaily",Object.entries(days).sort((a,b)=>{const da=a[0].split("/").reverse().join("-"),db=b[0].split("/").reverse().join("-");return db.localeCompare(da)}).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesOrderStatusBreakdown",Object.entries(orderStates).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:`${v} pedido(s)`})));
+ renderSalesList("salesPaymentStatusBreakdown",Object.entries(payStates).sort((a,b)=>b[1].count-a[1].count).map(([label,v])=>({label,value:`${v.count} pedidos · ${twoCur(v)}`})));
+ renderSalesList("salesZones",Object.entries(zones).sort((a,b)=>b[1].count-a[1].count).map(([label,v])=>({label,value:`${v.count} pedidos · ${twoCur(v)}`})));
+ renderSalesList("salesDeliveryFees",Object.entries(delivery).map(([label,v])=>({label:`Domicilio ${label}`,value:salesMoney(v,label)})));
+ const table=document.getElementById("salesOrdersTable");
+ if(table){
+  if(!rows.length)table.innerHTML='<p class="sales-empty">No hay pedidos que coincidan con estos filtros.</p>';
+  else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha / ID</th><th>Cliente</th><th>Productos y nota</th><th>Pago</th><th>Estado del cobro</th><th>Zona</th><th>Subtotal</th><th>Domicilio</th><th>Total</th><th>Estado pedido</th></tr></thead><tbody>${rows.map(r=>{
+   const items=Array.isArray(r.items)?r.items:[];
+   const itemText=items.map(i=>`${Number(i.qty)||0}× ${i.name||"Producto"}`).join(", ");
+   return `<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}<small>ID: ${salesEscape(r.id||"—")}</small></td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(itemText||"Sin detalle")}${r.note?`<small>Nota: ${salesEscape(r.note)}</small>`:""}</td><td>${salesEscape(r.payment_method||"") }<small>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}</small></td><td><strong>${salesEscape(salesPaymentLabel(r))}</strong>${r.payment_due_at?`<small>Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}</small>`:""}<label style="display:block;margin-top:6px;font-size:.75rem">Actualizar cobro<select data-payment-status="${salesEscape(r.id)}"><option value="PENDING" ${(!r.payment_status||r.payment_status==="PENDING")?"selected":""}>Pendiente</option><option value="PAID" ${r.payment_status==="PAID"?"selected":""}>Pagado</option><option value="OVERDUE" ${r.payment_status==="OVERDUE"?"selected":""}>Vencido</option><option value="CANCELLED" ${r.payment_status==="CANCELLED"?"selected":""}>Cancelado</option></select></label></td><td>${salesEscape(r.delivery_zone||"")}</td><td>${salesEscape(salesMoney(r.subtotal,r.currency||"USD"))}</td><td>${salesEscape(salesMoney(r.delivery_fee,r.currency||"USD"))}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`;
+  }).join("")}</tbody></table></div>`;
+ }
+}
 
-  const table=document.getElementById("salesOrdersTable");
-  if(table){
-    if(!rows.length){table.innerHTML='<p class="sales-empty">No hay pedidos registrados en este período.</p>';}
-    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Modalidad / estado de cobro</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}<small>${salesEscape(r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente de cobro")}${r.payment_due_at?` · Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}`:""}</small><label style="display:block;margin-top:6px;font-size:.75rem">Actualizar cobro<select data-payment-status="${salesEscape(r.id)}"><option value="PENDING" ${(!r.payment_status||r.payment_status==="PENDING")?"selected":""}>Pendiente</option><option value="PAID" ${r.payment_status==="PAID"?"selected":""}>Pagado</option><option value="OVERDUE" ${r.payment_status==="OVERDUE"?"selected":""}>Vencido</option><option value="CANCELLED" ${r.payment_status==="CANCELLED"?"selected":""}>Cancelado</option></select></label></td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
-  }
-}
 async function loadSalesReport(){
-  const status=document.getElementById("salesStatus");
-  if(!status)return;
-  status.textContent="☁️ Cargando ventas…";
-  const range=document.getElementById("salesRange")?.value||"7d";
-  try{
-    const bounds=salesRangeBounds(range);
-    let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,payment_timing,payment_due_at,payment_status,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
-    if(bounds.start)query=query.gte("created_at",bounds.start);
-    if(bounds.end)query=query.lte("created_at",bounds.end);
-    const {data,error}=await query;
-    if(error)throw error;
-    salesRows=Array.isArray(data)?data:[];
-    renderSalesReport();
-    status.textContent=`☁️ ${salesRows.length} pedido(s) encontrado(s)`;
-    clearAdminNotice("sales-load");
-  }catch(err){
-    salesRows=[];renderSalesReport();
-    setAdminNotice("sales-load","No se pudieron cargar los pedidos/ventas: "+(err.message||err),"#salesReport","Revisar ventas");
-    status.textContent="⚠️ No se pudo cargar el reporte: "+(err.message||err);
-    console.error("Reporte de ventas:",err);
-  }
+ const status=document.getElementById("salesStatus");if(!status)return;
+ status.textContent="☁️ Cargando ventas…";
+ const range=document.getElementById("salesRange")?.value||"7d";
+ try{
+  const bounds=salesRangeBounds(range);
+  let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,payment_timing,payment_due_at,payment_status,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
+  if(bounds.start)query=query.gte("created_at",bounds.start);
+  if(bounds.end)query=query.lte("created_at",bounds.end);
+  const {data,error}=await query;if(error)throw error;
+  salesFetchedRows=Array.isArray(data)?data:[];
+  salesFillFilterOptions("salesOrderStatusFilter",salesFetchedRows.map(r=>r.status||"Sin estado"),"Todos los estados");
+  salesFillFilterOptions("salesMethodFilter",salesFetchedRows.map(r=>r.payment_method||"Sin método"),"Todos los métodos");
+  salesFillFilterOptions("salesCurrencyFilter",salesFetchedRows.map(r=>(r.currency||"USD").toUpperCase()),"Todas las monedas");
+  salesFillFilterOptions("salesZoneFilter",salesFetchedRows.map(r=>r.delivery_zone||"Sin zona"),"Todas las zonas");
+  salesApplyFilters();clearAdminNotice("sales-load");
+ }catch(err){
+  salesFetchedRows=[];salesRows=[];renderSalesReport();
+  setAdminNotice("sales-load","No se pudieron cargar los pedidos/ventas: "+(err.message||err),"#salesReport","Revisar ventas");
+  status.textContent="⚠️ No se pudo cargar el reporte: "+(err.message||err);
+  console.error("Reporte de ventas:",err);
+ }
 }
+
 function exportSalesCsv(){
-  const headers=["Fecha","Cliente","Teléfono","Zona","Método de pago","Moneda","Subtotal","Domicilio","Total","Estado"];
-  const lines=[headers,...salesRows.map(r=>[r.created_at,r.customer_name,r.customer_phone,r.delivery_zone,r.payment_method,r.currency,r.subtotal,r.delivery_fee,r.total,r.status])].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(","));
-  const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ const headers=["ID","Fecha","Cliente","Teléfono","Zona","Método de pago","Modalidad de pago","Estado de cobro","Moneda","Subtotal","Domicilio","Total","Estado del pedido","Productos","Nota"];
+ const lines=[headers,...salesRows.map(r=>[r.id,r.created_at,r.customer_name,r.customer_phone,r.delivery_zone,r.payment_method,r.payment_timing,salesPaymentLabel(r),r.currency,r.subtotal,r.delivery_fee,r.total,r.status,(Array.isArray(r.items)?r.items:[]).map(i=>`${i.qty||0} x ${i.name||"Producto"}`).join("; "),r.note])].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(","));
+ const blob=new Blob(["\\ufeff"+lines.join("\\n")],{type:"text/csv;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-reporte-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
 const reviewsRefreshEl=document.getElementById("reviewsRefresh");
@@ -872,6 +936,13 @@ const salesRefreshEl=document.getElementById("salesRefresh");
 if(salesRefreshEl)salesRefreshEl.addEventListener("click",loadSalesReport);
 const salesExportEl=document.getElementById("salesExport");
 if(salesExportEl)salesExportEl.addEventListener("click",exportSalesCsv);
+const salesFilterIds=["salesSearch","salesOrderStatusFilter","salesPaymentStatusFilter","salesMethodFilter","salesCurrencyFilter","salesZoneFilter"];
+salesFilterIds.forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener(el.tagName==="INPUT"?"input":"change",salesApplyFilters);});
+const salesClearFilters=document.getElementById("salesClearFilters");
+if(salesClearFilters)salesClearFilters.addEventListener("click",()=>{
+ salesFilterIds.forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ salesApplyFilters();
+});
 supabaseClient.channel("reviews-admin").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},()=>loadAdminReviews()).subscribe();
 supabaseClient.channel("orders-admin").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>loadSalesReport()).subscribe();
 
