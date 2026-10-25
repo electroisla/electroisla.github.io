@@ -1,11 +1,11 @@
-const CACHE_NAME = 'electroisla-v9.8.9-tropipay-methods';
+const CACHE_NAME = 'electroisla-v9.8.10-payment-order';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
   './app.js?v=151',
   './supabase-config.js?v=4',
-  './payment-methods-store.js?v=21'
+  './payment-methods-store.js?v=28'
 ];
 
 self.addEventListener('install', event => {
