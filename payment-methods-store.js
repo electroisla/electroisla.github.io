@@ -29,8 +29,10 @@
   return methods.filter(m=>{
    const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";if(!m.enabled||(m.currency==="USD"||prepaid?!totals.usdAvailable:!totals.cupAvailable))return false;
    const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
+   // Los códigos ZELLE antiguos representan rangos de cuentas, no opciones de pago.
+   // Mostrar solo el método canónico ZELLE; accountForZelleAmount asigna la cuenta por importe.
+   if(isZelle)return m.code==="ZELLE"&&Boolean(t==="PREPAID"?m.supports_prepaid:m.supports_postdelivery);
    if(t==="PREPAID")return Boolean(m.supports_prepaid)||m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
-   if(isZelle)return m.code==="ZELLE"&&Boolean(m.supports_postdelivery);
    if(t==="POST_DELIVERY")return Boolean(m.supports_postdelivery);
    return true;
   });
