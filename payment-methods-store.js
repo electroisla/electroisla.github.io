@@ -30,6 +30,16 @@
   if(code==="PREPAGO"||code==="TRANSFERENCIA_PREPAGO"||currency==="TRANSFERENCIA_PREPAGO"||/transferencia prepago/.test(name))return 5;
   return 6;
  }
+ function paymentIcon(m){
+  const code=String(m.code||"").toUpperCase(),name=String(m.name||"").toLowerCase(),currency=String(m.currency||"").toUpperCase();
+  if(/^ZELLE(?:\d+)?$/.test(code)||name.includes("zelle"))return "ⓩ";
+  if(/visa|débito|debito|tropipay/.test(name)||/VISA|DEBIT|TROPIPAY/.test(code))return "💳";
+  if(currency==="USD"&&/efectivo|cash/.test(name))return "💵";
+  if(currency==="CUP"&&/efectivo|cash/.test(name))return "💴";
+  if(code==="TRANSFERENCIA"||/transferencia bancaria/.test(name))return "🏦";
+  if(code==="PREPAGO"||code==="TRANSFERENCIA_PREPAGO"||currency==="TRANSFERENCIA_PREPAGO"||/transferencia prepago/.test(name))return "⚡";
+  return "💰";
+ }
  function available(){
   const totals=getOrderTotals(),t=timing();
   // Los códigos ZELLE50, ZELLE100, ZELLE200, ZELLE300 y ZELLE400 son cuentas
@@ -57,7 +67,7 @@
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
-  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'> <span>'+escPay(m.name)+' · '+escPay(m.currency)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
+  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'><span class="payment-option-icon" aria-hidden="true">'+paymentIcon(m)+'</span><span class="payment-option-label">'+escPay(m.name)+' · '+escPay(m.currency)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
   if(!items.some(m=>m.code===old)&&items.length){const r=list.querySelector('input[name="paymentMethod"]');if(r)r.checked=true}
   // Actualizar el plazo después de reconstruir los métodos para leer la selección vigente.
   updateDueUI();
