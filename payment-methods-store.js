@@ -67,7 +67,7 @@
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
-  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'><span class="payment-option-icon" aria-hidden="true">'+paymentIcon(m)+'</span><span class="payment-option-label">'+escPay(m.name)+' · '+escPay(m.currency)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
+  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'><span class="payment-option-label">'+escPay(m.name)+' · '+escPay(m.currency)+'</span><span class="payment-option-icon" aria-hidden="true">'+paymentIcon(m)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
   if(!items.some(m=>m.code===old)&&items.length){const r=list.querySelector('input[name="paymentMethod"]');if(r)r.checked=true}
   // Actualizar el plazo después de reconstruir los métodos para leer la selección vigente.
   updateDueUI();
