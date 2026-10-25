@@ -40,7 +40,7 @@
   const hasPost=methods.some(m=>{
    const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
    const currencyAvailable=(m.currency==="USD"||prepaid)?totals.usdAvailable:totals.cupAvailable;
-   return m.enabled&&Boolean(m.supports_postdelivery)&&currencyAvailable&&(!/^ZELLE(?:\\d+)?$/i.test(String(m.code||""))||m.code==="ZELLE");
+   return m.enabled&&Boolean(m.supports_postdelivery)&&currencyAvailable&&(!/^ZELLE(?:\d+)?$/i.test(String(m.code||""))||m.code==="ZELLE");
   });
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
