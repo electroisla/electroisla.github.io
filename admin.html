@@ -1106,6 +1106,18 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 .admin-page .sales-trend-legend{display:flex;align-items:center;gap:8px;margin:17px 0 4px;color:#30445b;font-size:.8rem;font-weight:800}
 .admin-page .sales-trend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff6900;box-shadow:0 0 0 4px #ff690018}
 .admin-page .sales-trend-range{margin-left:auto;color:#7b8da2;font-size:.74rem;font-weight:650}
+.admin-page .sales-trend-overview-title,.admin-page .sales-trend-focus-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:18px 0 8px;color:#173b60;font-size:.88rem}
+.admin-page .sales-trend-overview-title span,.admin-page .sales-trend-focus-title span{color:#7b8da2;font-size:.74rem;font-weight:500}
+.admin-page .sales-trend-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-page .sales-trend-mini{min-width:0;border:1px solid #e3eaf2;border-radius:11px;background:#fff;padding:11px 10px}
+.admin-page .sales-trend-mini-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;color:#31475f;font-size:.78rem;font-weight:800}
+.admin-page .sales-trend-mini-head i{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--trend-color)}
+.admin-page .sales-trend-mini-value{color:#0d3760;font-size:1.02rem;font-weight:850;letter-spacing:-.02em;overflow-wrap:anywhere}
+.admin-page .sales-trend-mini-caption{color:#8291a4;font-size:.69rem;margin-top:2px}
+.admin-page .sales-trend-mini svg{display:block;width:100%;height:auto;margin-top:5px}
+.admin-page .sales-trend-mini .trend-mini-grid{stroke:#edf1f6;stroke-width:1}
+.admin-page .sales-trend-mini .trend-mini-line{fill:none;stroke:var(--trend-color);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.admin-page .sales-trend-mini .trend-mini-area{fill:var(--trend-color);opacity:.09}
 .admin-page .sales-trend-chart{width:100%;min-width:0;overflow:hidden}
 .admin-page .sales-trend-chart svg{display:block;width:100%;height:auto;min-height:190px;overflow:visible}
 .admin-page .sales-trend-chart .trend-grid{stroke:#e7edf5;stroke-width:1;stroke-dasharray:3 5}
@@ -1117,7 +1129,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 .admin-page .sales-trend-chart .trend-point:hover{fill:#ff6900}
 .admin-page .sales-trend-empty{padding:34px 10px;text-align:center;color:#6a7b8f;font-size:.88rem}
 .admin-page .sales-trend-footnote{margin:4px 0 0;color:#7b8da2;font-size:.75rem;line-height:1.45}
-@media(max-width:620px){.admin-page .sales-trend-card{padding:13px 10px;margin:10px 0 13px}.admin-page .sales-trend-head{gap:10px}.admin-page .sales-trend-metric-label{flex-basis:100%;min-width:0}.admin-page .sales-trend-chart svg{min-height:165px}.admin-page .sales-trend-range{font-size:.68rem}}
+@media(max-width:620px){.admin-page .sales-trend-overview{grid-template-columns:1fr 1fr}.admin-page .sales-trend-mini{padding:9px 7px}.admin-page .sales-trend-overview-title span,.admin-page .sales-trend-focus-title span{font-size:.68rem}.admin-page .sales-trend-card{padding:13px 10px;margin:10px 0 13px}.admin-page .sales-trend-head{gap:10px}.admin-page .sales-trend-metric-label{flex-basis:100%;min-width:0}.admin-page .sales-trend-chart svg{min-height:165px}.admin-page .sales-trend-range{font-size:.68rem}}
 </style>
 
 </head>
@@ -1345,7 +1357,10 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
       </label>
     </div>
     <div class="sales-trend-legend"><span class="sales-trend-dot"></span><span id="salesTrendLegendLabel">Pedidos</span><span class="sales-trend-range" id="salesTrendRangeLabel">Según filtros aplicados</span></div>
-    <div id="salesTrendChart" class="sales-trend-chart" role="img" aria-label="Gráfica de líneas de pedidos y ventas"><p class="sales-trend-empty">Cargando gráfica…</p></div>
+    <div class="sales-trend-overview-title"><strong>Vista general</strong><span>Todos los indicadores, cada uno con su propia escala</span></div>
+    <div id="salesTrendOverview" class="sales-trend-overview"><p class="sales-trend-empty">Cargando indicadores…</p></div>
+    <div class="sales-trend-focus-title"><strong>Vista individual</strong><span>Amplía un indicador y consulta sus valores por período</span></div>
+    <div id="salesTrendChart" class="sales-trend-chart" role="img" aria-label="Gráfica individual de pedidos y ventas"><p class="sales-trend-empty">Cargando gráfica…</p></div>
     <p class="sales-trend-footnote" id="salesTrendFootnote">La gráfica se actualiza con los filtros del reporte. En períodos largos, los datos se agrupan por semana o mes para facilitar la lectura.</p>
   </section>
 
