@@ -136,6 +136,7 @@ function initAllFancySelects(){
   initFancySelect("pCurrency","currencyPicker","currencyPickerTrigger","currencyPickerValue","currencyPickerOptions");
   initFancySelect("pUnit","unitPicker","unitPickerTrigger","unitPickerValue","unitPickerOptions");
   initFancySelect("salesRange","salesRangePicker","salesRangePickerTrigger","salesRangePickerValue","salesRangePickerOptions");
+  initFancySelect("paymentMethodCurrency","paymentCurrencyPicker","paymentCurrencyPickerTrigger","paymentCurrencyPickerValue","paymentCurrencyPickerOptions");
 }
 
 function persistCategoryOrder(){
@@ -367,36 +368,122 @@ async function removeCategory(id){
 }
 
 async function loadSettings(){
- const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent").eq("id",1).maybeSingle();
+ const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent,usd_to_eur,transfer_prepago_rate").eq("id",1).maybeSingle();
  if(error) throw error;
  if(data){
-   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0};
+   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04};
  }
- const rate=document.getElementById("usdToCup"),markup=document.getElementById("transferMarkup");
+ const rate=document.getElementById("usdToCup"),markup=document.getElementById("transferMarkup"),eur=document.getElementById("usdToEur"),prepago=document.getElementById("transferPrepagoRate");
  if(rate) rate.value=storeSettings.usd_to_cup;
  if(markup) markup.value=storeSettings.transfer_markup_percent;
+ if(eur) eur.value=storeSettings.usd_to_eur;
+ if(prepago) prepago.value=storeSettings.transfer_prepago_rate;
  const status=document.getElementById("settingsStatus");
- if(status) status.textContent=`☁️ Tasa: ${storeSettings.usd_to_cup} CUP/USD · Transferencia: ${storeSettings.transfer_markup_percent}%`;
+ if(status) status.textContent=`☁️ Tasas sincronizadas · ${storeSettings.usd_to_cup} CUP/USD · ${storeSettings.usd_to_eur} EUR/USD · Prepago ×${storeSettings.transfer_prepago_rate}`;
 }
 async function saveSettings(){
  const rate=Number(document.getElementById("usdToCup").value);
  const markup=Number(document.getElementById("transferMarkup").value);
+ const eur=Number(document.getElementById("usdToEur").value);
+ const prepago=Number(document.getElementById("transferPrepagoRate").value);
  if(!Number.isFinite(rate)||rate<=0){alert("La tasa USD → CUP debe ser mayor que 0.");return}
  if(!Number.isFinite(markup)||markup<0){alert("El recargo de transferencia no puede ser negativo.");return}
+ if(!Number.isFinite(eur)||eur<=0){alert("La tasa USD → EUR debe ser mayor que 0.");return}
+ if(!Number.isFinite(prepago)||prepago<=0){alert("La tasa de transferencia prepago debe ser mayor que 0.");return}
  const btn=document.getElementById("saveSettings"),status=document.getElementById("settingsStatus");
  if(btn) btn.disabled=true;
  if(status) status.textContent="☁️ Guardando…";
  try{
-   const {error}=await supabaseClient.from("store_settings").upsert({id:1,usd_to_cup:rate,transfer_markup_percent:markup,updated_at:new Date().toISOString()},{onConflict:"id"});
+   const {error}=await supabaseClient.from("store_settings").upsert({id:1,usd_to_cup:rate,transfer_markup_percent:markup,usd_to_eur:eur,transfer_prepago_rate:prepago,updated_at:new Date().toISOString()},{onConflict:"id"});
    if(error) throw error;
-   storeSettings={usd_to_cup:rate,transfer_markup_percent:markup};
-   if(status) status.textContent=`✅ Guardado · ${rate} CUP/USD · Transferencia: ${markup}%`;
+   storeSettings={usd_to_cup:rate,transfer_markup_percent:markup,usd_to_eur:eur,transfer_prepago_rate:prepago};
+   if(status) status.textContent=`✅ Guardado · ${rate} CUP/USD · ${eur} EUR/USD · Prepago ×${prepago}`;
    alert("✅ Configuración de precios guardada y sincronizada.");
  }catch(err){
    if(status) status.textContent="⚠️ No se pudo guardar la configuración.";
    alert("No se pudo guardar la configuración en Supabase.\n\n"+(err.message||err));
  }finally{if(btn) btn.disabled=false}
 }
+
+let adminPaymentMethods=[];
+function paymentAdminEscape(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function resetPaymentMethodForm(){
+ const form=document.getElementById("paymentMethodForm");if(form)form.reset();
+ document.getElementById("paymentMethodId").value="";
+ document.getElementById("paymentMethodCode").disabled=false;
+ document.getElementById("paymentMethodOrder").value=String(Math.max(0,...adminPaymentMethods.map(m=>Number(m.sort_order)||0))+10);
+ document.getElementById("paymentMethodDetails").value="{}";
+ document.getElementById("paymentMethodAccountNumber").value="";
+ document.getElementById("paymentMethodAccountHolder").value="";
+ document.getElementById("paymentMethodEnabled").checked=true;
+ document.getElementById("paymentMethodPrepaid").checked=true;
+ document.getElementById("paymentMethodPost").checked=false;
+}
+async function loadPaymentMethods(){
+ const list=document.getElementById("paymentMethodsList");if(!list)return;
+ const {data,error}=await supabaseClient.from("payment_methods").select("*").order("sort_order",{ascending:true}).order("name",{ascending:true});
+ if(error)throw error;
+ adminPaymentMethods=data||[];
+ list.innerHTML=adminPaymentMethods.length?adminPaymentMethods.map(m=>`<article class="admin-card" style="margin-top:10px;padding:14px">
+ <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${paymentAdminEscape(m.name)} <small>(${paymentAdminEscape(m.code)})</small></strong><span>${m.enabled?"🟢 Activo":"⚪ Desactivado"}</span></div>
+ <p style="margin:8px 0;color:var(--ei-muted);font-size:.85rem">Moneda: ${paymentAdminEscape(m.currency)} · Anticipado: ${m.supports_prepaid?"Sí":"No"} · Después de entrega: ${m.supports_postdelivery?"Sí":"No"}</p>
+ <p style="margin:6px 0;font-size:.85rem">${m.code==="ZELLE"?"Datos de Zelle":"Datos de cuenta"}: ${paymentAdminEscape((()=>{const d=m.account_details&&typeof m.account_details==="object"?m.account_details:{};const number=d.Cuenta||d["Número de cuenta"]||d["Numero de cuenta"]||d["Número"]||d["Correo o teléfono"]||"";const holder=d.Titular||d["Nombre del titular"]||d["Titular de la cuenta"]||"";const parts=[];if(number)parts.push((m.code==="ZELLE"?"Correo/teléfono":"Número")+": "+number);if(holder)parts.push("Titular: "+holder);return parts.join(" · ")||"Sin datos de cuenta"})())}</p>
+  <div style="margin:8px 0;padding:10px 12px;border-radius:8px;background:#f5f9ff;border-left:3px solid var(--ei-orange)"><strong style="display:block;margin-bottom:4px;color:var(--ei-blue);font-size:.85rem">Instrucciones para el cliente</strong><p style="margin:0;font-size:.85rem;white-space:pre-wrap">${paymentAdminEscape(m.instructions||"Sin instrucciones configuradas")}</p></div>
+ ${m.supports_postdelivery?`<p style="margin:6px 0;font-size:.85rem">Plazo: ${paymentAdminEscape(m.postdelivery_terms||"Pendiente de definir")}</p>`:""}
+ <div class="row" style="margin-top:10px"><button type="button" class="btn secondary" data-payment-edit="${m.id}">Editar</button><button type="button" class="btn secondary" data-payment-toggle="${m.id}">${m.enabled?"Desactivar":"Activar"}</button><button type="button" class="btn danger" data-payment-delete="${m.id}">Eliminar</button></div>
+ </article>`).join(""):"<p>No hay métodos configurados.</p>";
+ const status=document.getElementById("paymentMethodsStatus");if(status)status.textContent=`☁️ ${adminPaymentMethods.length} métodos cargados`;
+}
+async function savePaymentMethodForm(event){
+ event.preventDefault();
+ const id=document.getElementById("paymentMethodId").value||null;
+ const name=document.getElementById("paymentMethodName").value.trim();
+ const code=document.getElementById("paymentMethodCode").value.trim().toUpperCase();
+ const currency=document.getElementById("paymentMethodCurrency").value;
+ let details;
+ try{
+  details=JSON.parse(document.getElementById("paymentMethodDetails").value||"{}");
+  if(!details||Array.isArray(details)||typeof details!=="object")throw new Error("Los datos de cuenta no son válidos.");
+  const accountNumber=document.getElementById("paymentMethodAccountNumber").value.trim();
+  const accountHolder=document.getElementById("paymentMethodAccountHolder").value.trim();
+  if(code==="ZELLE"){
+   // Zelle guarda únicamente los dos campos acordados y elimina claves antiguas equivalentes.
+   details={};
+   if(accountNumber)details.Cuenta=accountNumber;
+   if(accountHolder)details.Titular=accountHolder;
+  }else{
+   // Los demás métodos conservan sus datos bancarios existentes.
+   if(accountNumber)details.Cuenta=accountNumber;else delete details.Cuenta;
+   if(accountHolder)details.Titular=accountHolder;else delete details.Titular;
+  }
+ }catch(e){alert("Revisa los datos de la cuenta. "+(e.message||""));return}
+ const prepaid=document.getElementById("paymentMethodPrepaid").checked;
+ const post=document.getElementById("paymentMethodPost").checked;
+ if(!prepaid&&!post){alert("Activa al menos una modalidad de pago.");return}
+ if(post&&!document.getElementById("paymentMethodTerms").value.trim()){alert("Especifica el plazo o las condiciones para pagar después de la entrega.");return}
+ const row={code,name,currency,account_details:details,instructions:document.getElementById("paymentMethodInstructions").value.trim(),enabled:document.getElementById("paymentMethodEnabled").checked,supports_prepaid:prepaid,supports_postdelivery:post,postdelivery_terms:document.getElementById("paymentMethodTerms").value.trim(),sort_order:(id?(adminPaymentMethods.find(m=>String(m.id)===String(id))?.sort_order??0):(adminPaymentMethods.find(m=>String(m.code||"").toUpperCase()===code)?.sort_order??(Math.max(0,...adminPaymentMethods.map(m=>Number(m.sort_order)||0))+10))),updated_at:new Date().toISOString()};
+ const status=document.getElementById("paymentMethodsStatus"),btn=document.getElementById("savePaymentMethod");if(btn)btn.disabled=true;if(status)status.textContent="Guardando…";
+ try{
+  // Si se inicia un registro nuevo con un código ya existente, editar ese registro
+  // en lugar de intentar crear un método duplicado.
+  const existingByCode=id?null:adminPaymentMethods.find(m=>String(m.code||"").toUpperCase()===code);
+  const targetId=id||(existingByCode?.id||null);
+  const query=targetId
+   ?supabaseClient.from("payment_methods").update(row).eq("id",targetId)
+   :supabaseClient.from("payment_methods").insert(row);
+  const {error}=await query;if(error)throw error;
+  resetPaymentMethodForm();await loadPaymentMethods();if(status)status.textContent="✅ Método guardado.";
+ }catch(e){if(status)status.textContent="⚠️ No se pudo guardar.";alert("No se pudo guardar el método de pago.\n\n"+(e.message||e))}
+ finally{if(btn)btn.disabled=false}
+}
+async function handlePaymentMethodListClick(event){
+ const edit=event.target.closest("[data-payment-edit]"),toggle=event.target.closest("[data-payment-toggle]"),del=event.target.closest("[data-payment-delete]");
+ if(edit){const m=adminPaymentMethods.find(x=>String(x.id)===edit.dataset.paymentEdit);if(!m)return;
+  document.getElementById("paymentMethodId").value=m.id;document.getElementById("paymentMethodName").value=m.name||"";document.getElementById("paymentMethodCode").value=m.code||"";document.getElementById("paymentMethodCode").disabled=true;document.getElementById("paymentMethodCurrency").value=m.currency||"USD";document.getElementById("paymentMethodOrder").value=m.sort_order||0;document.getElementById("paymentMethodDetails").value=JSON.stringify(m.account_details||{});const accountDetails=m.account_details&&typeof m.account_details==="object"?m.account_details:{};document.getElementById("paymentMethodAccountNumber").value=accountDetails.Cuenta||accountDetails["Número de cuenta"]||accountDetails["Numero de cuenta"]||accountDetails["Número"]||accountDetails["Correo o teléfono"]||"";document.getElementById("paymentMethodAccountHolder").value=accountDetails.Titular||accountDetails["Nombre del titular"]||accountDetails["Titular de la cuenta"]||"";document.getElementById("paymentMethodInstructions").value=m.instructions||"";document.getElementById("paymentMethodTerms").value=m.postdelivery_terms||"";document.getElementById("paymentMethodEnabled").checked=!!m.enabled;document.getElementById("paymentMethodPrepaid").checked=!!m.supports_prepaid;document.getElementById("paymentMethodPost").checked=!!m.supports_postdelivery;document.getElementById("paymentMethodForm").scrollIntoView({behavior:"smooth",block:"start"});return}
+ if(toggle){const m=adminPaymentMethods.find(x=>String(x.id)===toggle.dataset.paymentToggle);if(!m)return;try{const {error}=await supabaseClient.from("payment_methods").update({enabled:!m.enabled,updated_at:new Date().toISOString()}).eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo cambiar el estado. "+(e.message||e))}return}
+ if(del){const m=adminPaymentMethods.find(x=>String(x.id)===del.dataset.paymentDelete);if(!m||!confirm(`¿Eliminar el método "${m.name}"? Los pedidos anteriores conservarán el código registrado.`))return;try{const {error}=await supabaseClient.from("payment_methods").delete().eq("id",m.id);if(error)throw error;await loadPaymentMethods()}catch(e){alert("No se pudo eliminar el método. "+(e.message||e))}}
+}
+
 async function loadCloud(){
  const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});
  if(error) throw error;
@@ -445,7 +532,7 @@ async function renderAdminIdentity(){
    button.addEventListener("click",editAdminDisplayName);
    target.append(button);
   }
- }catch(err){target.textContent="Administrador: Cuenta activa";}
+ }catch(err){target.textContent="Administrador: "+(supabaseClient.auth.getSession()?.user?.email||"Cuenta activa");}
 }
 async function editAdminDisplayName(){
  const {data:{user},error}=await supabaseClient.auth.getUser();
@@ -477,6 +564,10 @@ async function show(){
  document.getElementById("dashboard").classList.remove("hidden");
  loginBoxMessage("");
  await renderAdminIdentity();
+ const paymentStatus=document.getElementById("paymentMethodsStatus");
+ if(paymentStatus)paymentStatus.textContent="Cargando métodos de pago…";
+ loadPaymentMethods().catch(err=>{console.error("Error cargando métodos de pago:",err);const list=document.getElementById("paymentMethodsList");if(list)list.innerHTML="<p>No se pudieron cargar los métodos. Comprueba la conexión y vuelve a entrar.</p>";if(paymentStatus)paymentStatus.textContent="⚠️ Error al cargar";});
+ if(typeof window.loadZelleAmountAccountsAdmin==="function")window.loadZelleAmountAccountsAdmin().catch(err=>console.error("Error cargando rangos Zelle:",err));
  const status=document.getElementById("cloudStatus");
  if(status) status.textContent="☁️ Conectando con Supabase…";
  try{
@@ -485,10 +576,12 @@ async function show(){
    const source=await loadCloud();
    render();
    if(status) status.textContent=source==="cloud"?`☁️ Sincronizado con Supabase · ${products.length} productos`:source==="migrated"?`☁️ Catálogo local enviado a Supabase · ${products.length} productos`:"☁️ Supabase conectado · catálogo vacío";
+   clearAdminNotice("catalog-load");
    await loadSalesReport();
    await loadAdminReviews();
  }catch(err){
    console.error(err);
+   setAdminNotice("catalog-load","No se pudo cargar el catálogo o la configuración de Supabase: "+(err.message||err),"#catalogPanel","Revisar catálogo");
    render();
    if(status) status.textContent="⚠️ No se pudo leer Supabase: "+(err.message||err);
    alert("No se pudo cargar el catálogo de Supabase.\n\n"+(err.message||err));
@@ -509,10 +602,46 @@ function renderCatalogCategories(){
    render();
  }));
 }
+const eiAdminNotices=new Map();
+let eiZoneStats={total:null,available:null};
+function setAdminNotice(key,message,href,label){eiAdminNotices.set(key,{message,href:href||"#dashboard",label:label||"Ver detalles"});renderAdminNotices();}
+function clearAdminNotice(key){eiAdminNotices.delete(key);renderAdminNotices();}
+function updateReviewSummary(){
+ const count=reviewRows.length,waiting=reviewRows.filter(r=>r.approved!==true).length;
+ const totalEl=document.getElementById("quickReviewsCount"),pendingEl=document.getElementById("quickReviewsPending");
+ if(totalEl)totalEl.textContent=String(count);
+ if(pendingEl)pendingEl.textContent="Pendientes de aprobar: "+waiting;
+ const badge=document.getElementById("adminReviewNavBadge");
+ if(badge){badge.textContent=String(waiting);badge.hidden=waiting===0;}
+ if(waiting>0)setAdminNotice("reviews-pending",waiting+" reseña(s) pendiente(s) de aprobación.","#reviewsAdmin","Revisar reseñas");
+ else clearAdminNotice("reviews-pending");
+ renderAdminNotices();
+}
+function updateZoneSummary(stats){
+ if(stats&&Number.isFinite(Number(stats.total)))eiZoneStats={total:Number(stats.total),available:Number(stats.available)||0};
+ const totalEl=document.getElementById("quickZonesCount"),availableEl=document.getElementById("quickZonesAvailable");
+ if(totalEl)totalEl.textContent=eiZoneStats.total===null?"—":String(eiZoneStats.total);
+ if(availableEl)availableEl.textContent=eiZoneStats.available===null?"Disponibles en tienda: —":"Disponibles en tienda: "+eiZoneStats.available;
+ if(stats?.error)setAdminNotice("zones-load","No se pudieron cargar las zonas de domicilio: "+stats.error,"#deliveryZonesPanel","Revisar zonas");
+ else if(stats)clearAdminNotice("zones-load");
+ renderAdminNotices();
+}
+function renderAdminNotices(){
+ const countEl=document.getElementById("quickNotificationsCount"),summaryEl=document.getElementById("quickNotificationsSummary");
+ const pendingReviews=Array.isArray(reviewRows)?reviewRows.filter(r=>r.approved!==true).length:0;
+ const otherNotices=[...eiAdminNotices.keys()].filter(key=>key!=="reviews-pending").length;
+ const total=pendingReviews+otherNotices;
+ if(countEl)countEl.textContent=String(total);
+ if(summaryEl)summaryEl.textContent=total?"Avisos que requieren atención":"Sin avisos pendientes";
+ const navBadge=document.querySelector('#eiAdminNav a[href="#reviewNotifications"] .ei-admin-nav-badge');
+ if(navBadge){navBadge.textContent=String(total);navBadge.hidden=total===0;}
+}
+window.addEventListener("ei:delivery-zones-updated",e=>updateZoneSummary(e.detail||{}));
 function updateDashboardQuickCounts(){
  const p=document.getElementById("quickProductsCount");if(p)p.textContent=String(products.length);
  const c=document.getElementById("quickCategoriesCount");if(c)c.textContent=String(categories.length);
  const o=document.getElementById("quickOrdersCount");if(o)o.textContent=String(salesRows.length);
+ updateReviewSummary();updateZoneSummary();renderAdminNotices();
 }
 function render(){
  const box=document.getElementById("adminProducts");
@@ -530,7 +659,7 @@ function edit(id){
  if(unitOptions.includes(p.unit||"")){document.getElementById("pUnit").value=p.unit||"";document.getElementById("pUnitCustom").value="";document.getElementById("pUnitCustom").style.display="none";}
  else{document.getElementById("pUnit").value="__otra__";document.getElementById("pUnitCustom").value=p.unit||"";document.getElementById("pUnitCustom").style.display="block";}
  document.getElementById("pImage").value=p.image||"";document.getElementById("pDescription").value=p.description||"";document.getElementById("pAvailable").checked=p.available!==false;
- document.getElementById("formTitle").textContent="✏️ Editar producto";syncFancySelects();showPreview(p.image||"");scrollTo(0,0)
+ document.getElementById("formTitle").textContent="✏️ Editar producto";syncFancySelects();showPreview(p.image||"");location.hash="#productForm"
 }
 async function toggle(id){
  const p=products.find(x=>x.id===id);if(!p)return;
@@ -580,6 +709,19 @@ document.getElementById("productForm").addEventListener("submit",async e=>{
 function reset(){document.getElementById("productForm").reset();document.getElementById("editId").value="";document.getElementById("pImage").value="";document.getElementById("formTitle").textContent="➕ Agregar producto";document.getElementById("pAvailable").checked=true;document.getElementById("pCurrency").value="USD";document.getElementById("pDiscountPrice").value="";document.getElementById("pUnitCustom").value="";document.getElementById("pUnitCustom").style.display="none";syncFancySelects();showPreview("")}
 document.getElementById("cancelEdit").onclick=reset;
 document.getElementById("saveSettings").onclick=saveSettings;
+
+document.getElementById("salesOrdersTable")?.addEventListener("change",async e=>{
+ const control=e.target.closest("select[data-payment-status]");if(!control)return;
+ const id=control.dataset.paymentStatus,value=control.value;
+ control.disabled=true;
+ try{const {error}=await supabaseClient.from("orders").update({payment_status:value}).eq("id",id);if(error)throw error;await loadSalesReport()}
+ catch(err){alert("No se pudo actualizar el estado del cobro.\n\n"+(err.message||err));await loadSalesReport()}
+ finally{control.disabled=false}
+});
+
+document.getElementById("paymentMethodForm")?.addEventListener("submit",savePaymentMethodForm);
+document.getElementById("resetPaymentMethod")?.addEventListener("click",resetPaymentMethodForm);
+document.getElementById("paymentMethodsList")?.addEventListener("click",handlePaymentMethodListClick);
 document.getElementById("loginBtn").onclick=login;
 document.getElementById("refreshCloud").onclick=async()=>{
  const status=document.getElementById("cloudStatus");
@@ -590,6 +732,7 @@ document.getElementById("refreshCloud").onclick=async()=>{
 document.getElementById("logoutBtn").onclick=async()=>{await supabaseClient.auth.signOut();location.reload()};
 (async()=>{const {data:{session}}=await supabaseClient.auth.getSession();if(session)await show()})();
 supabaseClient.channel("products-admin").on("postgres_changes",{event:"*",schema:"public",table:"products"},async()=>{try{const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(!error&&data){products=data.map(fromRow);saveLocal();render()}}catch(e){console.warn(e)}}).subscribe();
+supabaseClient.channel("payment-methods-admin").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},async()=>{try{await loadPaymentMethods()}catch(e){console.warn(e)}}).subscribe();
 supabaseClient.channel("settings-admin").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadSettings()}catch(e){console.warn(e)}}).subscribe();
 
 supabaseClient.channel("categories-admin").on("postgres_changes",{event:"*",schema:"public",table:"categories"},async()=>{
@@ -600,6 +743,7 @@ supabaseClient.channel("categories-admin").on("postgres_changes",{event:"*",sche
 
 // ===== Reporte de ventas ElectroIsla =====
 let salesRows=[];
+let salesFetchedRows=[];
 function salesMoney(v,currency){
   const n=Number(v)||0;
   return new Intl.NumberFormat("en-US",{style:"currency",currency:currency||"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
@@ -615,7 +759,7 @@ function renderAdminReviews(){
 }
 async function loadAdminReviews(){
  const status=document.getElementById("reviewsStatus"); if(status)status.textContent="☁️ Cargando reseñas…";
- try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
+ try{const {data,error}=await supabaseClient.from("reviews").select("id,product_id,rating,reviewer_name,comment,approved,created_at").order("created_at",{ascending:false});if(error)throw error;reviewRows=Array.isArray(data)?data:[];renderAdminReviews();updateReviewSummary();clearAdminNotice("reviews-load");if(status)status.textContent=`☁️ ${reviewRows.length} reseña(s)`;}catch(err){reviewRows=[];renderAdminReviews();updateReviewSummary();setAdminNotice("reviews-load","No se pudieron cargar las reseñas: "+(err.message||err),"#reviewsAdmin","Reintentar reseñas");if(status)status.textContent="⚠️ No se pudieron cargar las reseñas: "+(err.message||err);console.error("Reseñas:",err)}}
 async function setReviewApproved(id,approved){try{const {error}=await supabaseClient.from("reviews").update({approved}).eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo actualizar la reseña: "+(err.message||err))}}
 async function deleteReview(id){if(!confirm("¿Eliminar esta reseña? Esta acción no se puede deshacer."))return;try{const {error}=await supabaseClient.from("reviews").delete().eq("id",id);if(error)throw error;await loadAdminReviews();}catch(err){alert("No se pudo eliminar la reseña: "+(err.message||err))}}
 
@@ -655,67 +799,200 @@ function renderSalesList(id,items,empty="Sin datos"){
   if(!items.length){box.innerHTML=`<p class="sales-empty">${salesEscape(empty)}</p>`;return}
   box.innerHTML=items.map(x=>`<div class="sales-row"><span>${salesEscape(x.label)}</span><strong>${salesEscape(x.value)}</strong></div>`).join("");
 }
+function salesCurrencyTotals(rows,field){
+ const sums={USD:0,CUP:0};
+ rows.forEach(r=>{const cur=String(r.currency||"USD").toUpperCase()==="CUP"?"CUP":"USD";sums[cur]+=Number(r[field])||0;});
+ return `USD ${salesMoney(sums.USD,"USD")} · CUP ${salesMoney(sums.CUP,"CUP")}`;
+}
+function salesPaymentLabel(r){return r.payment_status==="PAID"?"Pagado":r.payment_status==="OVERDUE"?"Vencido":r.payment_status==="CANCELLED"?"Cancelado":"Pendiente";}
+function salesFillFilterOptions(id,values,placeholder,current){
+ const el=document.getElementById(id);if(!el)return;
+ const prior=current!==undefined?current:el.value;
+ const unique=[...new Set(values.map(v=>String(v||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+ el.innerHTML=`<option value="">${salesEscape(placeholder)}</option>`+unique.map(v=>`<option value="${salesEscape(v)}">${salesEscape(v)}</option>`).join("");
+ if(unique.includes(prior))el.value=prior;
+}
+function salesApplyFilters(){
+ const search=(document.getElementById("salesSearch")?.value||"").trim().toLocaleLowerCase("es");
+ const orderStatus=document.getElementById("salesOrderStatusFilter")?.value||"";
+ const paymentStatus=document.getElementById("salesPaymentStatusFilter")?.value||"";
+ const method=document.getElementById("salesMethodFilter")?.value||"";
+ const currency=document.getElementById("salesCurrencyFilter")?.value||"";
+ const zone=document.getElementById("salesZoneFilter")?.value||"";
+ salesRows=salesFetchedRows.filter(r=>{
+  if(orderStatus&&String(r.status||"")!==orderStatus)return false;
+  if(paymentStatus&&(r.payment_status||"PENDING")!==paymentStatus)return false;
+  if(method&&(r.payment_method||"Sin método")!==method)return false;
+  if(currency&&(r.currency||"USD").toUpperCase()!==currency)return false;
+  if(zone&&(r.delivery_zone||"Sin zona")!==zone)return false;
+  if(search){
+   const items=Array.isArray(r.items)?r.items.map(i=>i.name||"").join(" "):"";
+   const hay=[r.id,r.customer_name,r.customer_phone,r.payment_method,r.delivery_zone,r.status,r.note,items].join(" ").toLocaleLowerCase("es");
+   if(!hay.includes(search))return false;
+  }
+  return true;
+ });
+ renderSalesReport();
+ const status=document.getElementById("salesStatus");
+ if(status)status.textContent=`☁️ ${salesRows.length} de ${salesFetchedRows.length} pedido(s) · filtros aplicados`;
+}
+
+function renderSalesTrendChart(){
+ const overview=document.getElementById("salesTrendOverview");
+ const host=document.getElementById("salesTrendChart");
+ if(!host)return;
+ const metric=document.getElementById("salesTrendMetric")?.value||"orders";
+ const meta={
+  orders:{label:"Pedidos",unit:"count",value:r=>1,format:v=>String(Math.round(v))},
+  salesUSD:{label:"Ventas en USD",unit:"USD",value:r=>String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.total)||0):0,format:v=>"USD "+salesMoney(v,"USD")},
+  salesCUP:{label:"Ventas en CUP",unit:"CUP",value:r=>String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.total)||0):0,format:v=>"CUP "+salesMoney(v,"CUP")},
+  deliveryUSD:{label:"Domicilio en USD",unit:"USD",value:r=>String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.delivery_fee)||0):0,format:v=>"USD "+salesMoney(v,"USD")},
+  deliveryCUP:{label:"Domicilio en CUP",unit:"CUP",value:r=>String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.delivery_fee)||0):0,format:v=>"CUP "+salesMoney(v,"CUP")},
+  paidUSD:{label:"Cobros pagados USD",unit:"USD",value:r=>r.payment_status==="PAID"&&String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.total)||0):0,format:v=>"USD "+salesMoney(v,"USD")},
+  paidCUP:{label:"Cobros pagados CUP",unit:"CUP",value:r=>r.payment_status==="PAID"&&String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.total)||0):0,format:v=>"CUP "+salesMoney(v,"CUP")}
+ };
+ const keys=Object.keys(meta);
+ const colors={orders:"#ff6900",salesUSD:"#1769c2",salesCUP:"#00a38a",deliveryUSD:"#8a5bd7",deliveryCUP:"#1597a5",paidUSD:"#d94c76",paidCUP:"#b68116"};
+ const rows=(Array.isArray(salesRows)?salesRows:[]).filter(r=>r.created_at&&Number.isFinite(new Date(r.created_at).getTime()));
+ const legend=document.getElementById("salesTrendLegendLabel");if(legend)legend.textContent=meta[metric]?.label||"Pedidos";
+ const rangeLabel=document.getElementById("salesTrendRangeLabel");
+ if(!rows.length){if(overview)overview.innerHTML='<p class="sales-trend-empty">No hay pedidos con fecha que coincidan con los filtros seleccionados.</p>';host.innerHTML='<p class="sales-trend-empty">No hay datos para mostrar.</p>';if(rangeLabel)rangeLabel.textContent="Sin datos";return;}
+ const dateKey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+ const dates=rows.map(r=>new Date(r.created_at)).sort((a,b)=>a-b);
+ let min=new Date(dates[0]);min.setHours(0,0,0,0);
+ let max=new Date(dates[dates.length-1]);max.setHours(0,0,0,0);
+ const selectedRange=document.getElementById("salesRange")?.value||"7d";
+ if(selectedRange==="custom"){
+  const from=document.getElementById("salesDateFrom")?.value,to=document.getElementById("salesDateTo")?.value;
+  if(from){const d=new Date(from+"T00:00:00");if(d<min)min=d;}
+  if(to){const d=new Date(to+"T00:00:00");if(d>max)max=d;}
+ }else if(selectedRange!=="all"){
+  const now=new Date();now.setHours(0,0,0,0);let start=new Date(now);
+  if(selectedRange==="7d")start.setDate(start.getDate()-6);
+  if(selectedRange==="30d")start.setDate(start.getDate()-29);
+  if(selectedRange==="90d")start.setDate(start.getDate()-89);
+  if(selectedRange==="6m")start.setMonth(start.getMonth()-6);
+  if(selectedRange==="1y")start.setFullYear(start.getFullYear()-1);
+  if(selectedRange==="2y")start.setFullYear(start.getFullYear()-2);
+  if(start<min)min=start;if(now>max)max=now;
+ }
+ const span=Math.max(1,Math.round((max-min)/86400000)+1);
+ const mode=span<=45?"day":span<=180?"week":"month";
+ const bucketDate=d=>{const x=new Date(d);x.setHours(0,0,0,0);if(mode==="day")return dateKey(x);if(mode==="week"){x.setDate(x.getDate()-((x.getDay()+6)%7));return dateKey(x);}return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-01";};
+ const bucketLabel=k=>{const d=new Date(k+"T00:00:00");return mode==="month"?d.toLocaleDateString("es-ES",{month:"short",year:"2-digit"}):d.toLocaleDateString("es-ES",{day:"2-digit",month:"short"});};
+ const buckets=new Map(),cursor=new Date(min);cursor.setHours(0,0,0,0);
+ while(cursor<=max&&buckets.size<800){const k=bucketDate(cursor);if(!buckets.has(k))buckets.set(k,0);if(mode==="day")cursor.setDate(cursor.getDate()+1);else if(mode==="week")cursor.setDate(cursor.getDate()+7);else cursor.setMonth(cursor.getMonth()+1);}
+ const allSeries={};
+ keys.forEach(k=>{const b=new Map(buckets);rows.forEach(r=>{const key=bucketDate(new Date(r.created_at));if(!b.has(key))b.set(key,0);b.set(key,b.get(key)+meta[k].value(r));});allSeries[k]=[...b.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,value])=>({date,label:bucketLabel(date),value}));});
+ const makeLine=(points,width,height,pad,color,area)=>{const maxVal=Math.max(...points.map(p=>p.value),0),scale=maxVal||1;const x=i=>pad+(points.length===1?(width-2*pad)/2:i/(points.length-1)*(width-2*pad));const y=v=>height-pad-(v/scale)*(height-2*pad);const path=points.map((p,i)=>(i?"L":"M")+x(i).toFixed(2)+" "+y(p.value).toFixed(2)).join(" ");return {path:path,area:path+" L "+x(points.length-1)+" "+(height-pad)+" L "+x(0)+" "+(height-pad)+" Z",x:x,y:y,max:maxVal};};
+ if(overview)overview.innerHTML=keys.map(k=>{const points=allSeries[k],m=meta[k],color=colors[k],sum=points.reduce((a,p)=>a+p.value,0),line=makeLine(points,300,78,5,color,true);let grid="";[.25,.5,.75].forEach(n=>{grid+='<line class="trend-mini-grid" x1="0" y1="'+(78-5-n*68)+'" x2="300" y2="'+(78-5-n*68)+'"/>';});return '<article class="sales-trend-mini" style="--trend-color:'+color+'"><div class="sales-trend-mini-head"><i></i>'+salesEscape(m.label)+'</div><div class="sales-trend-mini-value">'+salesEscape(m.format(sum))+'</div><div class="sales-trend-mini-caption">Tendencia por '+(mode==="day"?"día":mode==="week"?"semana":"mes")+'</div><svg viewBox="0 0 300 78" role="img" aria-label="'+salesEscape(m.label)+' en el período">'+grid+'<path class="trend-mini-area" d="'+line.area+'"/><path class="trend-mini-line" d="'+line.path+'"/></svg></article>';}).join("");
+ const m=meta[metric]||meta.orders,points=allSeries[metric]||allSeries.orders,color=colors[metric]||colors.orders;
+ const maxValue=Math.max(...points.map(p=>p.value),0),scaleMax=maxValue===0?1:maxValue*1.12;
+ const W=760,H=270,L=75,R=18,T=18,B=43,plotW=W-L-R,plotH=H-T-B;
+ const x=i=>L+(points.length===1?plotW/2:i/(points.length-1)*plotW),y=v=>T+plotH-(v/scaleMax)*plotH;
+ const fmtTick=v=>metric==="orders"?String(Math.round(v)):((m.unit==="CUP"?"CUP ":"USD ")+salesMoney(v,m.unit));
+ let grid="";
+ for(let n=0;n<=4;n++){const value=scaleMax*n/4,yy=y(value);grid+='<line class="trend-grid" x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'"/><text class="trend-axis-label" x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end">'+salesEscape(fmtTick(value))+'</text>';}
+ const linePath=points.map((p,i)=>(i?"L":"M")+x(i).toFixed(2)+" "+y(p.value).toFixed(2)).join(" ");
+ const areaPath=linePath+" L "+x(points.length-1)+" "+(T+plotH)+" L "+x(0)+" "+(T+plotH)+" Z";
+ let xlabels="";const labelCount=Math.min(6,points.length),seen=new Set();
+ for(let n=0;n<labelCount;n++){const i=labelCount===1?0:Math.round(n*(points.length-1)/(labelCount-1));if(seen.has(i))continue;seen.add(i);xlabels+='<text class="trend-axis-label" x="'+x(i)+'" y="'+(H-15)+'" text-anchor="middle">'+salesEscape(points[i].label)+'</text>';}
+ const circles=points.map((p,i)=>'<circle class="trend-point" cx="'+x(i)+'" cy="'+y(p.value)+'" r="'+(points.length>35?2.2:3.6)+'"><title>'+salesEscape(p.label)+' · '+salesEscape(m.label)+': '+salesEscape(m.format(p.value))+'</title></circle>').join("");
+ host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+salesEscape(m.label)+' a lo largo del período"><defs><linearGradient id="salesTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity=".20"/><stop offset="100%" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+grid+'<path class="trend-area" d="'+areaPath+'"/><path class="trend-line-shadow" d="'+linePath+'"/><path class="trend-line" d="'+linePath+'" style="stroke:'+color+'"/>'+circles+xlabels+'</svg>';
+ if(rangeLabel)rangeLabel.textContent=points.length+" "+(mode==="day"?"días":mode==="week"?"semanas":"meses")+" · "+points[0].label+" — "+points[points.length-1].label;
+}
 function renderSalesReport(){
-  const rows=salesRows;
-  const usd=rows.filter(r=>r.currency==="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
-  const cup=rows.filter(r=>r.currency!=="USD").reduce((a,r)=>a+(Number(r.total)||0),0);
-  const count=document.getElementById("salesOrdersCount"); if(count)count.textContent=String(rows.length);
-  const quickOrders=document.getElementById("quickOrdersCount");if(quickOrders)quickOrders.textContent=String(rows.length);
-  const usdBox=document.getElementById("salesUsdTotal"); if(usdBox)usdBox.textContent=salesMoney(usd,"USD");
-  const cupBox=document.getElementById("salesCupTotal"); if(cupBox)cupBox.textContent=salesMoney(cup,"CUP");
-
-  const products={}; const payments={}; const cats={}; const days={};
-  rows.forEach(r=>{
-    const items=Array.isArray(r.items)?r.items:[];
-    items.forEach(i=>{
-      const name=i.name||"Producto"; const qty=Number(i.qty)||0;
-      products[name]=(products[name]||0)+qty;
-      const cat=i.category||"Sin categoría"; cats[cat]=(cats[cat]||0)+(Number(i.line_total)||0);
-    });
-    const pm=r.payment_method||"Sin método"; payments[pm]=(payments[pm]||0)+(Number(r.total)||0);
-    const day=r.created_at?new Date(r.created_at).toLocaleDateString("es-ES"):"Sin fecha"; days[day]=(days[day]||0)+(Number(r.total)||0);
+ const rows=salesRows;
+ renderSalesTrendChart();
+ const usdRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="USD");
+ const cupRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="CUP");
+ const usd=usdRows.reduce((a,r)=>a+(Number(r.total)||0),0);
+ const cup=cupRows.reduce((a,r)=>a+(Number(r.total)||0),0);
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+ set("salesOrdersCount",String(rows.length));set("salesTableCount",`${rows.length} pedido(s)`);
+ set("quickOrdersCount",String(rows.length));set("salesUsdTotal",salesMoney(usd,"USD"));set("salesCupTotal",salesMoney(cup,"CUP"));
+ set("salesOrdersCountHint",`De ${salesFetchedRows.length} en el período`);
+ set("salesSubtotalSummary",salesCurrencyTotals(rows,"subtotal"));
+ set("salesDeliverySummary",salesCurrencyTotals(rows,"delivery_fee"));
+ set("salesAverageSummary",`USD ${salesMoney(usdRows.length?usd/usdRows.length:0,"USD")} · CUP ${salesMoney(cupRows.length?cup/cupRows.length:0,"CUP")}`);
+ const paid=rows.filter(r=>r.payment_status==="PAID");
+ const pending=rows.filter(r=>!r.payment_status||r.payment_status==="PENDING");
+ const overdue=rows.filter(r=>r.payment_status==="OVERDUE");
+ set("salesPaidSummary",salesCurrencyTotals(paid,"total"));set("salesPaidCount",`${paid.length} pedido(s) pagado(s)`);
+ set("salesPendingSummary",salesCurrencyTotals(pending,"total"));set("salesPendingCount",`${pending.length} pedido(s) pendiente(s)`);
+ set("salesOverdueSummary",salesCurrencyTotals(overdue,"total"));set("salesOverdueCount",`${overdue.length} pedido(s) vencido(s)`);
+ const products={},payments={},cats={},days={},zones={},orderStates={},payStates={},delivery={};
+ rows.forEach(r=>{
+  const cur=(r.currency||"USD").toUpperCase()==="CUP"?"CUP":"USD";
+  const items=Array.isArray(r.items)?r.items:[];
+  items.forEach(i=>{
+   const name=i.name||"Producto",qty=Number(i.qty)||0;
+   if(!products[name])products[name]={qty:0,USD:0,CUP:0};
+   products[name].qty+=qty;products[name][cur]+=Number(i.line_total)||0;
+   const cat=i.category||"Sin categoría";if(!cats[cat])cats[cat]={USD:0,CUP:0};cats[cat][cur]+=Number(i.line_total)||0;
   });
-  renderSalesList("salesTopProducts",Object.entries(products).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([label,v])=>({label,value:`${v} uds.`})));
-  renderSalesList("salesPayments",Object.entries(payments).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:salesMoney(v,rows.find(r=>r.payment_method===label)?.currency||"USD")})));
-  renderSalesList("salesCategories",Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:salesMoney(v,"USD")})));
-  renderSalesList("salesDaily",Object.entries(days).sort((a,b)=>b[0].localeCompare(a[0])).map(([label,v])=>({label,value:salesMoney(v,rows.find(r=>r.created_at&&new Date(r.created_at).toLocaleDateString("es-ES")===label)?.currency||"USD")})));
+  const pm=r.payment_method||"Sin método";if(!payments[pm])payments[pm]={USD:0,CUP:0};payments[pm][cur]+=Number(r.total)||0;
+  const day=r.created_at?new Date(r.created_at).toLocaleDateString("es-ES"):"Sin fecha";if(!days[day])days[day]={USD:0,CUP:0};days[day][cur]+=Number(r.total)||0;
+  const zone=r.delivery_zone||"Sin zona";if(!zones[zone])zones[zone]={USD:0,CUP:0,count:0};zones[zone][cur]+=Number(r.total)||0;zones[zone].count++;
+  const os=r.status||"Sin estado";orderStates[os]=(orderStates[os]||0)+1;
+  const ps=salesPaymentLabel(r);if(!payStates[ps])payStates[ps]={USD:0,CUP:0,count:0};payStates[ps][cur]+=Number(r.total)||0;payStates[ps].count++;
+  if(!delivery[cur])delivery[cur]=0;delivery[cur]+=Number(r.delivery_fee)||0;
+ });
+ const twoCur=o=>`USD ${salesMoney(o.USD||0,"USD")} · CUP ${salesMoney(o.CUP||0,"CUP")}`;
+ renderSalesList("salesTopProducts",Object.entries(products).sort((a,b)=>b[1].qty-a[1].qty).slice(0,15).map(([label,v])=>({label,value:`${v.qty} uds. · ${twoCur(v)}`})));
+ renderSalesList("salesPayments",Object.entries(payments).sort((a,b)=>(b[1].USD+b[1].CUP)-(a[1].USD+a[1].CUP)).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesCategories",Object.entries(cats).sort((a,b)=>(b[1].USD+b[1].CUP)-(a[1].USD+a[1].CUP)).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesDaily",Object.entries(days).sort((a,b)=>{const da=a[0].split("/").reverse().join("-"),db=b[0].split("/").reverse().join("-");return db.localeCompare(da)}).map(([label,v])=>({label,value:twoCur(v)})));
+ renderSalesList("salesOrderStatusBreakdown",Object.entries(orderStates).sort((a,b)=>b[1]-a[1]).map(([label,v])=>({label,value:`${v} pedido(s)`})));
+ renderSalesList("salesPaymentStatusBreakdown",Object.entries(payStates).sort((a,b)=>b[1].count-a[1].count).map(([label,v])=>({label,value:`${v.count} pedidos · ${twoCur(v)}`})));
+ renderSalesList("salesZones",Object.entries(zones).sort((a,b)=>b[1].count-a[1].count).map(([label,v])=>({label,value:`${v.count} pedidos · ${twoCur(v)}`})));
+ renderSalesList("salesDeliveryFees",Object.entries(delivery).map(([label,v])=>({label:`Domicilio ${label}`,value:salesMoney(v,label)})));
+ const table=document.getElementById("salesOrdersTable");
+ if(table){
+  if(!rows.length)table.innerHTML='<p class="sales-empty">No hay pedidos que coincidan con estos filtros.</p>';
+  else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha / ID</th><th>Cliente</th><th>Productos y nota</th><th>Pago</th><th>Estado del cobro</th><th>Zona</th><th>Subtotal</th><th>Domicilio</th><th>Total</th><th>Estado pedido</th></tr></thead><tbody>${rows.map(r=>{
+   const items=Array.isArray(r.items)?r.items:[];
+   const itemText=items.map(i=>`${Number(i.qty)||0}× ${i.name||"Producto"}`).join(", ");
+   return `<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}<small>ID: ${salesEscape(r.id||"—")}</small></td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(itemText||"Sin detalle")}${r.note?`<small>Nota: ${salesEscape(r.note)}</small>`:""}</td><td>${salesEscape(r.payment_method||"") }<small>${salesEscape(r.payment_timing==="POST_DELIVERY"?"Después de la entrega":r.payment_timing==="PREPAID"?"Antes de la entrega":"Sin modalidad")}</small></td><td><strong>${salesEscape(salesPaymentLabel(r))}</strong>${r.payment_due_at?`<small>Límite: ${salesEscape(new Date(r.payment_due_at).toLocaleDateString("es-ES"))}</small>`:""}<label style="display:block;margin-top:6px;font-size:.75rem">Actualizar cobro<select data-payment-status="${salesEscape(r.id)}"><option value="PENDING" ${(!r.payment_status||r.payment_status==="PENDING")?"selected":""}>Pendiente</option><option value="PAID" ${r.payment_status==="PAID"?"selected":""}>Pagado</option><option value="OVERDUE" ${r.payment_status==="OVERDUE"?"selected":""}>Vencido</option><option value="CANCELLED" ${r.payment_status==="CANCELLED"?"selected":""}>Cancelado</option></select></label></td><td>${salesEscape(r.delivery_zone||"")}</td><td>${salesEscape(salesMoney(r.subtotal,r.currency||"USD"))}</td><td>${salesEscape(salesMoney(r.delivery_fee,r.currency||"USD"))}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`;
+  }).join("")}</tbody></table></div>`;
+ }
+}
 
-  const table=document.getElementById("salesOrdersTable");
-  if(table){
-    if(!rows.length){table.innerHTML='<p class="sales-empty">No hay pedidos registrados en este período.</p>';}
-    else table.innerHTML=`<div class="sales-table-scroll"><table class="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Zona</th><th>Total</th><th>Estado</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${salesEscape(r.created_at?new Date(r.created_at).toLocaleString("es-ES"):"")}</td><td>${salesEscape(r.customer_name||"")}<small>${salesEscape(r.customer_phone||"")}</small></td><td>${salesEscape(r.payment_method||"")}</td><td>${salesEscape(r.delivery_zone||"")}</td><td><strong>${salesEscape(salesMoney(r.total,r.currency||"USD"))}</strong></td><td>${salesEscape(r.status||"")}</td></tr>`).join("")}</tbody></table></div>`;
-  }
-}
 async function loadSalesReport(){
-  const status=document.getElementById("salesStatus");
-  if(!status)return;
-  status.textContent="☁️ Cargando ventas…";
-  const range=document.getElementById("salesRange")?.value||"7d";
-  try{
-    const bounds=salesRangeBounds(range);
-    let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
-    if(bounds.start)query=query.gte("created_at",bounds.start);
-    if(bounds.end)query=query.lte("created_at",bounds.end);
-    const {data,error}=await query;
-    if(error)throw error;
-    salesRows=Array.isArray(data)?data:[];
-    renderSalesReport();
-    status.textContent=`☁️ ${salesRows.length} pedido(s) encontrado(s)`;
-  }catch(err){
-    salesRows=[];renderSalesReport();
-    status.textContent="⚠️ No se pudo cargar el reporte: "+(err.message||err);
-    console.error("Reporte de ventas:",err);
-  }
+ const status=document.getElementById("salesStatus");if(!status)return;
+ status.textContent="☁️ Cargando ventas…";
+ const range=document.getElementById("salesRange")?.value||"7d";
+ try{
+  const bounds=salesRangeBounds(range);
+  let query=supabaseClient.from("orders").select("id,created_at,customer_name,customer_phone,delivery_zone,payment_method,payment_timing,payment_due_at,payment_status,currency,subtotal,delivery_fee,total,items,note,status").order("created_at",{ascending:false});
+  if(bounds.start)query=query.gte("created_at",bounds.start);
+  if(bounds.end)query=query.lte("created_at",bounds.end);
+  const {data,error}=await query;if(error)throw error;
+  salesFetchedRows=Array.isArray(data)?data:[];
+  salesFillFilterOptions("salesOrderStatusFilter",salesFetchedRows.map(r=>r.status||"Sin estado"),"Todos los estados");
+  salesFillFilterOptions("salesMethodFilter",salesFetchedRows.map(r=>r.payment_method||"Sin método"),"Todos los métodos");
+  salesFillFilterOptions("salesCurrencyFilter",salesFetchedRows.map(r=>(r.currency||"USD").toUpperCase()),"Todas las monedas");
+  salesFillFilterOptions("salesZoneFilter",salesFetchedRows.map(r=>r.delivery_zone||"Sin zona"),"Todas las zonas");
+  salesApplyFilters();clearAdminNotice("sales-load");
+ }catch(err){
+  salesFetchedRows=[];salesRows=[];renderSalesReport();
+  setAdminNotice("sales-load","No se pudieron cargar los pedidos/ventas: "+(err.message||err),"#salesReport","Revisar ventas");
+  status.textContent="⚠️ No se pudo cargar el reporte: "+(err.message||err);
+  console.error("Reporte de ventas:",err);
+ }
 }
+
 function exportSalesCsv(){
-  const headers=["Fecha","Cliente","Teléfono","Zona","Método de pago","Moneda","Subtotal","Domicilio","Total","Estado"];
-  const lines=[headers,...salesRows.map(r=>[r.created_at,r.customer_name,r.customer_phone,r.delivery_zone,r.payment_method,r.currency,r.subtotal,r.delivery_fee,r.total,r.status])].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(","));
-  const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ const headers=["ID","Fecha","Cliente","Teléfono","Zona","Método de pago","Modalidad de pago","Estado de cobro","Moneda","Subtotal","Domicilio","Total","Estado del pedido","Productos","Nota"];
+ const lines=[headers,...salesRows.map(r=>[r.id,r.created_at,r.customer_name,r.customer_phone,r.delivery_zone,r.payment_method,r.payment_timing,salesPaymentLabel(r),r.currency,r.subtotal,r.delivery_fee,r.total,r.status,(Array.isArray(r.items)?r.items:[]).map(i=>`${i.qty||0} x ${i.name||"Producto"}`).join("; "),r.note])].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(","));
+ const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`electroisla-reporte-ventas-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
 const reviewsRefreshEl=document.getElementById("reviewsRefresh");
 if(reviewsRefreshEl)reviewsRefreshEl.addEventListener("click",loadAdminReviews);
+const salesTrendMetricEl=document.getElementById("salesTrendMetric");
+if(salesTrendMetricEl)salesTrendMetricEl.addEventListener("change",renderSalesTrendChart);
 const salesRangeEl=document.getElementById("salesRange");
 if(salesRangeEl)salesRangeEl.addEventListener("change",()=>{
   toggleSalesCustomDates();
@@ -727,6 +1004,13 @@ const salesRefreshEl=document.getElementById("salesRefresh");
 if(salesRefreshEl)salesRefreshEl.addEventListener("click",loadSalesReport);
 const salesExportEl=document.getElementById("salesExport");
 if(salesExportEl)salesExportEl.addEventListener("click",exportSalesCsv);
+const salesFilterIds=["salesSearch","salesOrderStatusFilter","salesPaymentStatusFilter","salesMethodFilter","salesCurrencyFilter","salesZoneFilter"];
+salesFilterIds.forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener(el.tagName==="INPUT"?"input":"change",salesApplyFilters);});
+const salesClearFilters=document.getElementById("salesClearFilters");
+if(salesClearFilters)salesClearFilters.addEventListener("click",()=>{
+ salesFilterIds.forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ salesApplyFilters();
+});
 supabaseClient.channel("reviews-admin").on("postgres_changes",{event:"*",schema:"public",table:"reviews"},()=>loadAdminReviews()).subscribe();
 supabaseClient.channel("orders-admin").on("postgres_changes",{event:"*",schema:"public",table:"orders"},()=>loadSalesReport()).subscribe();
 
