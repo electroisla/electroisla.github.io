@@ -95,7 +95,7 @@
  function summary(){
   const box=byId("paymentSummary");if(!box)return;
   const m=current();if(!m){box.innerHTML="<span>Selecciona un método de pago disponible.</span>";return}
-  const totals=getOrderTotals(),prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO",usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA",amount=prepago?totals.usdTotal*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,fee=prepago?totals.deliveryFeeUSD*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP;
+  const totals=getOrderTotals(),prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO",usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA",amount=prepago?totals.usdTotal*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.usdTotal:transfer?totals.transferTotal:totals.cashTotal,fee=prepago?totals.deliveryFeeUSD*Number(storeSettings.transfer_prepago_rate||1.04):usd?totals.deliveryFeeUSD:transfer?totals.deliveryFeeTransfer:totals.deliveryFeeCUP;
   const zelleAccount=m.code==="ZELLE"?accountForZelleAmount(totals.usdTotal):null;
   const detailsSource=m.code==="ZELLE"?(zelleAccount?{Cuenta:zelleAccount.account_value,Titular:zelleAccount.account_holder}:{}):m.account_details;
   const details=detailsSource&&typeof detailsSource==="object"?Object.entries(detailsSource).filter(function(x){return String(x[1]??"").trim()}):[];
@@ -122,7 +122,7 @@
   e.preventDefault();e.stopImmediatePropagation();
   const m=current(),t=timing(),totals=getOrderTotals();
   if(!m){alert("No hay un método habilitado para la modalidad elegida.");return}
-  const prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
+  const prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
   if(t==="PREPAID"&&!(m.code==="ZELLE"&&m.supports_prepaid)&&!prepago){alert("Antes de la entrega solo están disponibles los métodos habilitados para prepago.");return}
   const usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA";
   if((usd||prepago)&&!totals.usdAvailable){alert("Este método en USD no está disponible para estos productos.");return}
