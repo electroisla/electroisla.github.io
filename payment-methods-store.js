@@ -32,7 +32,7 @@
    // Los códigos ZELLE antiguos representan rangos de cuentas, no opciones de pago.
    // Mostrar solo el método canónico ZELLE; accountForZelleAmount asigna la cuenta por importe.
    if(isZelle)return m.code==="ZELLE"&&Boolean(t==="PREPAID"?m.supports_prepaid:m.supports_postdelivery);
-   if(t==="PREPAID")return Boolean(m.supports_prepaid)||m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
+   if(t==="PREPAID")return Boolean(m.supports_prepaid);
    if(t==="POST_DELIVERY")return Boolean(m.supports_postdelivery);
    return true;
   });
@@ -125,7 +125,7 @@
   const m=current(),t=timing(),totals=getOrderTotals();
   if(!m){alert("No hay un método habilitado para la modalidad elegida.");return}
   const prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
-  if(t==="PREPAID"&&!Boolean(m.supports_prepaid)&&!prepago){alert("Este método no está habilitado para pagar antes de la entrega.");return}
+  if(t==="PREPAID"&&!Boolean(m.supports_prepaid)){alert("Este método no está habilitado para pagar antes de la entrega.");return}
   const usd=m.currency==="USD",transfer=m.code==="TRANSFERENCIA";
   if((usd||prepago)&&!totals.usdAvailable){alert("Este método en USD no está disponible para estos productos.");return}
   if(!usd&&!prepago&&!totals.cupAvailable){alert("Los métodos en CUP solo están disponibles para pedidos de electrodomésticos.");return}
