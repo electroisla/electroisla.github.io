@@ -4050,3 +4050,9 @@ button:active{
  .admin-page .ei-mobile-menu-toggle[aria-expanded="true"] .ei-menu-chevron{transform:rotate(180deg)}
 }
 @media(min-width:901px){.admin-page .ei-admin-nav{transform:none;visibility:visible}}
+
+
+/* ElectroIsla: icono de pago alineado al extremo derecho */
+.payment-option{display:flex;align-items:center;gap:10px}
+.payment-option .payment-option-label{flex:1;min-width:0}
+.payment-option .payment-option-icon{flex:0 0 30px;width:30px;height:30px;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:1}
