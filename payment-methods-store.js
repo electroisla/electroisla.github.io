@@ -27,16 +27,21 @@
   // Después de la entrega, mostrar Zelle una sola vez y todos los demás métodos activos compatibles
   // con la moneda/productos, incluidos efectivo y transferencia y futuros métodos.
   return methods.filter(m=>{
-   const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";if(!m.enabled||(m.currency==="USD"||prepaid?!totals.usdAvailable:!totals.cupAvailable))return false;
+   const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";if(!m.enabled||(m.currency==="USD"||prepaid?!totals.usdAvailable:!totals.cupAvailable))return false;
    const isZelle=/^ZELLE(?:\d+)?$/i.test(String(m.code||""));
    if(t==="PREPAID")return (m.code==="ZELLE"&&m.supports_prepaid)||m.code==="TRANSFERENCIA_PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
-   if(isZelle)return m.code==="ZELLE"&&m.supports_postdelivery;
+   if(isZelle)return m.code==="ZELLE"&&Boolean(m.supports_postdelivery);
+   if(t==="POST_DELIVERY")return Boolean(m.supports_postdelivery);
    return true;
   });
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
-  const hasPost=methods.some(m=>m.enabled&&(m.currency==="TRANSFERENCIA_PREPAGO"||m.code==="TRANSFERENCIA_PREPAGO"?totals.usdAvailable:m.currency==="USD"?totals.usdAvailable:totals.cupAvailable));
+  const hasPost=methods.some(m=>{
+   const prepaid=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
+   const currencyAvailable=(m.currency==="USD"||prepaid)?totals.usdAvailable:totals.cupAvailable;
+   return m.enabled&&Boolean(m.supports_postdelivery)&&currencyAvailable&&(!/^ZELLE(?:\\d+)?$/i.test(String(m.code||""))||m.code==="ZELLE");
+  });
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
