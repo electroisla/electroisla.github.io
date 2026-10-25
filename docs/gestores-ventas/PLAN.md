@@ -48,3 +48,15 @@ La rama de prueba y la web oficial usaban el mismo proyecto Supabase; por eso el
 - Los pedidos directos de la tienda no quedan asignados accidentalmente a un gestor.
 - Los informes separan monedas y no suman USD/CUP/EUR sin conversión explícita.
 - No se modifica ni despliega a producción sin autorización expresa.
+
+## Interfaz de prueba creada
+- Se añadió `gestores.html`, un portal adaptable a móvil con inicio de sesión, recuperación de contraseña, enlace personal por gestor, catálogo de prueba, edición de precio, creación de pedidos ficticios, vista de pedidos y libro de liquidaciones.
+- La misma página presenta paneles de administración solo cuando el usuario autenticado tiene `app_metadata.role = admin`: comisión general, alta de producto ficticio, creación de perfiles asociados a usuarios Auth ya existentes, estados de pedidos, devoluciones y registro de liquidaciones.
+- Se añadió un enlace «Gestores de ventas · PRUEBA» a la navegación de `admin.html`, únicamente en la rama `gestores-ventas-prueba`.
+- El JavaScript inline de `gestores.html` pasó una comprobación de sintaxis.
+- No se han creado usuarios de Auth ni datos ficticios todavía; la interfaz requiere crear cuentas de prueba y asignar el rol protegido desde el panel de Supabase.
+
+## Límites pendientes de integración
+- Los pedidos creados en esta fase se guardan solo en `gestor_orders` y `gestor_order_items` del proyecto aislado. No se envían a `public.orders` de producción, no notifican clientes y no modifican inventario, pagos ni zonas.
+- Falta una prueba funcional autenticada con un usuario administrador y uno gestor, incluyendo rechazo de precio inferior, pedidos, cancelación/reembolso, aislamiento entre cuentas y saldo de liquidación.
+- La función de creación de pedidos no debe considerarse integración con el checkout oficial hasta que se diseñe y pruebe el puente seguro entre ambos sistemas.
