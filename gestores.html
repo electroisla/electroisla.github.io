@@ -46,6 +46,7 @@
       <button data-admin-tab="catalog" type="button">Catálogo de prueba</button>
       <button data-admin-tab="managers" type="button">Gestores</button>
       <button data-admin-tab="orders" type="button">Pedidos</button>
+      <button data-admin-tab="earnings" type="button">Ganancias</button>
       <button data-admin-tab="payouts" type="button">Liquidaciones</button>
     </div>
     <section data-admin-panel="overview" class="grid">
@@ -75,6 +76,10 @@
     </section>
     <section data-admin-panel="managers" class="card hidden"><h2>Gestores registrados</h2><div id="managerList" class="table-wrap"><p class="muted">Todavía no hay perfiles.</p></div></section>
     <section data-admin-panel="orders" class="card hidden"><h2>Pedidos de gestores</h2><div id="adminOrders" class="table-wrap"><p class="muted">Todavía no hay pedidos.</p></div></section>
+    <section data-admin-panel="earnings" class="grid hidden">
+      <div class="card"><h2>Ganancias por gestor</h2><p class="muted small">Las ganancias reconocidas proceden del libro de movimientos. Los pedidos pendientes muestran ganancia potencial; los cancelados no cuentan como ganancia potencial.</p><div id="adminEarningsSummary" class="table-wrap"><p class="muted">Cargando ganancias…</p></div></div>
+      <div class="card"><h2>Detalle de ganancias por pedido</h2><div id="adminEarningsOrders" class="table-wrap"><p class="muted">Cargando pedidos…</p></div></div>
+    </section>
     <section data-admin-panel="payouts" class="grid hidden">
       <div class="card half"><h2>Registrar liquidación</h2><p class="muted small">Solo permite liquidar el saldo positivo disponible en la moneda elegida.</p>
         <form id="payoutForm"><div class="field"><label for="payoutManager">Gestor</label><select id="payoutManager" required></select></div><div class="row"><div class="field"><label for="payoutAmount">Importe</label><input id="payoutAmount" type="number" min=".01" step=".01" required></div><div class="field"><label for="payoutCurrency">Moneda</label><select id="payoutCurrency"><option>USD</option><option>CUP</option><option>EUR</option></select></div></div><div class="field"><label for="payoutReference">Referencia</label><input id="payoutReference" maxlength="160"></div><button class="btn primary" type="submit">Registrar pago</button></form>
@@ -164,7 +169,7 @@
       managers=gp||[];orders=go||[];ledger=gl||[];catalog=(products||[]).map(p=>({id:p.product_id,name:p.product_name,currency:p.currency,official_price:p.official_price,active:p.active}));
       $("commission").value=settings.commission_percent;$("commissionKpi").textContent=Number(settings.commission_percent)+"%";
       $("managerCount").textContent=managers.length;$("orderCount").textContent=orders.length;
-      renderAdminCatalog();renderManagers();renderAdminOrders();renderLedger("adminLedger",ledger,true);
+      renderAdminCatalog();renderManagers();renderAdminOrders();renderAdminEarnings();renderLedger("adminLedger",ledger,true);
       $("payoutManager").innerHTML=managers.map(m=>'<option value="'+esc(m.id)+'">'+esc(m.display_name)+' · '+esc(m.slug)+'</option>').join("");
       clearStatus("adminStatus");
     }catch(err){showStatus("adminStatus",failMessage(err),"error");}
@@ -184,6 +189,19 @@
   function renderAdminOrders(){
     $("adminOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Gestor</th><th>Totales</th><th>Estado pedido</th><th>Pago</th><th>Acción</th></tr></thead><tbody>'+orders.map(o=>{const m=managers.find(x=>x.id===o.gestor_id);return '<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'<br><span class="mono">'+esc(o.id.slice(0,8))+'</span></td><td>'+esc(m?.display_name||"Gestor")+'</td><td>Oficial: '+money(o.official_subtotal,o.currency)+'<br>Venta: '+money(o.seller_subtotal,o.currency)+'<br>Ganancia: '+money(o.profit_assigned,o.currency)+'</td><td><select data-order-status="'+esc(o.id)+'">'+["pending","confirmed","processing","completed","cancelled","partially_refunded","refunded"].map(s=>'<option '+(o.order_status===s?'selected':'')+'>'+s+'</option>').join("")+'</select></td><td><select data-payment-status="'+esc(o.id)+'">'+["pending","paid","partially_paid","failed","refunded"].map(s=>'<option '+(o.payment_status===s?'selected':'')+'>'+s+'</option>').join("")+'</select><div class="small muted">Devuelto: '+money(o.refunded_amount,o.currency)+'</div></td><td><button class="btn" data-save-order="'+esc(o.id)+'" type="button">Guardar</button></td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Todavía no hay pedidos.</p>';
     $("adminOrders").querySelectorAll("[data-save-order]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.saveOrder;const status=$("adminOrders").querySelector('[data-order-status="'+id+'"]').value;const payment=$("adminOrders").querySelector('[data-payment-status="'+id+'"]').value;let refund=null;if(["cancelled","refunded","partially_refunded"].includes(status)){const current=orders.find(o=>o.id===id);const value=prompt("Importe devuelto en "+current.currency+" (máximo "+current.seller_subtotal+")",status==="partially_refunded"?current.seller_subtotal/2:current.seller_subtotal);if(value===null)return;refund=Number(value);}try{await rpc("gestor_admin_update_order_state",{p_order_id:id,p_order_status:status,p_payment_status:payment,p_refunded_amount:refund,p_notes:null});await loadAdmin();showStatus("adminStatus","Estado del pedido actualizado.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}}));
+  }
+  function renderAdminEarnings(){
+    const totalsByManager=managers.map(m=>{
+      const ownOrders=orders.filter(o=>o.gestor_id===m.id);
+      const ownLedger=ledger.filter(l=>l.gestor_id===m.id);
+      const potential=ownOrders.reduce((sum,o)=>sum+((!["cancelled","refunded"].includes(o.order_status))?Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0)):0),0);
+      const recognized=ownLedger.filter(l=>["earning","reversal"].includes(l.entry_type)).reduce((sum,l)=>sum+Number(l.amount||0),0);
+      const balance=ownLedger.reduce((sum,l)=>sum+Number(l.amount||0),0);
+      const currency=ownOrders[0]?.currency||ownLedger[0]?.currency||"USD";
+      return {manager:m,potential,recognized,balance,currency,orderCount:ownOrders.length};
+    });
+    $("adminEarningsSummary").innerHTML=totalsByManager.length?'<table><thead><tr><th>Gestor</th><th>Pedidos</th><th>Ganancia potencial</th><th>Ganancia reconocida</th><th>Saldo del libro</th></tr></thead><tbody>'+totalsByManager.map(t=>'<tr><td>'+esc(t.manager.display_name)+'<br><span class="small muted">'+esc(t.manager.slug)+'</span></td><td>'+t.orderCount+'</td><td>'+money(t.potential,t.currency)+'</td><td>'+money(t.recognized,t.currency)+'</td><td><strong>'+money(t.balance,t.currency)+'</strong></td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no hay gestores registrados.</p>';
+    $("adminEarningsOrders").innerHTML=orders.length?'<table><thead><tr><th>Pedido</th><th>Gestor</th><th>Estado</th><th>Margen</th><th>Comisión</th><th>Ganancia asignada</th><th>Reversión</th><th>Ganancia potencial vigente</th></tr></thead><tbody>'+orders.map(o=>{const m=managers.find(x=>x.id===o.gestor_id);const inactive=["cancelled","refunded"].includes(o.order_status);const currentProfit=inactive?0:Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0));return '<tr><td class="mono">'+esc(o.id.slice(0,8))+'</td><td>'+esc(m?.display_name||"Gestor")+'</td><td>'+esc(o.order_status)+'</td><td>'+money(o.margin_total,o.currency)+'</td><td>'+money(o.commission_total,o.currency)+'</td><td>'+money(o.profit_assigned,o.currency)+'</td><td>'+money(o.reversed_profit_total,o.currency)+'</td><td><strong>'+money(currentProfit,o.currency)+'</strong></td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Todavía no hay pedidos.</p>';
   }
   $("payoutForm").addEventListener("submit",async e=>{e.preventDefault();try{await rpc("gestor_admin_record_payout",{p_gestor_id:$("payoutManager").value,p_amount:Number($("payoutAmount").value),p_currency:$("payoutCurrency").value,p_reference:$("payoutReference").value.trim()||null,p_notes:null});$("payoutForm").reset();await loadAdmin();showStatus("adminStatus","Liquidación registrada.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
   function renderLedger(targetId,rows,admin=false){
