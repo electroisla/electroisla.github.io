@@ -1,10 +1,11 @@
-const CACHE_NAME = 'electroisla-v9.8.0';
+const CACHE_NAME = 'electroisla-v9.8.13-haptic-buttons';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
-  './styles.css?v=9.8.0',
-  './app.js?v=16',
-  './supabase-config.js?v=4'
+  './styles.css?v=9.8.128',
+  './app.js?v=151',
+  './supabase-config.js?v=4',
+  './payment-methods-store.js?v=30'
 ];
 
 self.addEventListener('install', event => {
