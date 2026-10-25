@@ -60,3 +60,12 @@ La rama de prueba y la web oficial usaban el mismo proyecto Supabase; por eso el
 - Los pedidos creados en esta fase se guardan solo en `gestor_orders` y `gestor_order_items` del proyecto aislado. No se envían a `public.orders` de producción, no notifican clientes y no modifican inventario, pagos ni zonas.
 - Falta una prueba funcional autenticada con un usuario administrador y uno gestor, incluyendo rechazo de precio inferior, pedidos, cancelación/reembolso, aislamiento entre cuentas y saldo de liquidación.
 - La función de creación de pedidos no debe considerarse integración con el checkout oficial hasta que se diseñe y pruebe el puente seguro entre ambos sistemas.
+
+## Publicación de prueba
+- Se creó un sitio estático independiente en Render, vinculado a la rama `gestores-ventas-prueba`.
+- Sitio: https://electroisla-gestores-prueba.onrender.com
+- Portal: https://electroisla-gestores-prueba.onrender.com/gestores.html
+- Despliegue inicial de Render: estado `live` para el commit `f4e8bae0138f2dc549b3c6eeae21b9aca3795aa7`.
+- El portal `gestores.html` usa el proyecto Supabase de pruebas `dllsojqfpyjyxgwzxpoa`. No se debe usar `admin.html` en este nuevo host para validar gestores: ese archivo conserva la configuración de Supabase de la tienda y no forma parte del portal aislado.
+- La interfaz aún no ha pasado una prueba funcional autenticada. El proyecto no contiene usuarios, perfiles, catálogo ni pedidos; para probarlo hay que crear cuentas ficticias y asignar el rol protegido de administrador en Authentication.
+- El asesor de seguridad de Supabase sigue mostrando avisos genéricos sobre funciones `SECURITY DEFINER` ejecutables por usuarios autenticados. Las funciones incluyen comprobaciones internas de rol para acciones administrativas; aun así, la revisión funcional y de seguridad debe completarse antes de considerar el sistema listo.
