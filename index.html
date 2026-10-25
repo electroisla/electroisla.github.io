@@ -797,5 +797,27 @@
   syncDisplay();
 })();
 </script>
+
+<script>
+/* Respuesta háptica suave para botones de la tienda. Si el navegador no la admite, no afecta a la acción. */
+(function(){
+  if (!('vibrate' in navigator)) return;
+  let lastPulse = 0;
+  document.addEventListener('click', function(event){
+    const target = event.target && event.target.closest
+      ? event.target.closest('button, a[role="button"], [role="button"], .btn, input[type="button"], input[type="submit"], input[type="reset"]')
+      : null;
+    if (!target || target.disabled || target.getAttribute('aria-disabled') === 'true') return;
+    if (target.matches('input, select, textarea') && !/^button|submit|reset$/i.test(target.type || '')) return;
+    const now = Date.now();
+    if (now - lastPulse < 90) return;
+    lastPulse = now;
+    let duration = 12;
+    if (target.matches('#addToCart, .add-to-cart, [data-action*="cart"], [data-action*="order"], .checkout-button, #checkoutButton')) duration = 20;
+    try { navigator.vibrate(duration); } catch (_) {}
+  }, true);
+})();
+</script>
+
 </body>
 </html>
