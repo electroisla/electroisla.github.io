@@ -60,8 +60,8 @@
  async function load(force=false){
    if(!supabaseClient||(busy&&!force))return;
    busy=true;status("☁️ Cargando zonas desde Supabase…");
-   try{const {data,error}=await supabaseClient.from("delivery_zones").select("id,name,fee_usd,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;zones=data||[];render();status("☁️ "+zones.length+" zonas cargadas. Los cambios se guardan en Supabase.");if(!editingId)$("deliveryZoneOrder").value=String(zones.length+1)}
-   catch(err){status("⚠️ No se pudieron cargar las zonas: "+(err.message||err));console.error("Zonas de domicilio:",err)}
+   try{const {data,error}=await supabaseClient.from("delivery_zones").select("id,name,fee_usd,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;zones=data||[];render();status("☁️ "+zones.length+" zonas cargadas. Los cambios se guardan en Supabase.");window.dispatchEvent(new CustomEvent("ei:delivery-zones-updated",{detail:{total:zones.length,available:zones.filter(z=>z.available!==false).length}}));if(!editingId)$("deliveryZoneOrder").value=String(zones.length+1)}
+   catch(err){status("⚠️ No se pudieron cargar las zonas: "+(err.message||err));window.dispatchEvent(new CustomEvent("ei:delivery-zones-updated",{detail:{error:err.message||String(err)}}));console.error("Zonas de domicilio:",err)}
    finally{busy=false}
  }
  async function save(e){
