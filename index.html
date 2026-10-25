@@ -338,32 +338,14 @@
 .ei-zelle-card .btn.primary:hover{background:var(--logo-orange-dark)!important}
 @media(max-width:380px){.ei-zelle-card{padding:24px 17px}.ei-zelle-card h2{font-size:21px}}
 
-/* Métodos de pago: icono fijo en el extremo derecho */
-.payment-option:has(.payment-option-icon){
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  box-sizing:border-box;
-}
-.payment-option:has(.payment-option-icon) .payment-option-label{
-  flex:1 1 auto;
-  min-width:0;
-}
-.payment-option-icon{
-  flex:0 0 34px;
-  width:34px;
-  height:34px;
-  margin-left:auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  background:#eef5ff;
-  color:#123d78;
-  font-size:21px;
-  line-height:1;
-}
+/* Logotipos de pago y pictogramas vectoriales, alineados al extremo derecho */
+.payment-option:has(.payment-option-icon){display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box}
+.payment-option:has(.payment-option-icon) .payment-option-label{flex:1 1 auto;min-width:0}
+.payment-option-icon{flex:0 0 42px;width:42px;height:34px;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:#f4f7fc;overflow:hidden}
+.payment-brand-logo{display:block;width:38px;height:25px;object-fit:contain}
+.payment-brand-zelle{width:34px;height:28px}
+.payment-brand-visa{width:39px;height:25px}
+.payment-option-icon svg{display:block;width:40px;height:28px}
 </style>
 </head>
 <body>
@@ -722,12 +704,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=4"></script>
 <script src="app.js?v=151"></script>
-<script src="payment-methods-store.js?v=29"></script>
+<script src="payment-methods-store.js?v=30"></script>
 
 
 
   <script src="delivery-zones-store.js?v=2"></script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.34-payment-icons",{updateViaCache:"none"}).catch(()=>{}));}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=9.8.35-payment-brand-logos",{updateViaCache:"none"}).catch(()=>{}));}</script>
 
 <div id="eiDateTimeModal" hidden>
   <section class="ei-datetime-card" role="dialog" aria-modal="true" aria-labelledby="eiDateTimeTitle">
