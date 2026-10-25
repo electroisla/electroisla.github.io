@@ -88,7 +88,7 @@
     <div id="managerStatus" class="status hidden" role="status"></div>
     <div class="kpis">
       <div class="kpi"><small>Pedidos</small><strong id="myOrderCount">0</strong></div>
-      <div class="kpi"><small>Ganancia asignada</small><strong id="myProfit">$0.00</strong></div>
+      <div class="kpi"><small>Ganancia potencial</small><strong id="myProfit">$0.00</strong></div>
       <div class="kpi"><small>Saldo en liquidaciones</small><strong id="myBalance">$0.00</strong></div>
     </div>
     <div class="section-tabs"><button class="active" data-manager-tab="catalog" type="button">Catálogo y precios</button><button data-manager-tab="orders" type="button">Mis pedidos</button><button data-manager-tab="ledger" type="button">Mis liquidaciones</button></div>
@@ -202,7 +202,7 @@
       orders=myOrders||[];ledger=myLedger||[];
       renderManagerCatalog();renderManagerOrders();renderLedger("managerLedger",ledger,false);
       $("myOrderCount").textContent=orders.length;
-      const profit=orders.reduce((n,o)=>n+Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0),0);
+      const profit=orders.reduce((n,o)=>n+((!["cancelled","refunded"].includes(o.order_status))?Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0)):0),0);
       $("myProfit").textContent=money(profit,orders[0]?.currency||"USD");
       const balances={};ledger.forEach(l=>balances[l.currency]=(balances[l.currency]||0)+Number(l.amount||0));
       $("myBalance").textContent=Object.entries(balances).map(([c,v])=>money(v,c)).join(" · ")||money(0,"USD");
