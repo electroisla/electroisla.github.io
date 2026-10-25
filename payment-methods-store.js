@@ -32,13 +32,15 @@
  }
  function paymentIcon(m){
   const code=String(m.code||"").toUpperCase(),name=String(m.name||"").toLowerCase(),currency=String(m.currency||"").toUpperCase();
-  if(/^ZELLE(?:\d+)?$/.test(code)||name.includes("zelle"))return "ⓩ";
-  if(/visa|débito|debito|tropipay/.test(name)||/VISA|DEBIT|TROPIPAY/.test(code))return "💳";
-  if(currency==="USD"&&/efectivo|cash/.test(name))return "💵";
-  if(currency==="CUP"&&/efectivo|cash/.test(name))return "💴";
-  if(code==="TRANSFERENCIA"||/transferencia bancaria/.test(name))return "🏦";
-  if(code==="PREPAGO"||code==="TRANSFERENCIA_PREPAGO"||currency==="TRANSFERENCIA_PREPAGO"||/transferencia prepago/.test(name))return "⚡";
-  return "💰";
+  const svg=(body)=>'<svg viewBox="0 0 48 32" width="40" height="28" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">'+body+'</svg>';
+  if(/^ZELLE(?:\\d+)?$/.test(code)||name.includes("zelle"))return '<img class="payment-brand-logo payment-brand-zelle" src="https://cdn.simpleicons.org/zelle/6D1ED4" alt="Zelle" loading="lazy" referrerpolicy="no-referrer">';
+  if(/visa|débito|debito/.test(name)||/VISA|DEBIT/.test(code))return '<img class="payment-brand-logo payment-brand-visa" src="https://cdn.simpleicons.org/visa/1A1F71" alt="Visa" loading="lazy" referrerpolicy="no-referrer">';
+  if(/tropipay/.test(name)||/TROPIPAY/.test(code))return svg('<rect x="2" y="4" width="44" height="24" rx="4" fill="#123D78"/><rect x="2" y="10" width="44" height="5" fill="#F39A24"/><rect x="7" y="21" width="10" height="3" rx="1.5" fill="#fff"/>');
+  if(currency==="USD"&&/efectivo|cash/.test(name))return svg('<rect x="2" y="5" width="44" height="22" rx="3" fill="#18864B"/><rect x="5" y="8" width="38" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="24" cy="16" r="6" fill="#fff"/><path d="M26.5 13.5c-.6-.7-1.4-1-2.4-1-1.5 0-2.5.8-2.5 1.8 0 2.8 5 1.2 5 3.8 0 1.1-1.1 2-2.7 2-1 0-2-.4-2.7-1.2M24 11v10" fill="none" stroke="#18864B" stroke-width="1.3" stroke-linecap="round"/>');
+  if(currency==="CUP"&&/efectivo|cash/.test(name))return svg('<rect x="2" y="5" width="44" height="22" rx="3" fill="#C83D3D"/><rect x="5" y="8" width="38" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="24" cy="16" r="6" fill="#fff"/><path d="M26.5 13.5c-.6-.7-1.4-1-2.4-1-1.5 0-2.5.8-2.5 1.8 0 2.8 5 1.2 5 3.8 0 1.1-1.1 2-2.7 2-1 0-2-.4-2.7-1.2M24 11v10" fill="none" stroke="#C83D3D" stroke-width="1.3" stroke-linecap="round"/>');
+  if(code==="TRANSFERENCIA"||/transferencia bancaria/.test(name))return svg('<rect x="3" y="11" width="42" height="17" rx="2" fill="#174A7E"/><path d="M2 11 24 2 46 11Z" fill="#F39A24"/><path d="M8 14v10M16 14v10M24 14v10M32 14v10M40 14v10M4 26h40" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
+  if(code==="PREPAGO"||code==="TRANSFERENCIA_PREPAGO"||currency==="TRANSFERENCIA_PREPAGO"||/transferencia prepago/.test(name))return svg('<rect x="3" y="4" width="42" height="24" rx="5" fill="#F39A24"/><path d="M27 2 13 17h9l-2 13 15-17h-9Z" fill="#123D78" stroke="#fff" stroke-width="1" stroke-linejoin="round"/>');
+  return svg('<rect x="2" y="5" width="44" height="22" rx="4" fill="#123D78"/><rect x="2" y="11" width="44" height="5" fill="#F39A24"/><rect x="7" y="21" width="12" height="3" rx="1.5" fill="#fff"/>');
  }
  function available(){
   const totals=getOrderTotals(),t=timing();
@@ -67,7 +69,7 @@
   if(postOption)postOption.style.display=hasPost?"":"none";
   if(!hasPost&&postRadio?.checked){const pre=form.querySelector('input[name="paymentTiming"][value="PREPAID"]');if(pre)pre.checked=true}
   const old=form.querySelector('input[name="paymentMethod"]:checked')?.value,items=available();
-  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'><span class="payment-option-label">'+escPay(m.name)+' · '+escPay(m.currency)+'</span><span class="payment-option-icon" aria-hidden="true">'+paymentIcon(m)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
+  list.innerHTML=items.length?items.map(function(m,i){return '<label class="payment-option"><input type="radio" name="paymentMethod" value="'+escPay(m.code)+'" '+(m.code===old||(!old&&i===0)?"checked":"")+'><span class="payment-option-label">'+escPay(m.name)+' · '+escPay(m.currency)+'</span><span class="payment-option-icon">'+paymentIcon(m)+'</span></label>'}).join(""):'<p class="payment-help">No hay métodos habilitados para esta modalidad y estos productos. Contacta con la tienda para coordinar el pago.</p>';
   if(!items.some(m=>m.code===old)&&items.length){const r=list.querySelector('input[name="paymentMethod"]');if(r)r.checked=true}
   // Actualizar el plazo después de reconstruir los métodos para leer la selección vigente.
   updateDueUI();
