@@ -20,6 +20,16 @@
  const escPay=value=>String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});
  const timing=()=>form.querySelector('input[name="paymentTiming"]:checked')?.value||"PREPAID";
  const current=()=>{const el=form.querySelector('input[name="paymentMethod"]:checked');return methods.find(m=>m.code===el?.value)||null};
+ function paymentOrder(m){
+  const code=String(m.code||"").toUpperCase(),name=String(m.name||"").toLowerCase(),currency=String(m.currency||"").toUpperCase();
+  if(/^ZELLE(?:\\d+)?$/.test(code)||name.includes("zelle"))return 0;
+  if(/visa|débito|debito|tropipay/.test(name)||/VISA|DEBIT|TROPIPAY/.test(code))return 1;
+  if(currency==="USD"&&/efectivo|cash/.test(name))return 2;
+  if(currency==="CUP"&&/efectivo|cash/.test(name))return 3;
+  if(code==="TRANSFERENCIA"||/transferencia bancaria/.test(name))return 4;
+  if(code==="PREPAGO"||code==="TRANSFERENCIA_PREPAGO"||currency==="TRANSFERENCIA_PREPAGO"||/transferencia prepago/.test(name))return 5;
+  return 6;
+ }
  function available(){
   const totals=getOrderTotals(),t=timing();
   // Los códigos ZELLE50, ZELLE100, ZELLE200, ZELLE300 y ZELLE400 son cuentas
@@ -35,7 +45,7 @@
    if(t==="PREPAID")return Boolean(m.supports_prepaid);
    if(t==="POST_DELIVERY")return Boolean(m.supports_postdelivery);
    return true;
-  });
+  }).sort((a,b)=>paymentOrder(a)-paymentOrder(b));
  }
  function render(){
   const totals=getOrderTotals(),postOption=byId("postDeliveryTimingOption"),postRadio=form.querySelector('input[name="paymentTiming"][value="POST_DELIVERY"]');
