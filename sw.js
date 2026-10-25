@@ -1,4 +1,4 @@
-const CACHE_NAME = 'electroisla-v9.8.12-payment-brand-logos';
+const CACHE_NAME = 'electroisla-v9.8.13-haptic-buttons';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
