@@ -836,8 +836,75 @@ function salesApplyFilters(){
  const status=document.getElementById("salesStatus");
  if(status)status.textContent=`☁️ ${salesRows.length} de ${salesFetchedRows.length} pedido(s) · filtros aplicados`;
 }
+
+function renderSalesTrendChart(){
+ const host=document.getElementById("salesTrendChart");
+ if(!host)return;
+ const metric=document.getElementById("salesTrendMetric")?.value||"orders";
+ const meta={
+  orders:{label:"Pedidos",value:r=>1,format:v=>String(Math.round(v))},
+  salesUSD:{label:"Ventas en USD",value:r=>(String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.total)||0):0),format:v=>"USD "+salesMoney(v,"USD")},
+  salesCUP:{label:"Ventas en CUP",value:r=>(String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.total)||0):0),format:v=>"CUP "+salesMoney(v,"CUP")},
+  deliveryUSD:{label:"Domicilio en USD",value:r=>(String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.delivery_fee)||0):0),format:v=>"USD "+salesMoney(v,"USD")},
+  deliveryCUP:{label:"Domicilio en CUP",value:r=>(String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.delivery_fee)||0):0),format:v=>"CUP "+salesMoney(v,"CUP")},
+  paidUSD:{label:"Cobros pagados en USD",value:r=>(r.payment_status==="PAID"&&String(r.currency||"USD").toUpperCase()==="USD"?(Number(r.total)||0):0),format:v=>"USD "+salesMoney(v,"USD")},
+  paidCUP:{label:"Cobros pagados en CUP",value:r=>(r.payment_status==="PAID"&&String(r.currency||"USD").toUpperCase()==="CUP"?(Number(r.total)||0):0),format:v=>"CUP "+salesMoney(v,"CUP")}
+ };
+ const m=meta[metric]||meta.orders;
+ const legend=document.getElementById("salesTrendLegendLabel");if(legend)legend.textContent=m.label;
+ const rangeLabel=document.getElementById("salesTrendRangeLabel");
+ const rows=(Array.isArray(salesRows)?salesRows:[]).filter(r=>r.created_at&&Number.isFinite(new Date(r.created_at).getTime()));
+ if(!rows.length){host.innerHTML='<p class="sales-trend-empty">No hay pedidos con fecha que coincidan con los filtros seleccionados.</p>';if(rangeLabel)rangeLabel.textContent="Sin datos";return;}
+ const dateKey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+ const dates=rows.map(r=>new Date(r.created_at)).sort((a,b)=>a-b);
+ let min=new Date(dates[0]);min.setHours(0,0,0,0);
+ let max=new Date(dates[dates.length-1]);max.setHours(0,0,0,0);
+ const selectedRange=document.getElementById("salesRange")?.value||"7d";
+ if(selectedRange==="custom"){
+  const from=document.getElementById("salesDateFrom")?.value,to=document.getElementById("salesDateTo")?.value;
+  if(from){const d=new Date(from+"T00:00:00");if(d<min)min=d;}
+  if(to){const d=new Date(to+"T00:00:00");if(d>max)max=d;}
+ }else if(selectedRange!=="all"){
+  const now=new Date();now.setHours(0,0,0,0);
+  let start=new Date(now);
+  if(selectedRange==="today")start.setDate(start.getDate());
+  if(selectedRange==="7d")start.setDate(start.getDate()-6);
+  if(selectedRange==="30d")start.setDate(start.getDate()-29);
+  if(selectedRange==="90d")start.setDate(start.getDate()-89);
+  if(selectedRange==="6m")start.setMonth(start.getMonth()-6);
+  if(selectedRange==="1y")start.setFullYear(start.getFullYear()-1);
+  if(selectedRange==="2y")start.setFullYear(start.getFullYear()-2);
+  if(start<min)min=start;if(now>max)max=now;
+ }
+ const span=Math.max(1,Math.round((max-min)/86400000)+1);
+ const mode=span<=45?"day":span<=180?"week":"month";
+ const bucketDate=d=>{const x=new Date(d);x.setHours(0,0,0,0);if(mode==="day")return dateKey(x);if(mode==="week"){const weekday=(x.getDay()+6)%7;x.setDate(x.getDate()-weekday);return dateKey(x);}return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-01";};
+ const bucketLabel=k=>{const d=new Date(k+"T00:00:00");return mode==="month"?d.toLocaleDateString("es-ES",{month:"short",year:"2-digit"}):d.toLocaleDateString("es-ES",{day:"2-digit",month:"short"});};
+ const buckets=new Map();
+ const cursor=new Date(min);cursor.setHours(0,0,0,0);
+ while(cursor<=max&&buckets.size<800){const k=bucketDate(cursor);if(!buckets.has(k))buckets.set(k,0);if(mode==="day")cursor.setDate(cursor.getDate()+1);else if(mode==="week")cursor.setDate(cursor.getDate()+7);else cursor.setMonth(cursor.getMonth()+1);}
+ rows.forEach(r=>{const k=bucketDate(new Date(r.created_at));if(!buckets.has(k))buckets.set(k,0);buckets.set(k,buckets.get(k)+m.value(r));});
+ const points=[...buckets.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,value])=>({date:date,label:bucketLabel(date),value:value}));
+ const maxValue=Math.max(...points.map(p=>p.value),0),scaleMax=maxValue===0?1:maxValue*1.12;
+ const W=760,H=270,L=65,R=18,T=18,B=43,plotW=W-L-R,plotH=H-T-B;
+ const x=i=>L+(points.length===1?plotW/2:i/(points.length-1)*plotW);
+ const y=v=>T+plotH-(v/scaleMax)*plotH;
+ const fmtTick=v=>metric==="orders"?String(Math.round(v)):((metric.endsWith("CUP")?"CUP ":"USD ")+salesMoney(v,metric.endsWith("CUP")?"CUP":"USD"));
+ let grid="";
+ for(let n=0;n<=4;n++){const value=scaleMax*n/4,yy=y(value);grid+='<line class="trend-grid" x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'"/><text class="trend-axis-label" x="'+(L-9)+'" y="'+(yy+4)+'" text-anchor="end">'+salesEscape(fmtTick(value))+'</text>';}
+ const linePath=points.map((p,i)=>(i?"L":"M")+x(i).toFixed(2)+" "+y(p.value).toFixed(2)).join(" ");
+ const areaPath=linePath+" L "+x(points.length-1)+" "+(T+plotH)+" L "+x(0)+" "+(T+plotH)+" Z";
+ let xlabels="";
+ const labelCount=Math.min(6,points.length),seen=new Set();
+ for(let n=0;n<labelCount;n++){const i=labelCount===1?0:Math.round(n*(points.length-1)/(labelCount-1));if(seen.has(i))continue;seen.add(i);xlabels+='<text class="trend-axis-label" x="'+x(i)+'" y="'+(H-15)+'" text-anchor="middle">'+salesEscape(points[i].label)+'</text>';}
+ const circles=points.map((p,i)=>'<circle class="trend-point" cx="'+x(i)+'" cy="'+y(p.value)+'" r="'+(points.length>35?2.2:3.6)+'"><title>'+salesEscape(p.label)+' · '+salesEscape(m.label)+': '+salesEscape(m.format(p.value))+'</title></circle>').join("");
+ host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+salesEscape(m.label)+' a lo largo del período"><defs><linearGradient id="salesTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#ff6900" stop-opacity=".20"/><stop offset="100%" stop-color="#ff6900" stop-opacity="0"/></linearGradient></defs>'+grid+'<path class="trend-area" d="'+areaPath+'"/><path class="trend-line-shadow" d="'+linePath+'"/><path class="trend-line" d="'+linePath+'"/>'+circles+xlabels+'</svg>';
+ if(rangeLabel)rangeLabel.textContent=points.length+" "+(mode==="day"?"días":mode==="week"?"semanas":"meses")+" · "+points[0].label+" — "+points[points.length-1].label;
+}
+
 function renderSalesReport(){
  const rows=salesRows;
+ renderSalesTrendChart();
  const usdRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="USD");
  const cupRows=rows.filter(r=>(r.currency||"USD").toUpperCase()==="CUP");
  const usd=usdRows.reduce((a,r)=>a+(Number(r.total)||0),0);
@@ -925,6 +992,8 @@ function exportSalesCsv(){
 
 const reviewsRefreshEl=document.getElementById("reviewsRefresh");
 if(reviewsRefreshEl)reviewsRefreshEl.addEventListener("click",loadAdminReviews);
+const salesTrendMetricEl=document.getElementById("salesTrendMetric");
+if(salesTrendMetricEl)salesTrendMetricEl.addEventListener("change",renderSalesTrendChart);
 const salesRangeEl=document.getElementById("salesRange");
 if(salesRangeEl)salesRangeEl.addEventListener("change",()=>{
   toggleSalesCustomDates();
