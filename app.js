@@ -1,7 +1,8 @@
 // ElectroIsla 9.8.1
 const WHATSAPP="5352017110";
 // SOLO para esta rama aislada: nunca enviar pedidos de prueba a WhatsApp real.
-const EI_INTEGRATION_TEST_MODE=true;
+window.EI_INTEGRATION_TEST_MODE=true;
+const EI_INTEGRATION_TEST_MODE=window.EI_INTEGRATION_TEST_MODE;
 const gestorSlug=(new URLSearchParams(window.location.search).get("gestor")||"").trim().toLowerCase();
 let gestorPrices=new Map();
 const defaultProducts=[
