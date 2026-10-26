@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0755a4">
+<title>Gestores de ventas | ElectroIsla 360</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#0755a4;--deep:#07366f;--orange:#ff6900;--ink:#21364d;--muted:#6a7b8f;--line:#dce5ef;--bg:#f3f6fa;--white:#fff;--soft:#fff3e9;--green:#11834b;--red:#bd2e2e;--shadow:0 4px 16px #163b690b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden,[hidden]{display:none!important}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px;background:var(--blue);border-bottom:4px solid var(--orange);color:#fff}.brand{display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:850;letter-spacing:-.02em}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border:2px solid var(--orange);border-radius:50%;background:#fff;color:var(--blue);font-weight:900}.brand em{color:#ffb273;font-style:normal}.top-actions{display:flex;align-items:center;gap:8px}.wrap{width:min(1200px,100% - 28px);margin:22px auto 40px}.login{width:min(460px,100%);margin:40px auto;padding:26px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.login h1{margin:0 0 5px;color:var(--blue);font-size:1.55rem}.muted{color:var(--muted)}.small{font-size:.82rem}.field{display:grid;gap:5px;margin:12px 0}.field label{font-weight:750;font-size:.85rem}.field input,.field select,.field textarea{width:100%;min-height:42px;padding:10px 11px;border:1px solid #d2deea;border-radius:9px;background:#fff;color:var(--ink)}.field textarea{min-height:72px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:3px solid #ff69001c;border-color:var(--orange)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:9px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--blue);font-weight:800;text-decoration:none}.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn.danger{border-color:#f0caca;color:var(--red)}.btn:disabled{opacity:.5;cursor:not-allowed}.status{margin:10px 0;padding:10px 12px;border-radius:9px;background:#eef5ff;color:var(--blue);font-size:.86rem}.status.error{background:#fff0f0;color:var(--red)}.status.ok{background:#eaf8f0;color:var(--green)}.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}.head h1{margin:0;color:var(--blue);font-size:clamp(1.35rem,3vw,1.9rem);letter-spacing:-.03em}.head p{margin:3px 0 0;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}.card{grid-column:span 12;min-width:0;padding:17px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow)}.card h2{margin:0 0 12px;color:var(--blue);font-size:1.04rem}.half{grid-column:span 6}.third{grid-column:span 4}.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}.kpi{padding:14px;border:1px solid var(--line);border-radius:11px;background:#fff}.kpi small{display:block;color:var(--muted);font-weight:700}.kpi strong{display:block;margin-top:5px;color:var(--blue);font-size:1.35rem;overflow-wrap:anywhere}.table-wrap{max-width:100%;overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.84rem}th,td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f6f9fc;color:var(--blue);font-weight:850;white-space:nowrap}td input,td select{min-width:90px;max-width:150px;padding:7px;border:1px solid var(--line);border-radius:7px}.pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:99px;background:#edf4fc;color:var(--blue);font-size:.75rem;font-weight:800}.pill.orange{background:var(--soft);color:#a74600}.row{display:flex;align-items:end;flex-wrap:wrap;gap:10px}.row>.field{flex:1 1 150px;margin:4px 0}.product-list{display:grid;gap:9px}.product{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px}.product strong{display:block}.product .price{color:var(--blue);font-weight:850}.product input{width:112px;min-height:37px;padding:7px;border:1px solid var(--line);border-radius:8px}.actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.footnote{margin-top:10px;color:var(--muted);font-size:.8rem}.section-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}.section-tabs button{border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--blue);padding:9px 12px;font-weight:800}.section-tabs button.active{background:var(--blue);border-color:var(--blue);color:#fff}.notice{padding:12px;border-radius:10px;background:#fff8ef;border:1px solid #f4d1b3;color:#80420f}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;overflow-wrap:anywhere}
+@media(max-width:720px){.topbar{padding:10px 13px}.wrap{width:calc(100% - 20px);margin-top:14px}.login{margin:24px auto;padding:21px}.half,.third{grid-column:span 12}.kpis{grid-template-columns:1fr}.kpi{display:flex;align-items:center;justify-content:space-between;gap:12px}.kpi strong{font-size:1.15rem;margin:0}.card{padding:13px}.product{grid-template-columns:minmax(0,1fr) auto}.head{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">EI</span><span>Electro<em>Isla</em> 360</span></div>
+  <div class="top-actions"><span id="userLabel" class="small"></span><button id="logoutBtn" class="btn hidden" type="button">Cerrar sesión</button></div>
+</header>
+<main class="wrap">
+  <section id="loginView" class="login">
+    <p class="pill orange">Acceso seguro</p>
+    <h1>Gestores de ventas</h1>
+    <p class="muted">Entra con la cuenta que te asignó la administración.</p>
+    <form id="loginForm">
+      <div class="field"><label for="email">Correo electrónico</label><input id="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <button class="btn primary" type="submit" style="width:100%">Entrar</button>
+    </form>
+    <button id="forgotBtn" class="btn" type="button" style="width:100%;margin-top:8px">Recuperar contraseña</button>
+    <div id="loginStatus" class="status hidden" role="status"></div>
+    <p class="footnote">Este portal usa una base de pruebas independiente. No crea cuentas automáticamente ni cambia la tienda oficial.</p>
+  </section>
+
+  <section id="adminView" class="hidden">
+    <div class="head"><div><h1>Gestión de gestores</h1><p>Administración del piloto · entorno aislado</p></div><span class="pill orange">Administrador</span></div>
+    <div id="adminStatus" class="status hidden" role="status"></div>
+    <div class="kpis">
+      <div class="kpi"><small>Gestores creados</small><strong id="managerCount">0</strong></div>
+      <div class="kpi"><small>Pedidos registrados</small><strong id="orderCount">0</strong></div>
+      <div class="kpi"><small>Comisión general</small><strong id="commissionKpi">5%</strong></div>
+    </div>
+    <div class="section-tabs">
+      <button class="active" data-admin-tab="overview" type="button">Resumen</button>
+      <button data-admin-tab="catalog" type="button">Catálogo de prueba</button>
+      <button data-admin-tab="managers" type="button">Gestores</button>
+      <button data-admin-tab="orders" type="button">Pedidos</button>
+      <button data-admin-tab="earnings" type="button">Ganancias</button>
+      <button data-admin-tab="payouts" type="button">Liquidaciones</button>
+    </div>
+    <section data-admin-panel="overview" class="grid">
+      <div class="card half"><h2>Comisión general</h2><p class="muted small">Se guarda una copia del porcentaje en cada pedido nuevo.</p>
+        <form id="commissionForm" class="row"><div class="field"><label for="commission">Comisión (%)</label><input id="commission" type="number" min="0" max="100" step=".01" value="5" required></div><button class="btn primary" type="submit">Guardar comisión</button></form>
+      </div>
+      <div class="card half"><h2>Crear perfil de gestor</h2><p class="muted small">Primero crea su usuario en Supabase Authentication y copia su UUID. No introduzcas contraseñas aquí.</p>
+        <form id="managerForm">
+          <div class="field"><label for="authUserId">UUID del usuario de Auth</label><input id="authUserId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" required></div>
+          <div class="row"><div class="field"><label for="managerName">Nombre visible</label><input id="managerName" maxlength="120" required></div><div class="field"><label for="managerSlug">Enlace identificador</label><input id="managerSlug" pattern="[a-z0-9][a-z0-9-]{2,49}" placeholder="gestor-nombre" required></div></div>
+          <button class="btn primary" type="submit">Crear perfil</button>
+        </form>
+      </div>
+      <div class="card"><h2>Guía rápida de cuentas de prueba</h2><ol><li>En el panel de Supabase del proyecto <span class="mono">ElectroIsla-Gestores-Pruebas</span>, crea usuarios ficticios en Authentication.</li><li>Para la cuenta administrativa, asigna el rol protegido <span class="mono">app_metadata.role = admin</span> desde el panel seguro; no uses <span class="mono">user_metadata</span>.</li><li>Para cada gestor, copia su UUID en el formulario anterior. No se guardan contraseñas en estas tablas.</li><li>Añade productos ficticios al catálogo y prueba el precio mínimo antes de integrar nada con la tienda real.</li></ol><div class="notice">No reutilices contraseñas reales ni usuarios de producción en este proyecto de pruebas.</div></div>
+    </section>
+    <section data-admin-panel="catalog" class="grid hidden">
+      <div class="card half"><h2 id="productFormTitle">Añadir producto ficticio</h2>
+        <form id="productForm">
+          <input id="productId" type="hidden">
+          <div class="field"><label for="productName">Nombre del producto</label><input id="productName" maxlength="200" required></div>
+          <div class="row"><div class="field"><label for="officialPrice">Precio oficial</label><input id="officialPrice" type="number" min="0" step=".01" required></div><div class="field"><label for="productCurrency">Moneda</label><select id="productCurrency"><option>USD</option><option>CUP</option><option>EUR</option></select></div></div>
+          <label><input id="productActive" type="checkbox" checked> Producto activo</label>
+          <div class="actions"><button class="btn primary" type="submit">Guardar producto</button><button id="cancelProductEdit" class="btn hidden" type="button">Cancelar edición</button></div>
+        </form>
+      </div>
+      <div class="card"><h2>Catálogo ficticio</h2><div id="catalogList" class="table-wrap"><p class="muted">Todavía no hay productos de prueba.</p></div></div>
+    </section>
+    <section data-admin-panel="managers" class="card hidden"><h2>Gestores registrados</h2><div id="managerList" class="table-wrap"><p class="muted">Todavía no hay perfiles.</p></div></section>
+    <section data-admin-panel="orders" class="card hidden"><h2>Pedidos de gestores</h2><div id="adminOrders" class="table-wrap"><p class="muted">Todavía no hay pedidos.</p></div></section>
+    <section data-admin-panel="earnings" class="grid hidden">
+      <div class="card"><h2>Ganancias por gestor</h2><p class="muted small">Las ganancias reconocidas proceden del libro de movimientos. Los pedidos pendientes muestran ganancia potencial; los cancelados no cuentan como ganancia potencial.</p><div id="adminEarningsSummary" class="table-wrap"><p class="muted">Cargando ganancias…</p></div></div>
+      <div class="card"><h2>Detalle de ganancias por pedido</h2><div id="adminEarningsOrders" class="table-wrap"><p class="muted">Cargando pedidos…</p></div></div>
+    </section>
+    <section data-admin-panel="payouts" class="grid hidden">
+      <div class="card half"><h2>Registrar liquidación</h2><p class="muted small">Solo permite liquidar el saldo positivo disponible en la moneda elegida.</p>
+        <form id="payoutForm"><div class="field"><label for="payoutManager">Gestor</label><select id="payoutManager" required></select></div><div class="row"><div class="field"><label for="payoutAmount">Importe</label><input id="payoutAmount" type="number" min=".01" step=".01" required></div><div class="field"><label for="payoutCurrency">Moneda</label><select id="payoutCurrency"><option>USD</option><option>CUP</option><option>EUR</option></select></div></div><div class="field"><label for="payoutReference">Referencia</label><input id="payoutReference" maxlength="160"></div><button class="btn primary" type="submit">Registrar pago</button></form>
+      </div>
+      <div class="card"><h2>Libro de liquidaciones</h2><div id="adminLedger" class="table-wrap"><p class="muted">Sin movimientos.</p></div></div>
+    </section>
+  </section>
+
+  <section id="managerView" class="hidden">
+    <div class="head"><div><h1 id="managerHeading">Mi catálogo</h1><p>Tu enlace personal: <span id="managerLink" class="mono"></span></p></div><span class="pill">Gestor</span></div>
+    <div id="managerStatus" class="status hidden" role="status"></div>
+    <div class="kpis">
+      <div class="kpi"><small>Pedidos</small><strong id="myOrderCount">0</strong></div>
+      <div class="kpi"><small>Ganancia potencial</small><strong id="myProfit">$0.00</strong></div>
+      <div class="kpi"><small>Saldo en liquidaciones</small><strong id="myBalance">$0.00</strong></div>
+    </div>
+    <div class="section-tabs"><button class="active" data-manager-tab="catalog" type="button">Catálogo y precios</button><button data-manager-tab="orders" type="button">Mis pedidos</button><button data-manager-tab="ledger" type="button">Mis liquidaciones</button></div>
+    <section data-manager-panel="catalog" class="card"><h2>Catálogo oficial</h2><p class="muted small">El precio oficial es el mínimo. Solo se guarda tu precio personalizado; el precio oficial no cambia.</p><div id="managerCatalog" class="product-list"><p class="muted">Cargando catálogo…</p></div><h2 style="margin-top:20px">Crear pedido de prueba</h2><p class="muted small">Añade cantidades en el catálogo y pulsa “Preparar pedido”. El pedido queda en estado pendiente y no se envía a clientes ni a la tienda oficial.</p><div id="cartSummary" class="status">No has seleccionado productos.</div><div class="field"><label for="orderNotes">Nota opcional</label><textarea id="orderNotes" maxlength="1000"></textarea></div><button id="createOrderBtn" class="btn primary" type="button" disabled>Preparar pedido de prueba</button></section>
+    <section data-manager-panel="orders" class="card hidden"><h2>Mis pedidos</h2><div id="managerOrders" class="table-wrap"><p class="muted">Todavía no hay pedidos.</p></div></section>
+    <section data-manager-panel="ledger" class="card hidden"><h2>Mis liquidaciones</h2><div id="managerLedger" class="table-wrap"><p class="muted">Todavía no hay movimientos.</p></div></section>
+  </section>
+</main>
+<script>
+(() => {
+  const SUPABASE_URL = "https://dllsojqfpyjyxgwzxpoa.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_8DbBZxB9EzwyFRZSFy3aHQ_-s1h8Kwr";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const $ = id => document.getElementById(id);
+  const slugFromUrl = new URLSearchParams(location.search).get("gestor");
+  let user = null, profile = null, catalog = [], managers = [], orders = [], ledger = [], cart = {};
+  const money = (value, currency="USD") => new Intl.NumberFormat("es-ES",{style:"currency",currency}).format(Number(value||0));
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const showStatus = (id,message,type="info") => {const el=$(id);el.textContent=message;el.className="status"+(type==="error"?" error":type==="ok"?" ok":"");el.classList.remove("hidden");};
+  const clearStatus = id => {$(id).classList.add("hidden");};
+  const failMessage = err => {
+    const m = err?.message || String(err || "Error inesperado");
+    if (/price_below_official_minimum/.test(m)) return "El precio no puede ser inferior al precio oficial.";
+    if (/admin_only|42501/.test(m)) return "Tu cuenta no tiene permisos de administración para esta acción.";
+    if (/active_manager_profile_required/.test(m)) return "Esta cuenta no tiene un perfil de gestor activo.";
+    if (/payout_exceeds_available_balance/.test(m)) return "El importe supera el saldo disponible de ese gestor en esa moneda.";
+    if (/invalid login credentials/i.test(m)) return "Correo o contraseña incorrectos.";
+    return m;
+  };
+  async function rpc(name,args){const {data,error}=await db.rpc(name,args);if(error)throw error;return data;}
+  function setView(which){["loginView","adminView","managerView"].forEach(id=>$(id).classList.toggle("hidden",id!==which));$("logoutBtn").classList.toggle("hidden",which==="loginView");}
+  $("loginForm").addEventListener("submit",async e=>{
+    e.preventDefault();clearStatus("loginStatus");
+    const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+    if(error){showStatus("loginStatus",failMessage(error),"error");return;}
+    await initSession();
+  });
+  $("forgotBtn").addEventListener("click",async()=>{
+    const email=$("email").value.trim();
+    if(!email){showStatus("loginStatus","Escribe tu correo para enviarte el enlace de recuperación.");return;}
+    const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    showStatus("loginStatus",error?failMessage(error):"Si el correo está registrado, recibirás un enlace de recuperación.",error?"error":"ok");
+  });
+  $("logoutBtn").addEventListener("click",async()=>{await db.auth.signOut();user=null;profile=null;setView("loginView");$("userLabel").textContent="";});
+  async function initSession(){
+    const {data:{user:current},error}=await db.auth.getUser();
+    if(error||!current){setView("loginView");return;}
+    user=current;$("userLabel").textContent=current.email||"Sesión activa";
+    if(current.app_metadata?.role==="admin"){setView("adminView");await loadAdmin();return;}
+    const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
+    if(gpError||!gp||gp.status!=="active"){
+      await db.auth.signOut();setView("loginView");showStatus("loginStatus","La cuenta no tiene un perfil de gestor activo. Solicita acceso a la administración.","error");return;
+    }
+    if(slugFromUrl && slugFromUrl!==gp.slug){
+      await db.auth.signOut();setView("loginView");showStatus("loginStatus","Este enlace pertenece a otro gestor. Abre tu enlace personal.","error");return;
+    }
+    profile=gp;$("managerHeading").textContent="Hola, "+gp.display_name;$("managerLink").textContent=location.origin+"/?gestor="+gp.slug;
+    setView("managerView");await loadManager();
+  }
+  db.auth.onAuthStateChange((_event,session)=>{if(session?.user && !user){setTimeout(()=>initSession(),0);}});
+  document.querySelectorAll("[data-admin-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-admin-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-admin-panel]").forEach(p=>p.classList.toggle("hidden",p.dataset.adminPanel!==b.dataset.adminTab));}));
+  document.querySelectorAll("[data-manager-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-manager-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-manager-panel]").forEach(p=>p.classList.toggle("hidden",p.dataset.managerPanel!==b.dataset.managerTab));}));
+  async function loadAdmin(){
+    try{
+      const [{data:settings,error:se},{data:gp,error:ge},{data:go,error:oe},{data:gl,error:le},products] = await Promise.all([
+        db.from("gestor_settings").select("commission_percent").eq("singleton",true).single(),
+        db.from("gestor_profiles").select("id,auth_user_id,display_name,slug,status,created_at").order("created_at",{ascending:false}),
+        db.from("gestor_orders").select("*").order("created_at",{ascending:false}),
+        db.from("gestor_settlement_ledger").select("*").order("created_at",{ascending:false}),
+        rpc("gestor_admin_list_catalog",{})
+      ]);
+      if(se)throw se;if(ge)throw ge;if(oe)throw oe;if(le)throw le;
+      managers=gp||[];orders=go||[];ledger=gl||[];catalog=(products||[]).map(p=>({id:p.product_id,name:p.product_name,currency:p.currency,official_price:p.official_price,active:p.active}));
+      $("commission").value=settings.commission_percent;$("commissionKpi").textContent=Number(settings.commission_percent)+"%";
+      $("managerCount").textContent=managers.length;$("orderCount").textContent=orders.length;
+      renderAdminCatalog();renderManagers();renderAdminOrders();renderAdminEarnings();renderLedger("adminLedger",ledger,true);
+      $("payoutManager").innerHTML=managers.map(m=>'<option value="'+esc(m.id)+'">'+esc(m.display_name)+' · '+esc(m.slug)+'</option>').join("");
+      clearStatus("adminStatus");
+    }catch(err){showStatus("adminStatus",failMessage(err),"error");}
+  }
+  $("commissionForm").addEventListener("submit",async e=>{e.preventDefault();try{const v=Number($("commission").value);await rpc("gestor_admin_set_commission",{p_percent:v});$("commissionKpi").textContent=v+"%";showStatus("adminStatus","Comisión general guardada.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
+  $("managerForm").addEventListener("submit",async e=>{e.preventDefault();try{await rpc("gestor_admin_create_profile",{p_auth_user_id:$("authUserId").value.trim(),p_display_name:$("managerName").value.trim(),p_slug:$("managerSlug").value.trim()});$("managerForm").reset();await loadAdmin();showStatus("adminStatus","Perfil de gestor creado.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
+  $("productForm").addEventListener("submit",async e=>{e.preventDefault();try{await rpc("gestor_admin_upsert_catalog_product",{p_product_id:$("productId").value||null,p_name:$("productName").value.trim(),p_currency:$("productCurrency").value,p_official_price:Number($("officialPrice").value),p_active:$("productActive").checked});resetProductForm();await loadAdmin();showStatus("adminStatus","Producto ficticio guardado.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
+  $("cancelProductEdit").addEventListener("click",resetProductForm);
+  function resetProductForm(){$("productForm").reset();$("productId").value="";$("productActive").checked=true;$("productFormTitle").textContent="Añadir producto ficticio";$("cancelProductEdit").classList.add("hidden");}
+  function renderAdminCatalog(){
+    $("catalogList").innerHTML=catalog.length?'<table><thead><tr><th>Producto</th><th>Precio oficial</th><th>Estado</th><th></th></tr></thead><tbody>'+catalog.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+money(p.official_price,p.currency)+' '+esc(p.currency)+'</td><td>'+(p.active?'<span class="pill">Activo</span>':'<span class="pill orange">Oculto</span>')+'</td><td><button class="btn" data-edit-product="'+esc(p.id)+'" type="button">Editar</button></td></tr>').join("")+'</tbody></table>':'<p class="muted">Añade productos ficticios para comenzar las pruebas.</p>';
+    $("catalogList").querySelectorAll("[data-edit-product]").forEach(b=>b.addEventListener("click",()=>{const p=catalog.find(x=>x.id===b.dataset.editProduct);if(!p)return;$("productId").value=p.id;$("productName").value=p.name;$("officialPrice").value=p.official_price;$("productCurrency").value=p.currency;$("productActive").checked=p.active;$("productFormTitle").textContent="Editar producto";$("cancelProductEdit").classList.remove("hidden");document.querySelector('[data-admin-tab="catalog"]').click();$("productName").focus();}));
+  }
+  function renderManagers(){
+    $("managerList").innerHTML=managers.length?'<table><thead><tr><th>Gestor</th><th>Enlace</th><th>Estado</th><th>UUID Auth</th></tr></thead><tbody>'+managers.map(m=>'<tr><td>'+esc(m.display_name)+'</td><td><a href="gestores.html?gestor='+encodeURIComponent(m.slug)+'">Abrir enlace</a><br><span class="mono">'+esc(m.slug)+'</span></td><td>'+esc(m.status)+'</td><td class="mono">'+esc(m.auth_user_id)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Crea primero el usuario de Auth y luego su perfil.</p>';
+  }
+  function renderAdminOrders(){
+    $("adminOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Gestor</th><th>Totales</th><th>Estado pedido</th><th>Pago</th><th>Acción</th></tr></thead><tbody>'+orders.map(o=>{const m=managers.find(x=>x.id===o.gestor_id);return '<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'<br><span class="mono">'+esc(o.id.slice(0,8))+'</span></td><td>'+esc(m?.display_name||"Gestor")+'</td><td>Oficial: '+money(o.official_subtotal,o.currency)+'<br>Venta: '+money(o.seller_subtotal,o.currency)+'<br>Ganancia: '+money(o.profit_assigned,o.currency)+'</td><td><select data-order-status="'+esc(o.id)+'">'+["pending","confirmed","processing","completed","cancelled","partially_refunded","refunded"].map(s=>'<option '+(o.order_status===s?'selected':'')+'>'+s+'</option>').join("")+'</select></td><td><select data-payment-status="'+esc(o.id)+'">'+["pending","paid","partially_paid","failed","refunded"].map(s=>'<option '+(o.payment_status===s?'selected':'')+'>'+s+'</option>').join("")+'</select><div class="small muted">Devuelto: '+money(o.refunded_amount,o.currency)+'</div></td><td><button class="btn" data-save-order="'+esc(o.id)+'" type="button">Guardar</button></td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Todavía no hay pedidos.</p>';
+    $("adminOrders").querySelectorAll("[data-save-order]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.saveOrder;const status=$("adminOrders").querySelector('[data-order-status="'+id+'"]').value;const payment=$("adminOrders").querySelector('[data-payment-status="'+id+'"]').value;let refund=null;if(["cancelled","refunded","partially_refunded"].includes(status)){const current=orders.find(o=>o.id===id);const value=prompt("Importe devuelto en "+current.currency+" (máximo "+current.seller_subtotal+")",status==="partially_refunded"?current.seller_subtotal/2:current.seller_subtotal);if(value===null)return;refund=Number(value);}try{await rpc("gestor_admin_update_order_state",{p_order_id:id,p_order_status:status,p_payment_status:payment,p_refunded_amount:refund,p_notes:null});await loadAdmin();showStatus("adminStatus","Estado del pedido actualizado.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}}));
+  }
+  function renderAdminEarnings(){
+    const totalsByManager=managers.map(m=>{
+      const ownOrders=orders.filter(o=>o.gestor_id===m.id);
+      const ownLedger=ledger.filter(l=>l.gestor_id===m.id);
+      const potential=ownOrders.reduce((sum,o)=>sum+((!["cancelled","refunded"].includes(o.order_status))?Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0)):0),0);
+      const recognized=ownLedger.filter(l=>["earning","reversal"].includes(l.entry_type)).reduce((sum,l)=>sum+Number(l.amount||0),0);
+      const balance=ownLedger.reduce((sum,l)=>sum+Number(l.amount||0),0);
+      const currency=ownOrders[0]?.currency||ownLedger[0]?.currency||"USD";
+      return {manager:m,potential,recognized,balance,currency,orderCount:ownOrders.length};
+    });
+    $("adminEarningsSummary").innerHTML=totalsByManager.length?'<table><thead><tr><th>Gestor</th><th>Pedidos</th><th>Ganancia potencial</th><th>Ganancia reconocida</th><th>Saldo del libro</th></tr></thead><tbody>'+totalsByManager.map(t=>'<tr><td>'+esc(t.manager.display_name)+'<br><span class="small muted">'+esc(t.manager.slug)+'</span></td><td>'+t.orderCount+'</td><td>'+money(t.potential,t.currency)+'</td><td>'+money(t.recognized,t.currency)+'</td><td><strong>'+money(t.balance,t.currency)+'</strong></td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no hay gestores registrados.</p>';
+    $("adminEarningsOrders").innerHTML=orders.length?'<table><thead><tr><th>Pedido</th><th>Gestor</th><th>Estado</th><th>Margen</th><th>Comisión</th><th>Ganancia asignada</th><th>Reversión</th><th>Ganancia potencial vigente</th></tr></thead><tbody>'+orders.map(o=>{const m=managers.find(x=>x.id===o.gestor_id);const inactive=["cancelled","refunded"].includes(o.order_status);const currentProfit=inactive?0:Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0));return '<tr><td class="mono">'+esc(o.id.slice(0,8))+'</td><td>'+esc(m?.display_name||"Gestor")+'</td><td>'+esc(o.order_status)+'</td><td>'+money(o.margin_total,o.currency)+'</td><td>'+money(o.commission_total,o.currency)+'</td><td>'+money(o.profit_assigned,o.currency)+'</td><td>'+money(o.reversed_profit_total,o.currency)+'</td><td><strong>'+money(currentProfit,o.currency)+'</strong></td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Todavía no hay pedidos.</p>';
+  }
+  $("payoutForm").addEventListener("submit",async e=>{e.preventDefault();try{await rpc("gestor_admin_record_payout",{p_gestor_id:$("payoutManager").value,p_amount:Number($("payoutAmount").value),p_currency:$("payoutCurrency").value,p_reference:$("payoutReference").value.trim()||null,p_notes:null});$("payoutForm").reset();await loadAdmin();showStatus("adminStatus","Liquidación registrada.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
+  function renderLedger(targetId,rows,admin=false){
+    $(targetId).innerHTML=rows.length?'<table><thead><tr>'+(admin?'<th>Gestor</th>':'')+'<th>Fecha</th><th>Movimiento</th><th>Importe</th><th>Referencia</th></tr></thead><tbody>'+rows.map(r=>{const m=managers.find(x=>x.id===r.gestor_id);return '<tr>'+(admin?'<td>'+esc(m?.display_name||"Gestor")+'</td>':'')+'<td>'+new Date(r.created_at).toLocaleString("es-ES")+'</td><td>'+esc(r.entry_type)+'</td><td>'+money(r.amount,r.currency)+'</td><td>'+esc(r.reference||"—")+'</td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Sin movimientos registrados.</p>';
+  }
+  async function loadManager(){
+    try{
+      const [{data:settings,error:se},products,{data:myOrders,error:oe},{data:myLedger,error:le}] = await Promise.all([
+        db.from("gestor_settings").select("commission_percent").eq("singleton",true).single(),
+        rpc("gestor_get_my_catalog",{}),
+        db.from("gestor_orders").select("*").order("created_at",{ascending:false}),
+        db.from("gestor_settlement_ledger").select("*").order("created_at",{ascending:false})
+      ]);
+      if(se)throw se;if(oe)throw oe;if(le)throw le;
+      catalog=(products||[]).map(p=>({id:p.product_id,name:p.product_name,currency:p.currency,official_price:p.official_price,seller_price:p.seller_price,active:p.active}));
+      orders=myOrders||[];ledger=myLedger||[];
+      renderManagerCatalog();renderManagerOrders();renderLedger("managerLedger",ledger,false);
+      $("myOrderCount").textContent=orders.length;
+      const profit=orders.reduce((n,o)=>n+((!["cancelled","refunded"].includes(o.order_status))?Math.max(0,Number(o.profit_assigned||0)-Number(o.reversed_profit_total||0)):0),0);
+      $("myProfit").textContent=money(profit,orders[0]?.currency||"USD");
+      const balances={};ledger.forEach(l=>balances[l.currency]=(balances[l.currency]||0)+Number(l.amount||0));
+      $("myBalance").textContent=Object.entries(balances).map(([c,v])=>money(v,c)).join(" · ")||money(0,"USD");
+      clearStatus("managerStatus");
+    }catch(err){showStatus("managerStatus",failMessage(err),"error");}
+  }
+  function renderManagerCatalog(){
+    $("managerCatalog").innerHTML=catalog.length?catalog.map(p=>'<div class="product" data-product="'+esc(p.id)+'"><div><strong>'+esc(p.name)+'</strong><div class="small muted">Precio oficial mínimo: '+money(p.official_price,p.currency)+'</div><div class="small">Tu precio: <span class="price" data-price-label>'+money(p.seller_price,p.currency)+'</span></div></div><div style="display:grid;gap:6px;justify-items:end"><input type="number" min="'+Number(p.official_price)+'" step=".01" value="'+Number(p.seller_price)+'" aria-label="Tu precio para '+esc(p.name)+'" data-price-input="'+esc(p.id)+'"><div class="actions"><button class="btn" data-save-price="'+esc(p.id)+'" type="button">Guardar precio</button><input type="number" min=".001" step=".001" value="0" aria-label="Cantidad de '+esc(p.name)+'" data-quantity="'+esc(p.id)+'" style="width:86px"></div></div></div>').join(""):'<p class="muted">El administrador todavía no ha añadido productos de prueba.</p>';
+    $("managerCatalog").querySelectorAll("[data-save-price]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.savePrice;const p=catalog.find(x=>x.id===id);const input=$("managerCatalog").querySelector('[data-price-input="'+id+'"]');try{const val=Number(input.value);if(val<Number(p.official_price)){showStatus("managerStatus","El precio no puede ser inferior al precio oficial.","error");return;}await rpc("gestor_set_my_product_price",{p_product_id:id,p_custom_price:val});showStatus("managerStatus","Precio personalizado guardado.","ok");await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}}));
+    $("managerCatalog").querySelectorAll("[data-quantity]").forEach(i=>i.addEventListener("input",updateCartSummary));updateCartSummary();
+  }
+  function updateCartSummary(){
+    let count=0,total=0,cur=null,mixed=false;
+    catalog.forEach(p=>{const input=$("managerCatalog").querySelector('[data-quantity="'+p.id+'"]');const q=Number(input?.value||0);if(q>0){count++;total+=Number(p.seller_price||p.official_price)*q;if(cur&&cur!==p.currency)mixed=true;cur=p.currency;}});
+    $("cartSummary").textContent=count?("Productos: "+count+" · Total estimado: "+(mixed?"No se pueden mezclar monedas":money(total,cur||"USD"))):"No has seleccionado productos.";
+    $("createOrderBtn").disabled=count===0||mixed;
+  }
+  $("createOrderBtn").addEventListener("click",async()=>{
+    const items=catalog.map(p=>({product_id:p.id,quantity:Number($("managerCatalog").querySelector('[data-quantity="'+p.id+'"]')?.value||0)})).filter(i=>i.quantity>0);
+    if(!items.length)return;
+    try{const result=await rpc("gestor_create_order",{p_items:items,p_notes:$("orderNotes").value.trim()||null});showStatus("managerStatus","Pedido de prueba creado: "+result.order_id+". Total de venta: "+money(result.seller_subtotal,result.currency)+". Ganancia asignada: "+money(result.profit_assigned,result.currency)+".","ok");$("orderNotes").value="";catalog.forEach(p=>{const i=$("managerCatalog").querySelector('[data-quantity="'+p.id+'"]');if(i)i.value=0;});await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}
+  });
+  function renderManagerOrders(){
+    $("managerOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Pedido</th><th>Totales</th><th>Estado</th><th>Pago</th></tr></thead><tbody>'+orders.map(o=>'<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'</td><td class="mono">'+esc(o.id.slice(0,8))+'</td><td>Oficial '+money(o.official_subtotal,o.currency)+'<br>Venta '+money(o.seller_subtotal,o.currency)+'<br>Margen '+money(o.margin_total,o.currency)+'<br>Comisión '+money(o.commission_total,o.currency)+'</td><td>'+esc(o.order_status)+'</td><td>'+esc(o.payment_status)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no has creado pedidos de prueba.</p>';
+  }
+  db.auth.getSession().then(({data})=>{if(data.session)initSession();});
+})();
+</script>
+</body>
+</html>
