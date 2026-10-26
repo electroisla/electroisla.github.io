@@ -1,5 +1,6 @@
 /* ElectroIsla 360: métodos de pago configurables y modalidad de cobro */
 (function(){
+ const managerReferralSlug=(new URLSearchParams(window.location.search).get("gestor")||"").trim().toLowerCase();
  const form=document.getElementById("orderForm");
  const list=document.getElementById("paymentMethodsListStore");
  if(!form||!list||typeof supabaseClient==="undefined")return;
@@ -174,11 +175,17 @@
   const dueChoice=byId("paymentDueHours")?.value||"1",dueLabel=dueChoice==="CUSTOM"?"Personalizado":dueChoice+" hora"+(dueChoice==="1"?"":"s");
   const when=t==="PREPAID"?"Antes de la entrega":usesDueDate?"Después de la entrega ("+dueLabel+", fecha límite "+dueDate.toLocaleString("es-ES",{dateStyle:"medium",timeStyle:"short"})+")":"Después de la entrega";
   const msg="🛒 NUEVO PEDIDO\n\n👤 PERSONA QUE REALIZA EL PEDIDO\nNombre: "+name+"\nTeléfono: "+phone+"\n\n📦 PERSONA QUE RECIBE EL PEDIDO\nNombre: "+recipientName+"\nDirección: "+recipientAddress+"\nTeléfono: "+recipientPhone+"\n\n🛍️ PRODUCTOS:\n"+lines+"\n\n📍 Zona de entrega: "+zoneName+"\n\n💳 MÉTODO DE PAGO: "+m.name+" ("+m.code+")\n\n━━━━━━━━━━━━━━━━━━\n🕒 MOMENTO DE PAGO\n"+when+"\n━━━━━━━━━━━━━━━━━━\n"+(details?"\n🏦 DATOS DE PAGO\n"+details+"\n":"")+(m.instructions?"\n📝 INDICACIONES\n"+m.instructions+"\n":"")+(t==="POST_DELIVERY"&&m.postdelivery_terms?"\n📅 CONDICIONES\n"+m.postdelivery_terms+"\n":"")+"\n🧾 SUBTOTAL: "+money(subtotal,prepago?"USD":m.currency)+"\n\n🚚 DOMICILIO: "+(delivery>0?money(delivery,prepago?"USD":m.currency):"Gratis")+"\n💰 TOTAL A PAGAR: "+money(amount,prepago?"USD":m.currency)+(note?"\n🗒️ Nota del pedido: "+note:"");
+  let orderSaved=false;
   try{
    const items=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return null;const price=Number(effectivePrice(p))||0,qty=Number(i.qty)||0;return {id:String(p.id),name:p.name||"",category:p.category||"",qty:qty,unit:p.unit||"",unit_price:price,line_total:price*qty}}).filter(Boolean);
-   const res=await supabaseClient.from("orders").insert({customer_name:name,customer_phone:phone,delivery_zone:zoneName,payment_method:m.code,payment_timing:t,payment_due_at:dueAt,payment_status:"PENDING",currency:m.currency,subtotal:subtotal,delivery_fee:delivery,total:amount,items:items,note:["DATOS DE QUIEN RECIBE EL PEDIDO: "+recipientName+"; Dirección: "+recipientAddress+"; Teléfono: "+recipientPhone,note].filter(Boolean).join("\n"),status:"sent"});
-   if(res.error)console.warn("No se pudo registrar el pedido para el reporte:",res.error);
+   const res=await supabaseClient.from("orders").insert({customer_name:name,customer_phone:phone,delivery_zone:zoneName,payment_method:m.code,payment_timing:t,payment_due_at:dueAt,payment_status:"PENDING",currency:m.currency,subtotal:subtotal,delivery_fee:delivery,total:amount,items:items,note:["DATOS DE QUIEN RECIBE EL PEDIDO: "+recipientName+"; Dirección: "+recipientAddress+"; Teléfono: "+recipientPhone,note].filter(Boolean).join("\n"),status:"sent",gestor_slug:managerReferralSlug||null});
+   if(res.error)console.warn("No se pudo registrar el pedido para el reporte:",res.error);else orderSaved=true;
   }catch(err){console.warn("No se pudo registrar el pedido para el reporte:",err)}
+  if(window.EI_INTEGRATION_TEST_MODE){
+   sessionStorage.removeItem("electroisla_payment_method");sessionStorage.removeItem("electroisla_payment_timing");sessionStorage.removeItem("electroisla_zelle_account");
+   alert(orderSaved?(managerReferralSlug?"Pedido de prueba registrado y asociado al gestor "+managerReferralSlug+". No se envió a WhatsApp.":"Pedido de prueba registrado. No se envió a WhatsApp."):"No se pudo registrar el pedido de prueba. Revisa la conexión y vuelve a intentarlo.");
+   return;
+  }
   try{
    sessionStorage.setItem("electroisla_payment_method",String(m.code||""));
    sessionStorage.setItem("electroisla_payment_timing",String(t||"PREPAID"));
