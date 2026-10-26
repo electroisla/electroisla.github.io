@@ -229,6 +229,13 @@
     });
     $("adminPayoutBalances").innerHTML=rows.length?'<table><thead><tr><th>Gestor</th><th>Enlace</th><th>Moneda</th><th>Saldo disponible</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.manager.display_name)+'</td><td><span class="mono">'+esc(r.manager.slug)+'</span></td><td>'+esc(r.currency)+'</td><td><strong>'+money(r.balance,r.currency)+'</strong></td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no hay gestores registrados.</p>';
   }
+  $("payoutAmount").addEventListener("input",()=>{
+    const raw=$("payoutAmount").value;
+    if(raw!==""&&(!Number.isFinite(Number(raw))||Number(raw)<=0)) showStatus("adminStatus","Introduce un importe mayor que cero.","error");
+    else clearStatus("adminStatus");
+  });
+  $("payoutManager").addEventListener("change",()=>clearStatus("adminStatus"));
+  $("payoutCurrency").addEventListener("change",()=>clearStatus("adminStatus"));
   $("payoutForm").addEventListener("submit",async e=>{
     e.preventDefault();
     const gestorId=$("payoutManager").value;
