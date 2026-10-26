@@ -229,7 +229,28 @@
     });
     $("adminPayoutBalances").innerHTML=rows.length?'<table><thead><tr><th>Gestor</th><th>Enlace</th><th>Moneda</th><th>Saldo disponible</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.manager.display_name)+'</td><td><span class="mono">'+esc(r.manager.slug)+'</span></td><td>'+esc(r.currency)+'</td><td><strong>'+money(r.balance,r.currency)+'</strong></td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no hay gestores registrados.</p>';
   }
-  $("payoutForm").addEventListener("submit",async e=>{e.preventDefault();try{await rpc("gestor_admin_record_payout",{p_gestor_id:$("payoutManager").value,p_amount:Number($("payoutAmount").value),p_currency:$("payoutCurrency").value,p_reference:$("payoutReference").value.trim()||null,p_notes:null});$("payoutForm").reset();await loadAdmin();showStatus("adminStatus","Liquidación registrada.","ok");}catch(err){showStatus("adminStatus",failMessage(err),"error");}});
+  $("payoutForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const gestorId=$("payoutManager").value;
+    const amount=Number($("payoutAmount").value);
+    const currency=$("payoutCurrency").value;
+    if(!Number.isFinite(amount)||amount<=0){
+      showStatus("adminStatus","Introduce un importe mayor que cero.","error");
+      return;
+    }
+    const available=ledger.filter(l=>l.gestor_id===gestorId&&l.currency===currency).reduce((sum,l)=>sum+Number(l.amount||0),0);
+    if(amount>available){
+      const manager=managers.find(m=>m.id===gestorId);
+      showStatus("adminStatus","Liquidación cancelada: "+(manager?.display_name||"El gestor")+" tiene "+money(available,currency)+" disponibles en "+currency+". No se envió ninguna solicitud ni se registró ningún pago.","error");
+      return;
+    }
+    try{
+      await rpc("gestor_admin_record_payout",{p_gestor_id:gestorId,p_amount:amount,p_currency:currency,p_reference:$("payoutReference").value.trim()||null,p_notes:null});
+      $("payoutForm").reset();
+      await loadAdmin();
+      showStatus("adminStatus","Liquidación registrada.","ok");
+    }catch(err){showStatus("adminStatus",failMessage(err),"error");}
+  });
   function renderLedger(targetId,rows,admin=false){
     $(targetId).innerHTML=rows.length?'<table><thead><tr>'+(admin?'<th>Gestor</th>':'')+'<th>Fecha</th><th>Movimiento</th><th>Importe</th><th>Referencia</th></tr></thead><tbody>'+rows.map(r=>{const m=managers.find(x=>x.id===r.gestor_id);return '<tr>'+(admin?'<td>'+esc(m?.display_name||"Gestor")+'</td>':'')+'<td>'+new Date(r.created_at).toLocaleString("es-ES")+'</td><td>'+esc(r.entry_type)+'</td><td>'+money(r.amount,r.currency)+'</td><td>'+esc(r.reference||"—")+'</td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Sin movimientos registrados.</p>';
   }
