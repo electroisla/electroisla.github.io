@@ -391,7 +391,8 @@ async function saveSettings(){
  if(!Number.isFinite(rate)||rate<=0){alert("La tasa USD → CUP debe ser mayor que 0.");return}
  if(!Number.isFinite(markup)||markup<0){alert("El recargo de transferencia no puede ser negativo.");return}
  if(!Number.isFinite(eur)||eur<=0){alert("La tasa USD → EUR debe ser mayor que 0.");return}
- if(!Number.isFinite(prepago)||prepago<=0){alert("La tasa de transferencia prepago debe ser mayor que 0.");return}\n  if(whatsapp.length<8||whatsapp.length>15){alert("Introduce un número de WhatsApp válido con código de país, solo dígitos (8 a 15 números).");return}
+ if(!Number.isFinite(prepago)||prepago<=0){alert("La tasa de transferencia prepago debe ser mayor que 0.");return}
+  if(whatsapp.length<8||whatsapp.length>15){alert("Introduce un número de WhatsApp válido con código de país, solo dígitos (8 a 15 números).");return}
  const btn=document.getElementById("saveSettings"),status=document.getElementById("settingsStatus");
  if(btn) btn.disabled=true;
  if(status) status.textContent="☁️ Guardando…";
