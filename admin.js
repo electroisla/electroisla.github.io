@@ -371,13 +371,14 @@ async function loadSettings(){
  const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent,usd_to_eur,transfer_prepago_rate,whatsapp_order_phone").eq("id",1).maybeSingle();
  if(error) throw error;
  if(data){
-   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5352017110").replace(/\\D/g,"")};
+   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5352017110").replace(/\D/g,"")};
  }
  const rate=document.getElementById("usdToCup"),markup=document.getElementById("transferMarkup"),eur=document.getElementById("usdToEur"),prepago=document.getElementById("transferPrepagoRate"),whatsapp=document.getElementById("whatsappOrderPhone");
  if(rate) rate.value=storeSettings.usd_to_cup;
  if(markup) markup.value=storeSettings.transfer_markup_percent;
  if(eur) eur.value=storeSettings.usd_to_eur;
- if(prepago) prepago.value=storeSettings.transfer_prepago_rate;\n  if(whatsapp) whatsapp.value=storeSettings.whatsapp_order_phone;
+ if(prepago) prepago.value=storeSettings.transfer_prepago_rate;
+  if(whatsapp) whatsapp.value=storeSettings.whatsapp_order_phone;
  const status=document.getElementById("settingsStatus");
  if(status) status.textContent=`☁️ Tasas sincronizadas · ${storeSettings.usd_to_cup} CUP/USD · ${storeSettings.usd_to_eur} EUR/USD · Prepago ×${storeSettings.transfer_prepago_rate}`;
 }
@@ -385,7 +386,8 @@ async function saveSettings(){
  const rate=Number(document.getElementById("usdToCup").value);
  const markup=Number(document.getElementById("transferMarkup").value);
  const eur=Number(document.getElementById("usdToEur").value);
- const prepago=Number(document.getElementById("transferPrepagoRate").value);\n  const whatsapp=(document.getElementById("whatsappOrderPhone")?.value||"").replace(/\\D/g,"");
+ const prepago=Number(document.getElementById("transferPrepagoRate").value);
+  const whatsapp=(document.getElementById("whatsappOrderPhone")?.value||"").replace(/\D/g,"");
  if(!Number.isFinite(rate)||rate<=0){alert("La tasa USD → CUP debe ser mayor que 0.");return}
  if(!Number.isFinite(markup)||markup<0){alert("El recargo de transferencia no puede ser negativo.");return}
  if(!Number.isFinite(eur)||eur<=0){alert("La tasa USD → EUR debe ser mayor que 0.");return}
