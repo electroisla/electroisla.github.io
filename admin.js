@@ -397,7 +397,15 @@ async function saveSettings(){
  if(btn) btn.disabled=true;
  if(status) status.textContent="☁️ Guardando…";
  try{
-   const {error}=await supabaseClient.from("store_settings").upsert({id:1,usd_to_cup:rate,transfer_markup_percent:markup,usd_to_eur:eur,transfer_prepago_rate:prepago,whatsapp_order_phone:whatsapp,updated_at:new Date().toISOString()},{onConflict:"id"});
+   const saveController=new AbortController();
+   const saveTimeout=setTimeout(()=>saveController.abort(),15000);
+   let saveResult;
+   try{
+     saveResult=await supabaseClient.from("store_settings").upsert({id:1,usd_to_cup:rate,transfer_markup_percent:markup,usd_to_eur:eur,transfer_prepago_rate:prepago,whatsapp_order_phone:whatsapp,updated_at:new Date().toISOString()},{onConflict:"id"}).abortSignal(saveController.signal);
+   }finally{
+     clearTimeout(saveTimeout);
+   }
+   const {error}=saveResult;
    if(error) throw error;
    storeSettings={usd_to_cup:rate,transfer_markup_percent:markup,usd_to_eur:eur,transfer_prepago_rate:prepago,whatsapp_order_phone:whatsapp};
    if(status) status.textContent=`✅ Guardado · ${rate} CUP/USD · ${eur} EUR/USD · Prepago ×${prepago} · WhatsApp ${whatsapp}`;
