@@ -1178,7 +1178,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <label>1 USD = <span><input id="usdToEur" type="number" min="0" step="0.0001" placeholder="0.92"></span> EUR</label>
 <label>1 USD = <span><input id="transferPrepagoRate" type="number" min="0.0001" step="0.01" placeholder="1.04"></span> transferencia prepago</label>
 </div>
-<div class="row settings-actions"><button type="button" class="btn primary" id="saveSettings">💾 Guardar configuración</button><span id="settingsStatus" class="settings-status">☁️ Cargando configuración…</span></div>
+<div class="settings-whatsapp" style="margin-top:16px;padding:14px;border:1px solid var(--ei-line);border-radius:12px;background:#fff">\n<strong style="display:block;color:var(--ei-blue);margin-bottom:6px">📲 WhatsApp para recibir pedidos</strong>\n<p class="settings-help" style="margin:0 0 10px">Escribe el número con código de país, sin el signo + ni espacios. Ejemplo: 5352017110.</p>\n<label for="whatsappOrderPhone">Número de WhatsApp de destino<input id="whatsappOrderPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="15" pattern="[0-9]{8,15}" placeholder="5352017110"></label>\n</div>\n<div class="row settings-actions"><button type="button" class="btn primary" id="saveSettings">💾 Guardar configuración</button><span id="settingsStatus" class="settings-status">☁️ Cargando configuración…</span></div>
 </section>
 
 
