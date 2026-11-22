@@ -1490,6 +1490,7 @@ function initRouter(){
   const alerts=document.getElementById('reviewNotifications');
   const reviews=document.getElementById('reviewsAdmin');
   const zones=document.getElementById('deliveryZonesPanel');
+  const gestorPanel=document.getElementById('gestoresAdminPanel');
   const nav=document.getElementById('eiAdminNav');
   const toggle=document.getElementById('eiHeaderMenuToggle')||document.getElementById('eiMobileMenuToggle');
   const groups={
@@ -1503,9 +1504,10 @@ function initRouter(){
     reportes:{label:'Reportes',show:[sales],href:'#salesReport'},
     resenas:{label:'Reseñas de productos',show:[reviews],href:'#reviewsAdmin'},
     avisos:{label:'Notificaciones',show:[alerts],href:'#reviewNotifications'},
-    zonas:{label:'Zonas y costos de domicilio',show:[zones],href:'#deliveryZonesPanel'}
+    zonas:{label:'Zonas y costos de domicilio',show:[zones],href:'#deliveryZonesPanel'},
+    gestores:{label:'Administración de gestores',show:[gestorPanel],href:'#gestoresAdminPanel'}
   };
-  const all=[quick,settings,paymentMethods,zelleAccounts,categories,productForm,catalog,sales,alerts,reviews,zones].filter(Boolean);
+  const all=[quick,settings,paymentMethods,zelleAccounts,categories,productForm,catalog,sales,alerts,reviews,zones,gestorPanel].filter(Boolean);
   const routes={
     '#dashboard':'resumen',
     '#productForm':'productos',
@@ -1517,7 +1519,8 @@ function initRouter(){
     '#salesReport':'reportes',
     '#reviewsAdmin':'resenas',
     '#reviewNotifications':'avisos',
-    '#deliveryZonesPanel':'zonas'
+    '#deliveryZonesPanel':'zonas',
+    '#gestoresAdminPanel':'gestores'
   };
   function openView(name, updateUrl=true){
     const cfg=groups[name]||groups.resumen;
@@ -1592,11 +1595,12 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   reportes:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-4 3 2 5-6"/><circle cx="7" cy="15" r=".7"/><circle cx="10" cy="11" r=".7"/><circle cx="13" cy="13" r=".7"/><circle cx="18" cy="7" r=".7"/>',
   zelle:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="2.2"/><path d="M7 15h3"/>',
   zonas:'<path d="M3 7h11v11H3z"/><path d="M14 11h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/>',
+  gestores:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1"/><path d="M16 5a3 3 0 0 1 0 6"/><path d="M18 14a5 5 0 0 1 3 4v2"/>',
   resenas:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/>',
   avisos:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
   salir:'<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>'
  };
- const keyByHref={'#dashboard':'resumen','#productForm':'productos','#catalogPanel':'catalogo','#categoryManager':'categorias','#storeSettings':'precios','#paymentMethodsPanel':'pagos','#zelleAmountAccountsPanel':'zelle','#salesReport':'reportes','#deliveryZonesPanel':'zonas','#reviewsAdmin':'resenas','#reviewNotifications':'avisos','#logoutBtn':'salir'};
+ const keyByHref={'#dashboard':'resumen','#productForm':'productos','#catalogPanel':'catalogo','#categoryManager':'categorias','#storeSettings':'precios','#paymentMethodsPanel':'pagos','#zelleAmountAccountsPanel':'zelle','#salesReport':'reportes','#deliveryZonesPanel':'zonas','#gestoresAdminPanel':'gestores','#reviewsAdmin':'resenas','#reviewNotifications':'avisos','#logoutBtn':'salir'};
  function apply(){
   document.querySelectorAll('#eiAdminNav a.ei-admin-nav-link').forEach(a=>{
    const key=keyByHref[a.getAttribute('href')], path=icons[key];
