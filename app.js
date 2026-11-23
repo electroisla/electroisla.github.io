@@ -27,20 +27,25 @@ let cart=Array.isArray(localCart)?localCart:[];
 let categories=Array.isArray(localCategories)?localCategories:[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5352017110"};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
+const managerContextKey="electroisla_public_manager_context";
 const managerSlugFromUrl=(new URLSearchParams(location.search).get("gestor")||"").trim().toLowerCase();
 if(managerSlugFromUrl){
-  try{sessionStorage.setItem("electroisla_public_manager_context",JSON.stringify({slug:managerSlugFromUrl,expiresAt:Date.now()+15*60*1000}));}catch(_){}
+  const context=JSON.stringify({slug:managerSlugFromUrl,expiresAt:Date.now()+15*60*1000});
+  try{sessionStorage.setItem(managerContextKey,context);}catch(_){}
+  try{localStorage.setItem(managerContextKey,context);}catch(_){}
 }
 const publicManagerSlug=managerSlugFromUrl;
 function getCheckoutManagerSlug(){
   const fromUrl=(new URLSearchParams(window.location.search).get("gestor")||"").trim().toLowerCase();
   if(fromUrl)return fromUrl;
   if(publicManagerSlug)return publicManagerSlug;
-  try{
-    const saved=JSON.parse(sessionStorage.getItem("electroisla_public_manager_context")||"null");
-    if(saved?.slug&&saved.expiresAt>Date.now())return String(saved.slug).trim().toLowerCase();
-    sessionStorage.removeItem("electroisla_public_manager_context");
-  }catch(_){}
+  for(const storage of [sessionStorage,localStorage]){
+    try{
+      const saved=JSON.parse(storage.getItem(managerContextKey)||"null");
+      if(saved?.slug&&saved.expiresAt>Date.now())return String(saved.slug).trim().toLowerCase();
+      storage.removeItem(managerContextKey);
+    }catch(_){}
+  }
   return "";
 }
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
@@ -1021,7 +1026,7 @@ async function recordOrderForReport({name,phone,recipientName,recipientAddress,r
       });
       if(error)throw error;
       console.info("Pedido de gestor registrado correctamente:",data?.order_code||data?.order_id);
-      try{sessionStorage.removeItem("electroisla_public_manager_context");}catch(_){}
+      for(const storage of [sessionStorage,localStorage]){try{storage.removeItem(managerContextKey);}catch(_){}}
       return data;
     }
     const {error}=await supabaseClient.from("orders").insert({
