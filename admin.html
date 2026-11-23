@@ -1154,10 +1154,8 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
   <a href="#storeSettings" class="ei-admin-nav-link"><span>💱</span> Precios y tasas de cambio</a>
   <a href="#paymentMethodsPanel" class="ei-admin-nav-link"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span> Métodos de pago</a>
   <a href="#zelleAmountAccountsPanel" class="ei-admin-nav-link"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="2.2"/><path d="M7 15h3"/></svg></span> Cuentas Zelle por importe de compra</a>
+  <a href="#salesReport" class="ei-admin-nav-link"><span>▥</span> Reportes</a>
   <a href="#gestoresAdminPanel" class="ei-admin-nav-link"><span>♙</span> Gestores</a>
-  <div class="ei-admin-nav-submenu" aria-label="Opciones de gestores">
-    <a href="#salesReport" class="ei-admin-nav-link ei-admin-nav-child"><span>▥</span> Ventas y pedidos</a>
-  </div>
   <a href="#deliveryZonesPanel" class="ei-admin-nav-link"><span>🚚</span> Zonas y costos de domicilio</a>
   <a href="#reviewsAdmin" class="ei-admin-nav-link"><span>☆</span> Reseñas <span class="ei-admin-nav-badge" id="adminReviewNavBadge" hidden></span></a>
   <a href="#reviewNotifications" class="ei-admin-nav-link"><span>♧</span> Avisos</a>
@@ -1640,17 +1638,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     try { navigator.vibrate(important ? 26 : 18); } catch (_) {}
   }, true);
 })();
-</script>
-<style id="ei-gestores-submenu-style-v1">
-.admin-page .ei-admin-nav-submenu{display:grid;gap:5px;margin:-4px 0 5px 38px;padding:5px 0 5px 10px;border-left:2px solid #ffffff40}
-.admin-page .ei-admin-nav-link.ei-admin-nav-child{min-height:42px;padding:7px 10px;border-radius:9px;font-size:.9em;background:#ffffff0d}
-.admin-page .ei-admin-nav-link.ei-admin-nav-child .ei-nav-icon{flex-basis:26px;width:26px;height:26px}
-.admin-page .ei-admin-nav-link.ei-admin-nav-child.is-current{background:#ffffff22}
-.admin-page .ei-admin-nav-link.is-parent-current{background:#ffffff18}
-@media(max-width:720px){.admin-page .ei-admin-nav-submenu{margin-left:32px}}
-</style>
-<script id="ei-gestores-submenu-active-v1">
-(()=>{const nav=document.getElementById('eiAdminNav');if(!nav)return;const child=nav.querySelector('a[href="#salesReport"]'),parent=nav.querySelector('a[href="#gestoresAdminPanel"]');if(!child||!parent)return;const update=()=>parent.classList.toggle('is-parent-current',child.classList.contains('is-current'));new MutationObserver(update).observe(child,{attributes:true,attributeFilter:['class']});update();})();
 </script>
 </body>
 <style id="ei-summary-outline-icons">
