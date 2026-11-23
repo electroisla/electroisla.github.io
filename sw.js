@@ -1,11 +1,11 @@
-const CACHE_NAME = 'electroisla-v9.8.41-manager-checkout-handler';
+const CACHE_NAME = 'electroisla-v9.8.42-manager-session-recovery';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
-  './app.js?v=159',
+  './app.js?v=160',
   './supabase-config.js?v=4',
-  './payment-methods-store.js?v=31'
+  './payment-methods-store.js?v=33'
 ];
 
 self.addEventListener('install', event => {
