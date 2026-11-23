@@ -129,9 +129,16 @@
   function setView(which){["loginView","adminView","managerView"].forEach(id=>$(id).classList.toggle("hidden",id!==which));$("logoutBtn").classList.toggle("hidden",which==="loginView");}
   $("loginForm").addEventListener("submit",async e=>{
     e.preventDefault();clearStatus("loginStatus");
-    const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
-    if(error){showStatus("loginStatus",failMessage(error),"error");return;}
-    await initSession();
+    const button=$("loginForm").querySelector('button[type="submit"]');
+    if(button)button.disabled=true;
+    try{
+      const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+      if(error){showStatus("loginStatus",failMessage(error),"error");return;}
+      await initSession();
+    }catch(err){
+      console.error("Error al iniciar sesión en gestores:",err);
+      showStatus("loginStatus","No se pudo completar el acceso: "+(err?.message||String(err)),"error");
+    }finally{if(button)button.disabled=false;}
   });
   $("forgotBtn").addEventListener("click",async()=>{
     const email=$("email").value.trim();
@@ -149,8 +156,14 @@
     user=current;$("userLabel").textContent=current.email||"Sesión activa";
     if(current.app_metadata?.role==="admin"){setView("adminView");await loadAdmin();return;}
     const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
-    if(gpError||!gp||gp.status!=="active"){
-      await db.auth.signOut();setView("loginView");showStatus("loginStatus","La cuenta no tiene un perfil de gestor activo. Solicita acceso a la administración.","error");return;
+    if(gpError){
+      console.error("No se pudo verificar el perfil del gestor:",gpError);
+      setView("loginView");
+      showStatus("loginStatus","La sesión se inició, pero no se pudo verificar tu perfil de gestor. "+(gpError.message||"Intenta actualizar la página."),"error");
+      return;
+    }
+    if(!gp||gp.status!=="active"){
+      await db.auth.signOut();user=null;profile=null;setView("loginView");showStatus("loginStatus","La cuenta no tiene un perfil de gestor activo. Solicita acceso a la administración.","error");return;
     }
     if(slugFromUrl && slugFromUrl!==gp.slug){
       await db.auth.signOut();setView("loginView");showStatus("loginStatus","Este enlace pertenece a otro gestor. Abre tu enlace personal.","error");return;
@@ -160,7 +173,7 @@
     })();
     try{return await initSessionPromise;}finally{initSessionPromise=null;}
   }
-  db.auth.onAuthStateChange((_event,session)=>{if(session?.user && !user){setTimeout(()=>initSession(),0);}});
+  // El acceso se inicializa desde el formulario o desde la sesión ya existente; evita doble inicialización al autenticar.
   document.querySelectorAll("[data-admin-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-admin-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-admin-panel]").forEach(p=>p.classList.toggle("hidden",p.dataset.adminPanel!==b.dataset.adminTab));}));
   document.querySelectorAll("[data-manager-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-manager-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-manager-panel]").forEach(p=>p.classList.toggle("hidden",p.dataset.managerPanel!==b.dataset.managerTab));}));
   async function loadAdmin(){
