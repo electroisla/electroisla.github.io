@@ -126,6 +126,23 @@
     return m;
   };
   async function rpc(name,args){const {data,error}=await db.rpc(name,args);if(error)throw error;return data;}
+  // Revalida y renueva la sesión una sola vez si una operación del gestor llega sin identidad válida.
+  async function managerRpc(name,args){
+    let result=await db.rpc(name,args);
+    if(!result.error)return result.data;
+    if(!/active_manager_profile_required/.test(result.error.message||""))throw result.error;
+    const {data:refreshed,error:refreshError}=await db.auth.refreshSession();
+    if(refreshError||!refreshed?.session)throw new Error("La sesión del gestor venció. Vuelve a iniciar sesión para continuar.");
+    const {data:{user:current},error:userError}=await db.auth.getUser();
+    if(userError||!current)throw new Error("No se pudo validar tu sesión. Inicia sesión nuevamente.");
+    const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,auth_user_id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
+    if(gpError)throw gpError;
+    if(!gp||gp.status!=="active")throw new Error("Esta cuenta no tiene un perfil de gestor activo.");
+    user=current;profile=gp;
+    result=await db.rpc(name,args);
+    if(result.error)throw result.error;
+    return result.data;
+  }
   function setView(which){["loginView","adminView","managerView"].forEach(id=>$(id).classList.toggle("hidden",id!==which));$("logoutBtn").classList.toggle("hidden",which==="loginView");}
   $("loginForm").addEventListener("submit",async e=>{
     e.preventDefault();clearStatus("loginStatus");
@@ -155,7 +172,7 @@
     if(error||!current){setView("loginView");return;}
     user=current;$("userLabel").textContent=current.email||"Sesión activa";
     if(current.app_metadata?.role==="admin"){setView("adminView");await loadAdmin();return;}
-    const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
+    const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,auth_user_id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
     if(gpError){
       console.error("No se pudo verificar el perfil del gestor:",gpError);
       setView("loginView");
@@ -299,7 +316,7 @@
     })();
     const catalogTask=(async()=>{
       try{
-        const products=await rpc("gestor_get_my_catalog_full",{});
+        const products=await managerRpc("gestor_get_my_catalog_full",{});
         const rows=Array.isArray(products)?products:(Array.isArray(products?.data)?products.data:null);
         if(!rows)throw new Error("La respuesta del catálogo no tiene el formato esperado.");
         catalog=rows.map(p=>({id:p.product_id,name:p.product_name,category:p.category||"",unit:p.unit||"",description:p.description||"",image:p.image||"",currency:p.currency||"USD",official_price:p.official_price,seller_price:p.seller_price,active:p.active}));
@@ -371,7 +388,7 @@
       }));
     }
     $("managerCatalog").querySelectorAll("[data-quantity]").forEach(input=>input.addEventListener("input",()=>{cart[input.dataset.quantity]=Math.max(0,Number(input.value)||0);updateCartSummary();}));
-    $("managerCatalog").querySelectorAll("[data-save-price]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.savePrice;const p=catalog.find(x=>x.id===id);const input=$("managerCatalog").querySelector('[data-price-input="'+id+'"]');try{const val=Number(input.value);if(!Number.isFinite(val)||val<Number(p.official_price)){showStatus("managerStatus","El precio no puede ser inferior al precio oficial.","error");return;}await rpc("gestor_set_my_product_price",{p_product_id:id,p_custom_price:val});showStatus("managerStatus","Precio personalizado guardado.","ok");await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}}));
+    $("managerCatalog").querySelectorAll("[data-save-price]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.savePrice;const p=catalog.find(x=>x.id===id);const input=$("managerCatalog").querySelector('[data-price-input="'+id+'"]');try{const val=Number(input.value);if(!Number.isFinite(val)||val<Number(p.official_price)){showStatus("managerStatus","El precio no puede ser inferior al precio oficial.","error");return;}await managerRpc("gestor_set_my_product_price",{p_product_id:id,p_custom_price:val});showStatus("managerStatus","Precio personalizado guardado.","ok");await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}}));
     updateCartSummary();
   }
   function updateCartSummary(){
@@ -383,7 +400,7 @@
   $("createOrderBtn").addEventListener("click",async()=>{
     const items=catalog.map(p=>({product_id:p.id,quantity:Number(cart[p.id]||0)})).filter(i=>i.quantity>0);
     if(!items.length)return;
-    try{const result=await rpc("gestor_create_order",{p_items:items,p_notes:$("orderNotes").value.trim()||null});showStatus("managerStatus","Pedido creado: "+result.order_id+". Total de venta: "+money(result.seller_subtotal,result.currency)+". Ganancia asignada: "+money(result.profit_assigned,result.currency)+".","ok");$("orderNotes").value="";cart={};await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}
+    try{const result=await managerRpc("gestor_create_order",{p_items:items,p_notes:$("orderNotes").value.trim()||null});showStatus("managerStatus","Pedido creado: "+result.order_id+". Total de venta: "+money(result.seller_subtotal,result.currency)+". Ganancia asignada: "+money(result.profit_assigned,result.currency)+".","ok");$("orderNotes").value="";cart={};await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}
   });
   function renderManagerOrders(){
     $("managerOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Pedido</th><th>Totales</th><th>Estado</th><th>Pago</th></tr></thead><tbody>'+orders.map(o=>'<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'</td><td class="mono">'+esc(o.order_code||o.id.slice(0,8))+'</td><td>Oficial '+money(o.official_subtotal,o.currency)+'<br>Venta '+money(o.seller_subtotal,o.currency)+'<br>Margen '+money(o.margin_total,o.currency)+'<br>Comisión '+money(o.commission_total,o.currency)+'</td><td>'+esc(o.order_status)+'</td><td>'+esc(o.payment_status)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no has creado pedidos de prueba.</p>';
