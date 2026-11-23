@@ -322,7 +322,7 @@ async function startCloud(){
     try{
       await loadCloudProductsWithRetry();
       if(publicManagerSlug){
-        try{await loadPublicManagerPrices();}
+        try{await loadPublicManagerPrices();window.managerStoreLoadError="";}
         catch(managerPriceError){console.error("No se pudieron aplicar los precios del gestor:",managerPriceError);window.managerStoreLoadError=String(managerPriceError?.message||managerPriceError);}
       }
       window.catalogLoadError = "";
@@ -1063,6 +1063,23 @@ setupDeliveryPicker();
  setupPhoneCodePicker("recipientPhoneCode","recipientPhonePicker","recipientPhoneTrigger","recipientPhoneMenu","recipientPhoneSelectedText");
 ensureCategoryMenu();
 startCloud();
+
+/* Reintentar catálogo/precios si el móvil vuelve del segundo plano tras perder conexión. */
+let resumeCatalogTimer=null,resumeCatalogBusy=false;
+function scheduleCatalogResume(){
+ if(document.visibilityState!=="visible"||!navigator.onLine)return;
+ if(resumeCatalogTimer)clearTimeout(resumeCatalogTimer);
+ resumeCatalogTimer=setTimeout(async()=>{
+  if(resumeCatalogBusy)return;
+  if(!window.catalogLoadError&&!window.managerStoreLoadError&&products.length)return;
+  resumeCatalogBusy=true;
+  try{await startCloud()}catch(error){console.warn("No se pudo reintentar el catálogo al reanudar:",error)}
+  finally{resumeCatalogBusy=false}
+ },800);
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleCatalogResume()});
+window.addEventListener("pageshow",scheduleCatalogResume);
+window.addEventListener("online",scheduleCatalogResume);
 
 supabaseClient.channel("settings-store").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadStoreSettings();render();renderCart()}catch(e){console.warn(e)}}).subscribe();
 
