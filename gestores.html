@@ -321,7 +321,9 @@
         const items=catalog.filter(p=>normalize(p.category)===normalize(name));
         if(items.length){groups.push({name,items});items.forEach(p=>used.add(String(p.id)));}
       });
-      const remaining=categoryListLoaded?[]:catalog.filter(p=>!used.has(String(p.id)));
+      // If official category names do not match, never leave the catalog blank.
+      let remaining=catalog.filter(p=>!used.has(String(p.id)));
+      if(categoryListLoaded && groups.length===0) remaining=catalog;
       if(remaining.length){
         const extraNames=[...new Set(remaining.map(p=>String(p.category||"Otros").trim()||"Otros"))];
         extraNames.forEach(name=>{
