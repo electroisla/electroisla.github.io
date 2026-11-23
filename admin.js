@@ -604,7 +604,7 @@ async function show(){
    setAdminNotice("catalog-load","No se pudo cargar el catálogo o la configuración de Supabase: "+(err.message||err),"#catalogPanel","Revisar catálogo");
    render();
    if(status) status.textContent="⚠️ No se pudo leer Supabase: "+(err.message||err);
-   alert("No se pudo cargar el catálogo de Supabase.\n\n"+(err.message||err));
+   // No bloquear la administración con un alert si el móvil pierde conexión al volver del segundo plano.\n   // El reintento automático se ejecuta al recuperar visibilidad/conectividad.
  }
 }
 let activeCatalogCategory="";
@@ -1064,3 +1064,30 @@ async function recoverAdminPassword(){
 }
 const eiForgotPasswordButton=document.getElementById("eiForgotPassword");
 if(eiForgotPasswordButton)eiForgotPasswordButton.addEventListener("click",recoverAdminPassword);
+
+
+/* Recuperación automática al volver al navegador o recuperar la conexión */
+(function(){
+ let resumeTimer=null;
+ let resumeBusy=false;
+ async function refreshAfterResume(){
+  if(document.visibilityState!=="visible" || resumeBusy)return;
+  const dashboard=document.getElementById("dashboard");
+  if(!dashboard || dashboard.classList.contains("hidden"))return;
+  resumeBusy=true;
+  try{
+   await show();
+  }catch(error){
+   console.warn("No se pudo actualizar la administración al reanudar:",error);
+  }finally{
+   resumeBusy=false;
+  }
+ }
+ function scheduleResumeRefresh(){
+  if(resumeTimer)clearTimeout(resumeTimer);
+  resumeTimer=setTimeout(refreshAfterResume,900);
+ }
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleResumeRefresh();});
+ window.addEventListener("pageshow",event=>{if(event.persisted)scheduleResumeRefresh();});
+ window.addEventListener("online",scheduleResumeRefresh);
+})();
