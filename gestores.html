@@ -110,7 +110,7 @@
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const $ = id => document.getElementById(id);
   const slugFromUrl = new URLSearchParams(location.search).get("gestor");
-  let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};
+  let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};\n  let selectedManagerCategory = "";
   const money = (value, currency="USD") => new Intl.NumberFormat("es-ES",{style:"currency",currency}).format(Number(value||0));
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const showStatus = (id,message,type="info") => {const el=$(id);el.textContent=message;el.className="status"+(type==="error"?" error":type==="ok"?" ok":"");el.classList.remove("hidden");};
@@ -343,33 +343,33 @@
       }
       const renderProduct=p=>{
         const image=p.image?'<img class="product-thumb" src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async">':'<span class="product-thumb placeholder">📦</span>';
-        return '<div class="product" data-product="'+esc(p.id)+'"><div class="product-info"><div class="product-visual">'+image+'</div><div class="product-copy"><strong>'+esc(p.name)+'</strong><div class="small muted">'+esc(p.category)+(p.unit?' · '+esc(p.unit):'')+'</div>'+(p.description?'<p>'+esc(p.description)+'</p>':'')+'<div class="small muted">Precio oficial mínimo: '+money(p.official_price,p.currency)+'</div><div class="small">Tu precio: <span class="price" data-price-label>'+money(p.seller_price,p.currency)+'</span></div></div></div><div style="display:grid;grid-template-columns:minmax(76px,1fr) minmax(88px,1fr);gap:6px;align-items:center"><label class="small">Cantidad<input type="number" min="0" max="100000" step=".001" value="0" inputmode="decimal" aria-label="Cantidad de '+esc(p.name)+'" data-quantity="'+esc(p.id)+'"></label><label class="small">Tu precio<input type="number" min="'+Number(p.official_price)+'" step=".01" value="'+Number(p.seller_price)+'" aria-label="Tu precio para '+esc(p.name)+'" data-price-input="'+esc(p.id)+'"></label><button class="btn" style="grid-column:1/-1" data-save-price="'+esc(p.id)+'" type="button">Guardar precio</button></div></div>';
+        return '<div class="product" data-product="'+esc(p.id)+'"><div class="product-info"><div class="product-visual">'+image+'</div><div class="product-copy"><strong>'+esc(p.name)+'</strong><div class="small muted">'+esc(p.category)+(p.unit?' · '+esc(p.unit):'')+'</div>'+(p.description?'<p>'+esc(p.description)+'</p>':'')+'<div class="small muted">Precio oficial mínimo: '+money(p.official_price,p.currency)+'</div><div class="small">Tu precio: <span class="price" data-price-label>'+money(p.seller_price,p.currency)+'</span></div></div></div><div style="display:grid;grid-template-columns:minmax(76px,1fr) minmax(88px,1fr);gap:6px;align-items:center"><label class="small">Cantidad<input type="number" min="0" max="100000" step=".001" value="'+Number(cart[p.id]||0)+'" inputmode="decimal" aria-label="Cantidad de '+esc(p.name)+'" data-quantity="'+esc(p.id)+'"></label><label class="small">Tu precio<input type="number" min="'+Number(p.official_price)+'" step=".01" value="'+Number(p.seller_price)+'" aria-label="Tu precio para '+esc(p.name)+'" data-price-input="'+esc(p.id)+'"></label><button class="btn" style="grid-column:1/-1" data-save-price="'+esc(p.id)+'" type="button">Guardar precio</button></div></div>';
       };
       const nav=$("managerCategoryNav");
-      nav.innerHTML=groups.map((group,index)=>'<button type="button" class="'+(index===0?'is-active':'')+'" data-category-target="manager-category-'+index+'" aria-pressed="'+(index===0?'true':'false')+'">'+esc(group.name)+'</button>').join("");
+      if(!groups.some(group=>group.name===selectedManagerCategory))selectedManagerCategory=groups[0]?.name||"";
+      nav.innerHTML=groups.map(group=>'<button type="button" class="'+(group.name===selectedManagerCategory?'is-active':'')+'" data-category-name="'+esc(group.name)+'" aria-pressed="'+(group.name===selectedManagerCategory?'true':'false')+'">'+esc(group.name)+'</button>').join("");
       nav.hidden=groups.length===0;
-      $("managerCatalog").innerHTML=groups.map((group,index)=>'<section id="manager-category-'+index+'" class="manager-category-block"><h3 class="manager-category-title">'+esc(group.name)+'</h3><div class="product-list">'+group.items.map(renderProduct).join("")+'</div></section>').join("");
-      nav.querySelectorAll("[data-category-target]").forEach(button=>button.addEventListener("click",()=>{
-        nav.querySelectorAll("[data-category-target]").forEach(item=>{item.classList.remove("is-active");item.setAttribute("aria-pressed","false");});
-        button.classList.add("is-active");button.setAttribute("aria-pressed","true");
-        const target=$(button.dataset.categoryTarget);
-        if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+      const selectedGroup=groups.find(group=>group.name===selectedManagerCategory);
+      $("managerCatalog").innerHTML=selectedGroup?'<section class="manager-category-block"><h3 class="manager-category-title">'+esc(selectedGroup.name)+'</h3><div class="product-list">'+selectedGroup.items.map(renderProduct).join("")+'</div></section>':'<p class="muted">No hay productos en esta categoría.</p>';
+      nav.querySelectorAll("[data-category-name]").forEach(button=>button.addEventListener("click",()=>{
+        selectedManagerCategory=button.dataset.categoryName||"";
+        renderManagerCatalog();
       }));
     }
-    $("managerCatalog").querySelectorAll("[data-quantity]").forEach(input=>input.addEventListener("input",updateCartSummary));
+    $("managerCatalog").querySelectorAll("[data-quantity]").forEach(input=>input.addEventListener("input",()=>{cart[input.dataset.quantity]=Math.max(0,Number(input.value)||0);updateCartSummary();}));
     $("managerCatalog").querySelectorAll("[data-save-price]").forEach(b=>b.addEventListener("click",async()=>{const id=b.dataset.savePrice;const p=catalog.find(x=>x.id===id);const input=$("managerCatalog").querySelector('[data-price-input="'+id+'"]');try{const val=Number(input.value);if(!Number.isFinite(val)||val<Number(p.official_price)){showStatus("managerStatus","El precio no puede ser inferior al precio oficial.","error");return;}await rpc("gestor_set_my_product_price",{p_product_id:id,p_custom_price:val});showStatus("managerStatus","Precio personalizado guardado.","ok");await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}}));
     updateCartSummary();
   }
   function updateCartSummary(){
     let count=0,total=0,cur=null,mixed=false;
-    catalog.forEach(p=>{const input=$("managerCatalog").querySelector('[data-quantity="'+p.id+'"]');const q=Number(input?.value||0);if(q>0){count++;total+=Number(p.seller_price||p.official_price)*q;if(cur&&cur!==p.currency)mixed=true;cur=p.currency;}});
+    catalog.forEach(p=>{const q=Number(cart[p.id]||0);if(q>0){count++;total+=Number(p.seller_price||p.official_price)*q;if(cur&&cur!==p.currency)mixed=true;cur=p.currency;}});
     $("cartSummary").textContent=count?("Productos: "+count+" · Total estimado: "+(mixed?"No se pueden mezclar monedas":money(total,cur||"USD"))):"No has seleccionado productos.";
     $("createOrderBtn").disabled=count===0||mixed;
   }
   $("createOrderBtn").addEventListener("click",async()=>{
-    const items=catalog.map(p=>({product_id:p.id,quantity:Number($("managerCatalog").querySelector('[data-quantity="'+p.id+'"]')?.value||0)})).filter(i=>i.quantity>0);
+    const items=catalog.map(p=>({product_id:p.id,quantity:Number(cart[p.id]||0)})).filter(i=>i.quantity>0);
     if(!items.length)return;
-    try{const result=await rpc("gestor_create_order",{p_items:items,p_notes:$("orderNotes").value.trim()||null});showStatus("managerStatus","Pedido creado: "+result.order_id+". Total de venta: "+money(result.seller_subtotal,result.currency)+". Ganancia asignada: "+money(result.profit_assigned,result.currency)+".","ok");$("orderNotes").value="";catalog.forEach(p=>{const i=$("managerCatalog").querySelector('[data-quantity="'+p.id+'"]');if(i)i.value=0;});await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}
+    try{const result=await rpc("gestor_create_order",{p_items:items,p_notes:$("orderNotes").value.trim()||null});showStatus("managerStatus","Pedido creado: "+result.order_id+". Total de venta: "+money(result.seller_subtotal,result.currency)+". Ganancia asignada: "+money(result.profit_assigned,result.currency)+".","ok");$("orderNotes").value="";cart={};await loadManager();}catch(err){showStatus("managerStatus",failMessage(err),"error");}
   });
   function renderManagerOrders(){
     $("managerOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Pedido</th><th>Totales</th><th>Estado</th><th>Pago</th></tr></thead><tbody>'+orders.map(o=>'<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'</td><td class="mono">'+esc(o.order_code||o.id.slice(0,8))+'</td><td>Oficial '+money(o.official_subtotal,o.currency)+'<br>Venta '+money(o.seller_subtotal,o.currency)+'<br>Margen '+money(o.margin_total,o.currency)+'<br>Comisión '+money(o.commission_total,o.currency)+'</td><td>'+esc(o.order_status)+'</td><td>'+esc(o.payment_status)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no has creado pedidos de prueba.</p>';
