@@ -133,9 +133,19 @@
   async function managerRpc(name,args){
     let result=await db.rpc(name,args);
     if(!result.error)return result.data;
-    if(!/active_manager_profile_required/.test(result.error.message||""))throw result.error;
+    const message=String(result.error.message||"");
+    const needsRefresh=/active_manager_profile_required|jwt expired|invalid jwt|session not found|refresh token/i.test(message)||[401,403].includes(Number(result.error.status));
+    if(!needsRefresh)throw result.error;
     const {data:refreshed,error:refreshError}=await db.auth.refreshSession();
-    if(refreshError||!refreshed?.session)throw new Error("La sesión del gestor venció. Vuelve a iniciar sesión para continuar.");
+    if(refreshError||!refreshed?.session){
+      const refreshMessage=String(refreshError?.message||"");
+      if(/refresh token not found|invalid refresh token|session not found|refresh_token_not_found/i.test(refreshMessage)){
+        try{await db.auth.signOut({scope:"local"})}catch(_){}
+        user=null;profile=null;setView("loginView");
+        throw new Error("Tu sesión del gestor venció. Inicia sesión nuevamente para continuar.");
+      }
+      throw new Error("No se pudo renovar la sesión por un problema de conexión. Comprueba Internet e inténtalo otra vez.");
+    }
     const {data:{user:current},error:userError}=await db.auth.getUser();
     if(userError||!current)throw new Error("No se pudo validar tu sesión. Inicia sesión nuevamente.");
     const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,auth_user_id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
@@ -172,8 +182,35 @@
   async function initSession(){
     if(initSessionPromise)return initSessionPromise;
     initSessionPromise=(async()=>{
-    const {data:{user:current},error}=await db.auth.getUser();
-    if(error||!current){setView("loginView");return;}
+    let {data:{user:current},error}=await db.auth.getUser();
+    if(error||!current){
+      const authMessage=String(error?.message||"");
+      const expired=!!error&&(/jwt|token|session/i.test(authMessage)||[401,403].includes(Number(error.status)));
+      if(expired){
+        const {data:refreshed,error:refreshError}=await db.auth.refreshSession();
+        if(!refreshError&&refreshed?.session){
+          const verified=await db.auth.getUser();
+          if(!verified.error&&verified.data?.user)current=verified.data.user;
+          else error=verified.error||new Error("No se pudo validar la sesión renovada.");
+        }else{
+          const refreshMessage=String(refreshError?.message||"");
+          if(/refresh token not found|invalid refresh token|session not found|refresh_token_not_found/i.test(refreshMessage)){
+            try{await db.auth.signOut({scope:"local"})}catch(_){}
+            user=null;profile=null;setView("loginView");
+            showStatus("loginStatus","Tu sesión venció. Inicia sesión nuevamente para continuar.","error");
+            return;
+          }
+          setView("loginView");
+          showStatus("loginStatus","No se pudo renovar la sesión. Comprueba tu conexión y vuelve a intentarlo.","error");
+          return;
+        }
+      }else if(error){
+        setView("loginView");
+        showStatus("loginStatus","No se pudo comprobar la sesión por un problema de conexión. Vuelve a intentarlo cuando tengas Internet.","error");
+        return;
+      }
+      if(!current){setView("loginView");return;}
+    }
     user=current;$("userLabel").textContent=current.email||"Sesión activa";
     if(current.app_metadata?.role==="admin"){setView("adminView");await loadAdmin();return;}
     const {data:gp,error:gpError}=await db.from("gestor_profiles").select("id,auth_user_id,display_name,slug,status").eq("auth_user_id",current.id).maybeSingle();
@@ -420,7 +457,18 @@
   function renderManagerOrders(){
     $("managerOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Pedido</th><th>Totales</th><th>Estado</th><th>Pago</th></tr></thead><tbody>'+orders.map(o=>'<tr><td>'+new Date(o.created_at).toLocaleString("es-ES")+'</td><td class="mono">'+esc(o.order_code||o.id.slice(0,8))+'</td><td>Oficial '+money(o.official_subtotal,o.currency)+'<br>Venta '+money(o.seller_subtotal,o.currency)+'<br>Margen '+money(o.margin_total,o.currency)+'<br>Comisión '+money(o.commission_total,o.currency)+'</td><td>'+esc(o.order_status)+'</td><td>'+esc(o.payment_status)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Todavía no has creado pedidos de prueba.</p>';
   }
-  db.auth.getSession().then(({data})=>{if(data.session)initSession();});
+  db.auth.getSession().then(({data})=>{if(data.session)initSession().catch(err=>console.warn("No se pudo reanudar la sesión:",err));});
+  let resumeSessionTimer=null;
+  function scheduleSessionResume(){
+    if(document.visibilityState!=="visible")return;
+    if(resumeSessionTimer)clearTimeout(resumeSessionTimer);
+    resumeSessionTimer=setTimeout(()=>{
+      if(!initSessionPromise)initSession().catch(err=>console.warn("Error al reanudar el portal de gestores:",err));
+    },700);
+  }
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleSessionResume();});
+  window.addEventListener("pageshow",scheduleSessionResume);
+  window.addEventListener("online",scheduleSessionResume);
 })();
 </script>
 <!-- publicación manual logo compacto bd11a67dcab0fcb2 -->
