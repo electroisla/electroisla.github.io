@@ -264,9 +264,14 @@
   }
   async function loadManager(){
     try{
-      const {data:publicCategories,error:categoryError}=await categoryDb.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
-      categoryList=publicCategories||[];
-      categoryListLoaded=!categoryError;
+      try{
+        const {data:publicCategories,error:categoryError}=await categoryDb.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
+        if(!categoryError){categoryList=publicCategories||[];categoryListLoaded=true;}
+        else{categoryList=[];categoryListLoaded=false;}
+      }catch(categoryFetchError){
+        console.warn("No se pudieron cargar las categorías oficiales; se agrupará el catálogo por categoría del producto.",categoryFetchError);
+        categoryList=[];categoryListLoaded=false;
+      }
       const [{data:settings,error:se},products,{data:myOrders,error:oe},{data:myLedger,error:le}] = await Promise.all([
         db.from("gestor_settings").select("commission_percent").eq("singleton",true).single(),
         rpc("gestor_get_my_catalog_full",{}),
