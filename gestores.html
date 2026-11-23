@@ -108,7 +108,6 @@
   const SUPABASE_URL = "https://pdvfupvtofpzfllkjhhc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const categoryDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   const $ = id => document.getElementById(id);
   const slugFromUrl = new URLSearchParams(location.search).get("gestor");
   let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};
@@ -265,7 +264,7 @@
   async function loadManager(){
     const categoryTask=(async()=>{
       try{
-        const {data,error}=await categoryDb.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
+        const {data,error}=await db.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
         if(error)throw error;
         categoryList=data||[];
         categoryListLoaded=true;
