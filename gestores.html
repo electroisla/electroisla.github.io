@@ -110,7 +110,8 @@
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const $ = id => document.getElementById(id);
   const slugFromUrl = new URLSearchParams(location.search).get("gestor");
-  let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};\n  let selectedManagerCategory = "";
+  let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};
+  let selectedManagerCategory = "";
   const money = (value, currency="USD") => new Intl.NumberFormat("es-ES",{style:"currency",currency}).format(Number(value||0));
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const showStatus = (id,message,type="info") => {const el=$(id);el.textContent=message;el.className="status"+(type==="error"?" error":type==="ok"?" ok":"");el.classList.remove("hidden");};
