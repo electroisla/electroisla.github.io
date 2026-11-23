@@ -27,6 +27,7 @@ let cart=Array.isArray(localCart)?localCart:[];
 let categories=Array.isArray(localCategories)?localCategories:[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
 let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5352017110"};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
+const publicManagerSlug=(new URLSearchParams(location.search).get("gestor")||"").trim().toLowerCase();
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
 const effectivePrice=p=>Number.isFinite(Number(p.discountPrice))&&Number(p.discountPrice)>0&&Number(p.discountPrice)<Number(p.price)?Number(p.discountPrice):Number(p.price);
 const cashCup=p=>{const base=effectivePrice(p);if((p.currency||"USD")==="USD")return base*Number(storeSettings.usd_to_cup||0);if((p.currency||"USD")==="CUP")return base;return null};
@@ -229,6 +230,15 @@ async function loadCloudProducts(){
   return true;
 }
 
+async function loadPublicManagerPrices(){
+  if(!publicManagerSlug)return;
+  const {data,error}=await catalogReadClient.rpc("gestor_get_public_prices",{p_slug:publicManagerSlug});
+  if(error)throw error;
+  const prices=new Map((Array.isArray(data)?data:[]).map(row=>[String(row.product_id),Number(row.seller_price)]));
+  if(!prices.size)throw new Error("El enlace del gestor no tiene precios públicos activos.");
+  products=products.map(p=>prices.has(String(p.id))?({...p,price:prices.get(String(p.id)),discountPrice:null}):p);
+  save();
+}
 async function loadCloudProductsWithRetry(maxAttempts=3){
   let lastError;
   for(let attempt=1;attempt<=maxAttempts;attempt++){
@@ -291,6 +301,10 @@ async function startCloud(){
   const productsTask = (async()=>{
     try{
       await loadCloudProductsWithRetry();
+      if(publicManagerSlug){
+        try{await loadPublicManagerPrices();}
+        catch(managerPriceError){console.error("No se pudieron aplicar los precios del gestor:",managerPriceError);window.managerStoreLoadError=String(managerPriceError?.message||managerPriceError);}
+      }
       window.catalogLoadError = "";
       window.catalogLoading = false;
       renderCategoryTabs();
@@ -969,36 +983,37 @@ async function recordOrderForReport({name,phone,recipientName,recipientAddress,r
       if(!p)return null;
       const unitPrice=Number(effectivePrice(p))||0;
       const qty=Number(i.qty)||0;
-      return {
-        id:String(p.id),
-        name:p.name||"",
-        category:p.category||"",
-        qty,
-        unit:p.unit||"",
-        unit_price:unitPrice,
-        line_total:unitPrice*qty
-      };
+      return {id:String(p.id),name:p.name||"",category:p.category||"",qty,unit:p.unit||"",unit_price:unitPrice,line_total:unitPrice*qty};
     }).filter(Boolean);
     const isUsd=method==="USD"||method==="ZELLE";
     const total=Number(isUsd?totals.usdTotal:method==="CUP"?totals.cashTotal:totals.transferTotal)||0;
     const delivery=Number(isUsd?totals.deliveryFeeUSD:method==="CUP"?totals.deliveryFeeCUP:totals.deliveryFeeTransfer)||0;
     const subtotal=Math.max(0,total-delivery);
+    const orderNote=[`DATOS DE QUIEN RECIBE EL PEDIDO: ${recipientName||""}; Dirección: ${recipientAddress||""}; Teléfono: ${recipientPhone||""}`,note||""].filter(Boolean).join("\n");
+    if(publicManagerSlug){
+      const {data,error}=await supabaseClient.rpc("gestor_create_public_order",{
+        p_slug:publicManagerSlug,
+        p_order:{
+          customer_name:name||"",customer_phone:phone||"",recipient_name:recipientName||"",
+          recipient_address:recipientAddress||"",recipient_phone:recipientPhone||"",
+          delivery_zone:zoneName||"",payment_method:method,currency:isUsd?"USD":"CUP",
+          subtotal,delivery_fee:delivery,total,note:note||"",
+          items:orderItems.map(item=>({id:item.id,qty:item.qty,category:item.category,unit:item.unit}))
+        }
+      });
+      if(error)throw error;
+      console.info("Pedido de gestor registrado correctamente:",data?.order_code||data?.order_id);
+      return data;
+    }
     const {error}=await supabaseClient.from("orders").insert({
-      customer_name:name||"",
-      customer_phone:phone||"",
-      delivery_zone:zoneName||"",
-      payment_method:method,
-      currency:isUsd?"USD":"CUP",
-      subtotal,
-      delivery_fee:delivery,
-      total,
-      items:orderItems,
-      note:[`DATOS DE QUIEN RECIBE EL PEDIDO: ${recipientName||""}; Dirección: ${recipientAddress||""}; Teléfono: ${recipientPhone||""}`,note||""].filter(Boolean).join("\n"),
-      status:"sent"
+      customer_name:name||"",customer_phone:phone||"",delivery_zone:zoneName||"",
+      payment_method:method,currency:isUsd?"USD":"CUP",subtotal,delivery_fee:delivery,total,
+      items:orderItems,note:orderNote,status:"sent"
     });
     if(error)console.warn("No se pudo registrar el pedido para el reporte de ventas:",error);
   }catch(err){
-    console.warn("No se pudo registrar el pedido para el reporte de ventas:",err);
+    console.error("No se pudo registrar el pedido:",err);
+    alert("No se pudo registrar el pedido en ElectroIsla. Intenta enviarlo nuevamente o contacta con la tienda.");
   }
 }
 
