@@ -1139,9 +1139,26 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 .admin-page .admin-user-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:12px 0 16px;padding:14px;border:1px solid var(--ei-line);border-radius:11px;background:#f8fafd}
 .admin-page .admin-user-form>label{min-width:0;margin:0}
 .admin-page .admin-user-form>.settings-help,.admin-page .admin-user-form>.row{grid-column:1/-1;margin:0}
-.admin-page #adminUsersList table{min-width:560px}
-.admin-page #adminUsersList .admin-user-actions{white-space:nowrap}
-@media(max-width:650px){.admin-page .admin-user-form{grid-template-columns:minmax(0,1fr);padding:10px}.admin-page .admin-user-form>.settings-help,.admin-page .admin-user-form>.row{grid-column:auto}.admin-page .admin-user-form>.row{display:grid;grid-template-columns:1fr 1fr}.admin-page .admin-user-form>.row .btn{width:100%;padding-inline:7px}}
+.admin-page #adminUsersList table{width:100%;min-width:0;table-layout:fixed}
+.admin-page #adminUsersList th,.admin-page #adminUsersList td{overflow-wrap:anywhere;padding:8px 6px}
+.admin-page #adminUsersList th:nth-child(1){width:20%}
+.admin-page #adminUsersList th:nth-child(2){width:30%}
+.admin-page #adminUsersList th:nth-child(3){width:22%}
+.admin-page #adminUsersList th:nth-child(4){width:28%}
+.admin-page #adminUsersList .admin-user-actions{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}
+.admin-page #adminUsersList .admin-user-actions .btn{min-width:0;padding:8px 9px;font-size:.8rem}
+@media(max-width:650px){
+.admin-page .admin-user-form{grid-template-columns:minmax(0,1fr);padding:10px}
+.admin-page .admin-user-form>.settings-help,.admin-page .admin-user-form>.row{grid-column:auto}
+.admin-page .admin-user-form>.row{display:grid;grid-template-columns:1fr 1fr}
+.admin-page .admin-user-form>.row .btn{width:100%;padding-inline:7px}
+.admin-page #adminUsersList th:nth-child(1){width:18%}
+.admin-page #adminUsersList th:nth-child(2){width:28%}
+.admin-page #adminUsersList th:nth-child(3){width:20%}
+.admin-page #adminUsersList th:nth-child(4){width:34%}
+.admin-page #adminUsersList .admin-user-actions{flex-direction:column;align-items:stretch}
+.admin-page #adminUsersList .admin-user-actions .btn{width:100%;padding:7px 4px;font-size:.76rem}
+}
 </style>
 </head>
 <body class="admin-page">
