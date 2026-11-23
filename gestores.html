@@ -111,7 +111,7 @@
   const categoryDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   const $ = id => document.getElementById(id);
   const slugFromUrl = new URLSearchParams(location.search).get("gestor");
-  let user = null, profile = null, catalog = [], categoryList = [], managers = [], orders = [], ledger = [], cart = {};
+  let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};
   const money = (value, currency="USD") => new Intl.NumberFormat("es-ES",{style:"currency",currency}).format(Number(value||0));
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const showStatus = (id,message,type="info") => {const el=$(id);el.textContent=message;el.className="status"+(type==="error"?" error":type==="ok"?" ok":"");el.classList.remove("hidden");};
@@ -264,8 +264,9 @@
   }
   async function loadManager(){
     try{
-      const {data:publicCategories}=await categoryDb.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
+      const {data:publicCategories,error:categoryError}=await categoryDb.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
       categoryList=publicCategories||[];
+      categoryListLoaded=!categoryError;
       const [{data:settings,error:se},products,{data:myOrders,error:oe},{data:myLedger,error:le}] = await Promise.all([
         db.from("gestor_settings").select("commission_percent").eq("singleton",true).single(),
         rpc("gestor_get_my_catalog_full",{}),
@@ -296,7 +297,7 @@
         const items=catalog.filter(p=>normalize(p.category)===normalize(name));
         if(items.length){groups.push({name,items});items.forEach(p=>used.add(String(p.id)));}
       });
-      const remaining=catalog.filter(p=>!used.has(String(p.id)));
+      const remaining=categoryListLoaded?[]:catalog.filter(p=>!used.has(String(p.id)));
       if(remaining.length){
         const extraNames=[...new Set(remaining.map(p=>String(p.category||"Otros").trim()||"Otros"))];
         extraNames.forEach(name=>{
