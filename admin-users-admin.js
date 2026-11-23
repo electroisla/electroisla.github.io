@@ -25,7 +25,7 @@
     if(!box)return;
     if(!admins.length){box.innerHTML='<p class="settings-help">No se encontraron cuentas con permisos de administrador.</p>';return;}
     box.innerHTML='<table><thead><tr><th>Administrador</th><th>Correo</th><th>Último acceso</th><th>Acción</th></tr></thead><tbody>'+
-      admins.map(a=>'<tr><td><strong>'+escHtml(a.full_name||"Sin nombre")+'</strong></td><td>'+escHtml(a.email)+'</td><td>'+dateLabel(a.last_sign_in_at)+'</td><td class="admin-user-actions"><button type="button" class="btn secondary" data-edit-admin="'+escHtml(a.id)+'">✏️ Editar</button></td></tr>').join("")+
+      admins.map(a=>'<tr><td><strong>'+escHtml(a.full_name||"Sin nombre")+'</strong></td><td>'+escHtml(a.email)+'</td><td>'+dateLabel(a.last_sign_in_at)+'</td><td class="admin-user-actions"><button type="button" class="btn secondary" data-edit-admin="'+escHtml(a.id)+'">✏️ Editar</button> <button type="button" class="btn danger" data-delete-admin="'+escHtml(a.id)+'" data-admin-email="'+escHtml(a.email)+'">🗑️ Eliminar</button></td></tr>').join("")+
       '</tbody></table>';
   }
   async function load(){
@@ -95,9 +95,16 @@
   });
   $("adminUserCancel")?.addEventListener("click",reset);
   $("adminUsersRefresh")?.addEventListener("click",load);
-  $("adminUsersList")?.addEventListener("click",event=>{
-    const button=event.target.closest("[data-edit-admin]");
-    if(button)edit(button.dataset.editAdmin);
+  $("adminUsersList")?.addEventListener("click",async event=>{
+    const editButton=event.target.closest("[data-edit-admin]");
+    if(editButton){edit(editButton.dataset.editAdmin);return;}
+    const deleteButton=event.target.closest("[data-delete-admin]");
+    if(!deleteButton)return;
+    const email=deleteButton.dataset.adminEmail||"esta cuenta";
+    if(!confirm("¿Eliminar definitivamente la cuenta de administrador "+email+"? Esta acción no se puede deshacer."))return;
+    deleteButton.disabled=true;status("Eliminando cuenta…");
+    try{await invoke({action:"delete",user_id:deleteButton.dataset.deleteAdmin});await load();status("Cuenta "+email+" eliminada.");}
+    catch(error){status("No se pudo eliminar: "+error.message,true);deleteButton.disabled=false;}
   });
   document.querySelector('#eiAdminNav a[href="#adminUsersPanel"]')?.addEventListener("click",()=>load());
   window.loadAdminUsersAdmin=load;
