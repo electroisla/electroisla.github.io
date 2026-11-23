@@ -222,7 +222,18 @@
     $("catalogList").innerHTML=catalog.length?'<table><thead><tr><th>Producto</th><th>Precio oficial</th><th>Estado</th></tr></thead><tbody>'+catalog.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+money(p.official_price,p.currency)+' '+esc(p.currency)+'</td><td>'+(p.active?'<span class="pill">Activo</span>':'<span class="pill orange">Oculto</span>')+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Pulsa “Sincronizar catálogo de tienda” para cargar los productos.</p>';
   }
   function renderManagers(){
-    $("managerList").innerHTML=managers.length?'<table><thead><tr><th>Gestor</th><th>Enlace</th><th>Estado</th><th>UUID Auth</th></tr></thead><tbody>'+managers.map(m=>'<tr><td>'+esc(m.display_name)+'</td><td><a href="/?gestor='+encodeURIComponent(m.slug)+'">Abrir tienda del gestor</a><br><span class="mono">'+esc(m.slug)+'</span></td><td>'+esc(m.status)+'</td><td class="mono">'+esc(m.auth_user_id)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Crea primero el usuario de Auth y luego su perfil.</p>';
+    $("managerList").innerHTML=managers.length?'<table><thead><tr><th>Gestor</th><th>Enlace</th><th>Estado</th><th>UUID Auth</th></tr></thead><tbody>'+managers.map(m=>'<tr><td>'+esc(m.display_name)+'</td><td><a href="/?gestor='+encodeURIComponent(m.slug)+'" target="_blank" rel="noopener">Abrir tienda del gestor</a><br><span class="mono">'+esc(m.slug)+'</span><br><button class="btn" type="button" data-copy-manager-link="'+esc(m.slug)+'" style="margin-top:6px">Copiar enlace</button></td><td>'+esc(m.status)+'</td><td class="mono">'+esc(m.auth_user_id)+'</td></tr>').join("")+'</tbody></table>':'<p class="muted">Crea primero el usuario de Auth y luego su perfil.</p>';
+    $("managerList").querySelectorAll("[data-copy-manager-link]").forEach(button=>button.addEventListener("click",async()=>{
+      const slug=button.dataset.copyManagerLink;
+      const url=location.origin+"/?gestor="+encodeURIComponent(slug);
+      try{
+        await navigator.clipboard.writeText(url);
+        const original=button.textContent;button.textContent="¡Enlace copiado!";
+        setTimeout(()=>{button.textContent=original;},1800);
+      }catch(err){
+        window.prompt("Copia el enlace de la tienda del gestor:",url);
+      }
+    }));
   }
   function renderAdminOrders(){
     $("adminOrders").innerHTML=orders.length?'<table><thead><tr><th>Fecha</th><th>Gestor</th><th>Totales</th><th>Estado pedido</th><th>Pago</th><th>Acción</th></tr></thead><tbody>'+orders.map(o=>{
