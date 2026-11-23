@@ -990,9 +990,11 @@ async function recordOrderForReport({name,phone,recipientName,recipientAddress,r
     const delivery=Number(isUsd?totals.deliveryFeeUSD:method==="CUP"?totals.deliveryFeeCUP:totals.deliveryFeeTransfer)||0;
     const subtotal=Math.max(0,total-delivery);
     const orderNote=[`DATOS DE QUIEN RECIBE EL PEDIDO: ${recipientName||""}; Dirección: ${recipientAddress||""}; Teléfono: ${recipientPhone||""}`,note||""].filter(Boolean).join("\n");
-    if(publicManagerSlug){
+    // Releer el slug al confirmar: no depender de una variable capturada al cargar la página.
+    const checkoutManagerSlug=(new URLSearchParams(window.location.search).get("gestor")||"").trim().toLowerCase();
+    if(checkoutManagerSlug){
       const {data,error}=await supabaseClient.rpc("gestor_create_public_order",{
-        p_slug:publicManagerSlug,
+        p_slug:checkoutManagerSlug,
         p_order:{
           customer_name:name||"",customer_phone:phone||"",recipient_name:recipientName||"",
           recipient_address:recipientAddress||"",recipient_phone:recipientPhone||"",
