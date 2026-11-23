@@ -1145,7 +1145,9 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 .admin-page #adminUsersList th:nth-child(2){width:30%}
 .admin-page #adminUsersList th:nth-child(3){width:22%}
 .admin-page #adminUsersList th:nth-child(4){width:28%}
-.admin-page #adminUsersList .admin-user-actions{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}
+.admin-page #adminUsersList .admin-user-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px;white-space:normal}
+.admin-page #adminUsersList .admin-user-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;min-width:38px;padding:0!important;border-radius:9px!important}
+.admin-page #adminUsersList .admin-user-icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .admin-page #adminUsersList .admin-user-actions .btn{min-width:0;padding:8px 9px;font-size:.8rem}
 @media(max-width:650px){
 .admin-page .admin-user-form{grid-template-columns:minmax(0,1fr);padding:10px}
