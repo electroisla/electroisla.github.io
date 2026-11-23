@@ -139,7 +139,10 @@
     showStatus("loginStatus",error?failMessage(error):"Si el correo está registrado, recibirás un enlace de recuperación.",error?"error":"ok");
   });
   $("logoutBtn").addEventListener("click",async()=>{await db.auth.signOut();user=null;profile=null;setView("loginView");$("userLabel").textContent="";});
+  let initSessionPromise=null;
   async function initSession(){
+    if(initSessionPromise)return initSessionPromise;
+    initSessionPromise=(async()=>{
     const {data:{user:current},error}=await db.auth.getUser();
     if(error||!current){setView("loginView");return;}
     user=current;$("userLabel").textContent=current.email||"Sesión activa";
@@ -153,6 +156,8 @@
     }
     profile=gp;$("managerHeading").textContent="Hola, "+gp.display_name;$("managerLink").textContent=location.origin+"/?gestor="+gp.slug;
     setView("managerView");await loadManager();
+    })();
+    try{return await initSessionPromise;}finally{initSessionPromise=null;}
   }
   db.auth.onAuthStateChange((_event,session)=>{if(session?.user && !user){setTimeout(()=>initSession(),0);}});
   document.querySelectorAll("[data-admin-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-admin-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-admin-panel]").forEach(p=>p.classList.toggle("hidden",p.dataset.adminPanel!==b.dataset.adminTab));}));
@@ -261,7 +266,10 @@
   function renderLedger(targetId,rows,admin=false){
     $(targetId).innerHTML=rows.length?'<table><thead><tr>'+(admin?'<th>Gestor</th>':'')+'<th>Fecha</th><th>Movimiento</th><th>Importe</th><th>Referencia</th></tr></thead><tbody>'+rows.map(r=>{const m=managers.find(x=>x.id===r.gestor_id);return '<tr>'+(admin?'<td>'+esc(m?.display_name||"Gestor")+'</td>':'')+'<td>'+new Date(r.created_at).toLocaleString("es-ES")+'</td><td>'+esc(r.entry_type)+'</td><td>'+money(r.amount,r.currency)+'</td><td>'+esc(r.reference||"—")+'</td></tr>';}).join("")+'</tbody></table>':'<p class="muted">Sin movimientos registrados.</p>';
   }
+  let managerLoadPromise=null;
   async function loadManager(){
+    if(managerLoadPromise)return managerLoadPromise;
+    managerLoadPromise=(async()=>{
     const categoryTask=(async()=>{
       try{
         const {data,error}=await db.from("categories").select("name,sort_order,available").eq("available",true).order("sort_order",{ascending:true}).order("name",{ascending:true});
@@ -308,6 +316,8 @@
       }catch(err){console.warn("No se pudieron cargar los indicadores del gestor.",err);}
     })();
     await Promise.all([catalogTask,categoryTask,statsTask]);
+    })();
+    try{return await managerLoadPromise;}finally{managerLoadPromise=null;}
   }
   function renderManagerCatalog(){
     if(!catalog.length){
