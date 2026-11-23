@@ -144,6 +144,11 @@
  form.addEventListener("change",function(e){if(e.target.matches('input[name="paymentTiming"],input[name="paymentMethod"]'))render();else {if(e.target.id==="paymentDueHours")updateDueUI();summary()}});
  form.addEventListener("submit",async function(e){
   e.preventDefault();e.stopImmediatePropagation();
+  const managerSlug=typeof getCheckoutManagerSlug==="function"?getCheckoutManagerSlug():"";
+  if(managerSlug&&window.managerStoreLoadError){
+   alert("No se pudieron verificar los precios actualizados de este gestor. El pedido no se enviará para evitar cobrar un importe incorrecto. Comprueba la conexión y vuelve a intentarlo.");
+   return;
+  }
   const m=current(),t=timing(),totals=getOrderTotals();
   if(!m){alert("No hay un método habilitado para la modalidad elegida.");return}
   const prepago=m.code==="TRANSFERENCIA_PREPAGO"||m.code==="PREPAGO"||m.currency==="TRANSFERENCIA_PREPAGO";
