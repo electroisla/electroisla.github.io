@@ -176,9 +176,34 @@
   const msg="🛒 NUEVO PEDIDO\n\n👤 PERSONA QUE REALIZA EL PEDIDO\nNombre: "+name+"\nTeléfono: "+phone+"\n\n📦 PERSONA QUE RECIBE EL PEDIDO\nNombre: "+recipientName+"\nDirección: "+recipientAddress+"\nTeléfono: "+recipientPhone+"\n\n🛍️ PRODUCTOS:\n"+lines+"\n\n📍 Zona de entrega: "+zoneName+"\n\n💳 MÉTODO DE PAGO: "+m.name+" ("+m.code+")\n\n━━━━━━━━━━━━━━━━━━\n🕒 MOMENTO DE PAGO\n"+when+"\n━━━━━━━━━━━━━━━━━━\n"+(details?"\n🏦 DATOS DE PAGO\n"+details+"\n":"")+(m.instructions?"\n📝 INDICACIONES\n"+m.instructions+"\n":"")+(t==="POST_DELIVERY"&&m.postdelivery_terms?"\n📅 CONDICIONES\n"+m.postdelivery_terms+"\n":"")+"\n🧾 SUBTOTAL: "+money(subtotal,prepago?"USD":m.currency)+"\n\n🚚 DOMICILIO: "+(delivery>0?money(delivery,prepago?"USD":m.currency):"Gratis")+"\n💰 TOTAL A PAGAR: "+money(amount,prepago?"USD":m.currency)+(note?"\n🗒️ Nota del pedido: "+note:"");
   try{
    const items=cart.map(function(i){const p=products.find(x=>x.id===i.id);if(!p)return null;const price=Number(effectivePrice(p))||0,qty=Number(i.qty)||0;return {id:String(p.id),name:p.name||"",category:p.category||"",qty:qty,unit:p.unit||"",unit_price:price,line_total:price*qty}}).filter(Boolean);
-   const res=await supabaseClient.from("orders").insert({customer_name:name,customer_phone:phone,delivery_zone:zoneName,payment_method:m.code,payment_timing:t,payment_due_at:dueAt,payment_status:"PENDING",currency:m.currency,subtotal:subtotal,delivery_fee:delivery,total:amount,items:items,note:["DATOS DE QUIEN RECIBE EL PEDIDO: "+recipientName+"; Dirección: "+recipientAddress+"; Teléfono: "+recipientPhone,note].filter(Boolean).join("\n"),status:"sent"});
-   if(res.error)console.warn("No se pudo registrar el pedido para el reporte:",res.error);
-  }catch(err){console.warn("No se pudo registrar el pedido para el reporte:",err)}
+   const managerSlug=typeof getCheckoutManagerSlug==="function"?getCheckoutManagerSlug():"";
+   if(managerSlug){
+    const managerPayment=/^ZELLE$/i.test(String(m.code||""))?"ZELLE":m.code==="TRANSFERENCIA"?"TRANSFERENCIA":String(m.currency||"").toUpperCase()==="USD"?"USD":"CUP";
+    const paymentNotes=["Método: "+m.name+" ("+m.code+")","Modalidad: "+when,details?("Datos de pago: "+details):"",m.instructions?("Instrucciones: "+m.instructions):"",t==="POST_DELIVERY"&&m.postdelivery_terms?("Condiciones: "+m.postdelivery_terms):"",note||""].filter(Boolean).join("\n");
+    const {data,error}=await supabaseClient.rpc("gestor_create_public_order",{
+     p_slug:managerSlug,
+     p_order:{
+      customer_name:name,customer_phone:phone,recipient_name:recipientName,
+      recipient_address:recipientAddress,recipient_phone:recipientPhone,
+      delivery_zone:zoneName,payment_method:managerPayment,currency:managerPayment==="USD"||managerPayment==="ZELLE"?"USD":"CUP",
+      payment_timing:t,payment_due_at:dueAt,subtotal:subtotal,delivery_fee:delivery,total:amount,
+      note:paymentNotes,items:items.map(item=>({id:item.id,qty:item.qty,category:item.category,unit:item.unit}))
+     }
+    });
+    if(error)throw error;
+    if(!data?.gestor_order_id)throw new Error("El registro del gestor no devolvió un identificador de venta.");
+    for(const storage of [sessionStorage,localStorage]){try{storage.removeItem("electroisla_public_manager_context");}catch(_){}}
+    console.info("[ElectroIsla] Venta del gestor registrada:",data.order_code||data.gestor_order_id);
+   }else{
+    const res=await supabaseClient.from("orders").insert({customer_name:name,customer_phone:phone,delivery_zone:zoneName,payment_method:m.code,payment_timing:t,payment_due_at:dueAt,payment_status:"PENDING",currency:m.currency,subtotal:subtotal,delivery_fee:delivery,total:amount,items:items,note:["DATOS DE QUIEN RECIBE EL PEDIDO: "+recipientName+"; Dirección: "+recipientAddress+"; Teléfono: "+recipientPhone,note].filter(Boolean).join("\n"),status:"sent"});
+    if(res.error)throw res.error;
+   }
+  }catch(err){
+   console.error("No se pudo registrar el pedido:",err);
+   const managerSlug=typeof getCheckoutManagerSlug==="function"?getCheckoutManagerSlug():"";
+   if(managerSlug){alert("No se pudo registrar la venta de Jorge Frank. El pedido no se enviará por WhatsApp para evitar una venta sin registrar. Detalle: "+(err?.message||err));return;}
+   console.warn("No se pudo registrar el pedido para el reporte:",err);
+  }
   try{
    sessionStorage.setItem("electroisla_payment_method",String(m.code||""));
    sessionStorage.setItem("electroisla_payment_timing",String(t||"PREPAID"));
