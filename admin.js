@@ -739,7 +739,7 @@ document.getElementById("salesOrdersTable")?.addEventListener("change",async e=>
   if(error)throw error;
   await loadSalesReport();
  }
- catch(err){alert("No se pudo actualizar el estado del cobro.\\n\\n"+(err.message||err));await loadSalesReport()}
+ catch(err){alert("No se pudo actualizar el estado del cobro.\n\n"+(err.message||err));await loadSalesReport()}
  finally{control.disabled=false}
 });
 
