@@ -1,9 +1,9 @@
-const CACHE_NAME = 'electroisla-v9.8.38-manager-order-slug';
+const CACHE_NAME = 'electroisla-v9.8.39-manager-order-context';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
-  './app.js?v=157',
+  './app.js?v=158',
   './supabase-config.js?v=4',
   './payment-methods-store.js?v=30'
 ];
