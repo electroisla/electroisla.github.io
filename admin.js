@@ -571,6 +571,15 @@ async function login(){
  await show();
 }
 async function show(){
+ const {data:{user},error:authError}=await supabaseClient.auth.getUser();
+ const isAdmin=!authError&&user&&user.app_metadata?.role==="admin";
+ if(!isAdmin){
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
+  await supabaseClient.auth.signOut();
+  loginBoxMessage("Acceso denegado. Esta cuenta no tiene permisos de administración de ElectroIsla.");
+  return;
+ }
  document.getElementById("loginBox").classList.add("hidden");
  document.getElementById("dashboard").classList.remove("hidden");
  loginBoxMessage("");
