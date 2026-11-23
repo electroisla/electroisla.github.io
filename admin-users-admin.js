@@ -25,7 +25,7 @@
     if(!box)return;
     if(!admins.length){box.innerHTML='<p class="settings-help">No se encontraron cuentas con permisos de administrador.</p>';return;}
     box.innerHTML='<table><thead><tr><th>Administrador</th><th>Correo</th><th>Último acceso</th><th>Acción</th></tr></thead><tbody>'+
-      admins.map(a=>'<tr><td><strong>'+escHtml(a.full_name||"Sin nombre")+'</strong></td><td>'+escHtml(a.email)+'</td><td>'+dateLabel(a.last_sign_in_at)+'</td><td class="admin-user-actions"><button type="button" class="btn secondary" data-edit-admin="'+escHtml(a.id)+'">✏️ Editar</button> <button type="button" class="btn danger" data-delete-admin="'+escHtml(a.id)+'" data-admin-email="'+escHtml(a.email)+'">🗑️ Eliminar</button></td></tr>').join("")+
+      admins.map(a=>'<tr><td><strong>'+escHtml(a.full_name||"Sin nombre")+'</strong></td><td>'+escHtml(a.email)+'</td><td>'+dateLabel(a.last_sign_in_at)+'</td><td class="admin-user-actions"><button type="button" class="btn secondary admin-user-icon-btn" data-edit-admin="'+escHtml(a.id)+'" title="Editar administrador" aria-label="Editar administrador"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button type="button" class="btn danger admin-user-icon-btn" data-delete-admin="'+escHtml(a.id)+'" data-admin-email="'+escHtml(a.email)+'" title="Eliminar administrador" aria-label="Eliminar administrador"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></td></tr>').join("")+
       '</tbody></table>';
   }
   async function load(){
