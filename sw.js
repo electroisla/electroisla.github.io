@@ -1,9 +1,9 @@
-const CACHE_NAME = 'electroisla-v9.8.14-haptic-buttons';
+const CACHE_NAME = 'electroisla-v9.8.37-manager-orders';
 const CORE = [
   './?app_version=9.8.0',
   './index.html',
   './styles.css?v=9.8.128',
-  './app.js?v=155',
+  './app.js?v=156',
   './supabase-config.js?v=4',
   './payment-methods-store.js?v=30'
 ];
