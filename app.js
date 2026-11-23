@@ -991,7 +991,7 @@ async function recordOrderForReport({name,phone,recipientName,recipientAddress,r
     const subtotal=Math.max(0,total-delivery);
     const orderNote=[`DATOS DE QUIEN RECIBE EL PEDIDO: ${recipientName||""}; Dirección: ${recipientAddress||""}; Teléfono: ${recipientPhone||""}`,note||""].filter(Boolean).join("\n");
     // Releer el slug al confirmar: no depender de una variable capturada al cargar la página.
-    const checkoutManagerSlug=(new URLSearchParams(window.location.search).get("gestor")||"").trim().toLowerCase();
+    const checkoutManagerSlug=(new URLSearchParams(window.location.search).get("gestor")||publicManagerSlug||"").trim().toLowerCase();
     if(checkoutManagerSlug){
       const {data,error}=await supabaseClient.rpc("gestor_create_public_order",{
         p_slug:checkoutManagerSlug,
