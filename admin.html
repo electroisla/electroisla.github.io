@@ -499,6 +499,41 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox:after{content:"";position:
 .admin-page .sales-custom-dates label{font-size:13px;font-weight:700;color:#34465a}
 .admin-page .sales-custom-dates input[type=date]{min-height:40px;border:1px solid #cbd8e6;border-radius:9px;padding:7px 9px;background:#fff;color:#1d2939;max-width:100%}
 @media(max-width:600px){.admin-page .sales-custom-dates{align-items:stretch}.admin-page .sales-custom-dates label{width:100%}.admin-page .sales-custom-dates input[type=date],.admin-page .sales-custom-dates .btn{width:100%}}
+
+/* Menú lateral: desplazamiento vertical táctil y ancho controlado */
+.admin-page .ei-admin-nav{
+  position:fixed!important;
+  top:70px!important;
+  left:8px!important;
+  right:auto!important;
+  width:min(320px,calc(100vw - 16px))!important;
+  height:calc(100dvh - 82px)!important;
+  max-height:calc(100dvh - 82px)!important;
+  min-height:0!important;
+  display:none;
+  flex-direction:column!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  touch-action:pan-y;
+  align-content:flex-start;
+}
+.admin-page .ei-admin-nav.is-open{display:flex!important}
+.admin-page .ei-admin-nav-link{flex:0 0 auto!important;width:100%!important}
+@media(max-width:700px){
+  .admin-page .ei-admin-nav{
+    top:70px!important;
+    left:8px!important;
+    width:min(320px,calc(100vw - 16px))!important;
+    height:calc(100dvh - 82px)!important;
+    max-height:calc(100dvh - 82px)!important;
+    padding-bottom:18px!important;
+  }
+}
+
 </style>
 <style id="ei-final-centered-header-fix">
 /* Ajuste definitivo del encabezado: centrado real y tamaños consistentes */
