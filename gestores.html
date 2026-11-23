@@ -107,7 +107,8 @@
 (() => {
   const SUPABASE_URL = "https://pdvfupvtofpzfllkjhhc.supabase.co";
   const SUPABASE_KEY = "sb_publishable_5AaqssiZuAx_ogZrV0tEAA_gXU-QYg-";
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Sesión aislada: evita que el administrador y el portal de gestores se sobrescriban entre pestañas del mismo dominio.
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storageKey: "electroisla-gestores-auth-v1" } });
   const $ = id => document.getElementById(id);
   const slugFromUrl = new URLSearchParams(location.search).get("gestor");
   let user = null, profile = null, catalog = [], categoryList = [], categoryListLoaded = false, managers = [], orders = [], ledger = [], cart = {};
