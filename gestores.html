@@ -279,11 +279,16 @@
     const catalogTask=(async()=>{
       try{
         const products=await rpc("gestor_get_my_catalog_full",{});
-        catalog=(products||[]).map(p=>({id:p.product_id,name:p.product_name,category:p.category||"",unit:p.unit||"",description:p.description||"",image:p.image||"",currency:p.currency,official_price:p.official_price,seller_price:p.seller_price,active:p.active}));
+        const rows=Array.isArray(products)?products:(Array.isArray(products?.data)?products.data:null);
+        if(!rows)throw new Error("La respuesta del catálogo no tiene el formato esperado.");
+        catalog=rows.map(p=>({id:p.product_id,name:p.product_name,category:p.category||"",unit:p.unit||"",description:p.description||"",image:p.image||"",currency:p.currency||"USD",official_price:p.official_price,seller_price:p.seller_price,active:p.active}));
         renderManagerCatalog();
+        if(!catalog.length) $("managerCatalog").innerHTML='<p class="muted">No hay productos activos disponibles en el catálogo oficial.</p>';
         clearStatus("managerStatus");
       }catch(err){
-        showStatus("managerStatus",failMessage(err),"error");
+        console.error("Error al cargar o mostrar el catálogo del gestor:",err);
+        $("managerCatalog").innerHTML='<p class="status error">No se pudo mostrar el catálogo: '+esc(err?.message||String(err))+'</p>';
+        showStatus("managerStatus","No se pudo cargar el catálogo. "+(err?.message||String(err)),"error");
       }
     })();
     const statsTask=(async()=>{
