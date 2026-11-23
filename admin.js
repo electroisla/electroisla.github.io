@@ -734,8 +734,12 @@ document.getElementById("salesOrdersTable")?.addEventListener("change",async e=>
  const control=e.target.closest("select[data-payment-status]");if(!control)return;
  const id=control.dataset.paymentStatus,value=control.value;
  control.disabled=true;
- try{const {error}=await supabaseClient.from("orders").update({payment_status:value}).eq("id",id);if(error)throw error;await loadSalesReport()}
- catch(err){alert("No se pudo actualizar el estado del cobro.\n\n"+(err.message||err));await loadSalesReport()}
+ try{
+  const {error}=await supabaseClient.rpc("gestor_admin_set_store_order_payment",{p_source_order_id:id,p_payment_status:value});
+  if(error)throw error;
+  await loadSalesReport();
+ }
+ catch(err){alert("No se pudo actualizar el estado del cobro.\\n\\n"+(err.message||err));await loadSalesReport()}
  finally{control.disabled=false}
 });
 
