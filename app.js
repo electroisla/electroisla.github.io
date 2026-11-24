@@ -25,7 +25,7 @@ const localCategories=readLocalJSON("electroisla_categories",null);
 let products=Array.isArray(localProducts)?localProducts:[];
 let cart=Array.isArray(localCart)?localCart:[];
 let categories=Array.isArray(localCategories)?localCategories:[...new Set(defaultProducts.map(p=>p.category).filter(Boolean))].map((name,index)=>({id:`local-${index}`,name,sort_order:index+1,available:true}));
-let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5356459504"};
+let storeSettings={usd_to_cup:700,usd_to_cup_electro:700,usd_to_cup_food:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5356459504"};
 const currencySymbols={USD:"$",CUP:"$",EUR:"€"};
 const managerContextKey="electroisla_public_manager_context";
 const managerSlugFromUrl=(new URLSearchParams(location.search).get("gestor")||"").trim().toLowerCase();
@@ -50,7 +50,8 @@ function getCheckoutManagerSlug(){
 }
 const money=(n,currency="USD")=>(currencySymbols[currency]||"")+Number(n).toFixed(2)+" "+currency;
 const effectivePrice=p=>Number.isFinite(Number(p.discountPrice))&&Number(p.discountPrice)>0&&Number(p.discountPrice)<Number(p.price)?Number(p.discountPrice):Number(p.price);
-const cashCup=p=>{const base=effectivePrice(p);if((p.currency||"USD")==="USD")return base*Number(storeSettings.usd_to_cup||0);if((p.currency||"USD")==="CUP")return base;return null};
+const productExchangeRate=p=>p?.category==="Electrodomésticos"?Number(storeSettings.usd_to_cup_electro||storeSettings.usd_to_cup||0):Number(storeSettings.usd_to_cup_food||storeSettings.usd_to_cup||0);
+const cashCup=p=>{const base=effectivePrice(p);if((p.currency||"USD")==="USD")return base*productExchangeRate(p);if((p.currency||"USD")==="CUP")return base;return null};
 const transferCup=p=>{const cash=cashCup(p);return cash===null?null:cash*(1+Number(storeSettings.transfer_markup_percent||0)/100)};
 // Tarifas de respaldo: deben coincidir con delivery_zones en Supabase.
 const DELIVERY_FEES={
@@ -204,7 +205,7 @@ function setupDeliveryPicker(){
 
 function priceMarkup(p){const cur=p.currency||"USD",sym=currencySymbols[cur]||"";const discounted=effectivePrice(p)<Number(p.price);const original=discounted?`<span class="old-price">${sym}${Number(p.price).toFixed(2)} ${cur}</span> `:"";return `${original}<span class="discount-price">${sym}${effectivePrice(p).toFixed(2)} ${cur}</span>`;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-async function loadStoreSettings(){const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent,usd_to_eur,transfer_prepago_rate,whatsapp_order_phone").eq("id",1).maybeSingle();if(error)throw error;if(data){storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5356459504").replace(/\D/g,"")};const phone=storeSettings.whatsapp_order_phone;const contact=document.getElementById("storeWhatsAppLink");if(contact)contact.href=`https://wa.me/${phone}`;const footer=document.getElementById("storeWhatsAppFooter");if(footer)footer.textContent=`WhatsApp: +${phone}`;}}
+async function loadStoreSettings(){const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,usd_to_cup_electro,usd_to_cup_food,transfer_markup_percent,usd_to_eur,transfer_prepago_rate,whatsapp_order_phone").eq("id",1).maybeSingle();if(error)throw error;if(data){const legacy=Number(data.usd_to_cup)||700;const electro=Number(data.usd_to_cup_electro)||legacy;const food=Number(data.usd_to_cup_food)||legacy;storeSettings={usd_to_cup:food,usd_to_cup_electro:electro,usd_to_cup_food:food,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5356459504").replace(/\D/g,"")};const phone=storeSettings.whatsapp_order_phone;const contact=document.getElementById("storeWhatsAppLink");if(contact)contact.href="https://wa.me/"+phone;const footer=document.getElementById("storeWhatsAppFooter");if(footer)footer.textContent="WhatsApp: +"+phone;}}
 async function loadCloudCategories(){const {data,error}=await supabaseClient.from("categories").select("id,name,sort_order,available").order("sort_order",{ascending:true}).order("name",{ascending:true});if(error)throw error;categories=(data||[]).filter(c=>c.available!==false&&String(c.name||"").trim()).map(c=>({id:c.id,name:String(c.name).trim(),sort_order:Number(c.sort_order)||0,available:true}));saveCategories();return true}
 function saveCategories(){localStorage.setItem("electroisla_categories",JSON.stringify(categories))}
 function save(){
@@ -698,7 +699,9 @@ function getOrderTotals(){
   cashTotal+=cash*qty; transferTotal+=transfer*qty;
  });
  const deliveryFeeUSD=getDeliveryFeeUSD();
- const deliveryFeeCUP=deliveryFeeUSD*Number(storeSettings.usd_to_cup||0);
+ const cartIsElectroOnly=cart.length>0&&cart.every(i=>{const p=products.find(x=>x.id===i.id);return p&&p.category==="Electrodomésticos";});
+ const deliveryExchangeRate=cartIsElectroOnly?Number(storeSettings.usd_to_cup_electro||storeSettings.usd_to_cup||0):Number(storeSettings.usd_to_cup_food||storeSettings.usd_to_cup||0);
+ const deliveryFeeCUP=deliveryFeeUSD*deliveryExchangeRate;
  const deliveryFeeTransfer=deliveryFeeCUP*(1+Number(storeSettings.transfer_markup_percent||0)/100);
  usdTotal+=deliveryFeeUSD;
  cashTotal+=deliveryFeeCUP;
