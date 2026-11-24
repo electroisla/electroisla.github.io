@@ -21,12 +21,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Convert SVG posters to JPEG
         run: |
-          sudo apt-get update
-          sudo apt-get install -y librsvg2-bin imagemagick
-          rsvg-convert -w 1200 -h 630 preview-administracion.svg > /tmp/admin.png
-          rsvg-convert -w 1200 -h 630 preview-gestores.svg > /tmp/gestores.png
-          magick /tmp/admin.png -background white -alpha remove -alpha off -quality 88 preview-administracion.jpg
-          magick /tmp/gestores.png -background white -alpha remove -alpha off -quality 88 preview-gestores.jpg
+          python -m pip install --upgrade pip
+          python -m pip install cairosvg pillow
+          python - <<'PY'
+          import cairosvg
+          from PIL import Image
+          for name in ("administracion", "gestores"):
+              png = f"/tmp/{name}.png"
+              cairosvg.svg2png(url=f"preview-{name}.svg", write_to=png, output_width=1200, output_height=630)
+              Image.open(png).convert("RGB").save(f"preview-{name}.jpg", "JPEG", quality=88, optimize=True)
+          PY
       - name: Publish JPEG files
         run: |
           git config user.name "github-actions[bot]"
