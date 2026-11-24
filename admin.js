@@ -496,7 +496,7 @@ async function handlePaymentMethodListClick(event){
 }
 
 async function loadCloud(){
- const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});
+ const {data,error}=await supabaseClient.from("products").select("id,name,category,price,discount_price,currency,unit,description,available,created_at").order("created_at",{ascending:true});
  if(error) throw error;
  if(data && data.length){
    products=data.map(fromRow);
@@ -663,16 +663,70 @@ function updateDashboardQuickCounts(){
  const o=document.getElementById("quickOrdersCount");if(o)o.textContent=String(salesRows.length);
  updateReviewSummary();updateZoneSummary();renderAdminNotices();
 }
+let adminProductImageObserver=null;
+const requestedAdminProductImages=new Set();
+let pendingAdminProductImages=new Set();
+let adminProductImageBatchScheduled=false;
+function observeAdminProductImages(root){
+ const box=root||document.getElementById("adminProducts");
+ if(!box)return;
+ if(!("IntersectionObserver" in window)){
+   queueAdminProductImages([...box.querySelectorAll("[data-admin-product-image]")]);
+   return;
+ }
+ if(!adminProductImageObserver)adminProductImageObserver=new IntersectionObserver(entries=>{
+   const visible=[];
+   entries.forEach(entry=>{if(entry.isIntersecting){adminProductImageObserver.unobserve(entry.target);visible.push(entry.target);}});
+   if(visible.length)queueAdminProductImages(visible);
+ },{rootMargin:"250px 0px"});
+ box.querySelectorAll("[data-admin-product-image]").forEach(el=>adminProductImageObserver.observe(el));
+}
+function queueAdminProductImages(elements){
+ elements.forEach(el=>{const id=String(el.dataset.adminProductImage||"");if(id&&!requestedAdminProductImages.has(id))pendingAdminProductImages.add(id);});
+ if(adminProductImageBatchScheduled||!pendingAdminProductImages.size)return;
+ adminProductImageBatchScheduled=true;
+ setTimeout(flushAdminProductImages,0);
+}
+async function flushAdminProductImages(){
+ adminProductImageBatchScheduled=false;
+ const ids=[...pendingAdminProductImages];pendingAdminProductImages.clear();
+ const fresh=ids.filter(id=>!requestedAdminProductImages.has(id));
+ if(!fresh.length)return;
+ fresh.forEach(id=>requestedAdminProductImages.add(id));
+ try{
+   const {data,error}=await supabaseClient.from("products").select("id,image").in("id",fresh);
+   if(error)throw error;
+   const images=new Map((data||[]).map(row=>[String(row.id),typeof row.image==="string"?row.image:""]));
+   fresh.forEach(id=>{
+     const p=products.find(x=>String(x.id)===id);if(!p)return;
+     p.image=images.get(id)||"";
+     const el=document.querySelector('[data-admin-product-image="'+CSS.escape(id)+'"]');
+     if(!el)return;
+     if(p.image){const img=document.createElement("img");img.src=p.image;img.alt=p.name||"";img.loading="lazy";img.decoding="async";el.replaceChildren(img);}
+     else el.textContent="📦";
+     el.removeAttribute("data-admin-product-image");
+   });
+ }catch(err){
+   fresh.forEach(id=>requestedAdminProductImages.delete(id));
+   console.warn("No se pudieron cargar algunas imágenes del catálogo:",err);
+ }
+}
 function render(){
  const box=document.getElementById("adminProducts");
  updateDashboardQuickCounts();
  if(!box)return;
  renderCatalogCategories();
  const filtered=products.filter(p=>String(p.category||"Sin categoría").trim()===activeCatalogCategory);
- box.innerHTML=filtered.length?filtered.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div>${p.image?`<img src="${esc(p.image)}" alt="">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):`<p class="catalog-empty">No hay productos en «${esc(activeCatalogCategory)}».</p>`;
+ box.innerHTML=filtered.length?filtered.map(p=>`<div class="admin-product ${p.available?"":"disabled"}"><div data-admin-product-image="${esc(p.id)}">${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" decoding="async">`:"📦"}</div><div><h4>${esc(p.name)}</h4><small>${esc(p.category)} · ${priceHtml(p)} · ${esc(p.unit||"")} · ${p.available?"Disponible":"Oculto"}</small></div><div class="admin-actions"><button onclick="edit('${esc(p.id)}')">✏️</button><button onclick="toggle('${esc(p.id)}')">👁️</button><button onclick="removeP('${esc(p.id)}')">🗑️</button></div></div>`).join(""):`<p class="catalog-empty">No hay productos en «${esc(activeCatalogCategory)}».</p>`;
+ observeAdminProductImages(box);
 }
-function edit(id){
+async function edit(id){
  const p=products.find(x=>x.id===id);if(!p)return;
+ if(!p.image){
+   const status=document.getElementById("photoStatus");if(status)status.textContent="Cargando foto del producto…";
+   try{const {data,error}=await supabaseClient.from("products").select("image").eq("id",id).maybeSingle();if(error)throw error;p.image=data?.image||"";}
+   catch(err){console.warn("No se pudo recuperar la imagen del producto para editarlo:",err);alert("No se pudo cargar la foto original. Comprueba la conexión e inténtalo de nuevo.");return;}
+ }
  document.getElementById("editId").value=p.id;document.getElementById("pName").value=p.name;
  document.getElementById("pCategory").value=p.category;document.getElementById("pPrice").value=p.price;document.getElementById("pCurrency").value=p.currency||"USD";document.getElementById("pDiscountPrice").value=p.discountPrice??"";
  const unitOptions=[...document.getElementById("pUnit").options].map(o=>o.value);
@@ -755,7 +809,7 @@ document.getElementById("refreshCloud").onclick=async()=>{
 };
 document.getElementById("logoutBtn").onclick=async()=>{await supabaseClient.auth.signOut();location.reload()};
 (async()=>{const {data:{session}}=await supabaseClient.auth.getSession();if(session)await show()})();
-supabaseClient.channel("products-admin").on("postgres_changes",{event:"*",schema:"public",table:"products"},async()=>{try{const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:true});if(!error&&data){products=data.map(fromRow);saveLocal();render()}}catch(e){console.warn(e)}}).subscribe();
+supabaseClient.channel("products-admin").on("postgres_changes",{event:"*",schema:"public",table:"products"},async()=>{try{const {data,error}=await supabaseClient.from("products").select("id,name,category,price,discount_price,currency,unit,description,available,created_at").order("created_at",{ascending:true});if(!error&&data){products=data.map(fromRow);saveLocal();render()}}catch(e){console.warn(e)}}).subscribe();
 supabaseClient.channel("payment-methods-admin").on("postgres_changes",{event:"*",schema:"public",table:"payment_methods"},async()=>{try{await loadPaymentMethods()}catch(e){console.warn(e)}}).subscribe();
 supabaseClient.channel("settings-admin").on("postgres_changes",{event:"*",schema:"public",table:"store_settings"},async()=>{try{await loadSettings()}catch(e){console.warn(e)}}).subscribe();
 
