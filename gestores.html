@@ -403,6 +403,17 @@
     try{return await managerLoadPromise;}finally{managerLoadPromise=null;}
   }
   const managerImageRequests=new Set();
+  let managerCatalogImageObserver=null;
+  function observeManagerCatalogImages(root){
+    const box=root||$("managerCatalog");if(!box)return;
+    if(!("IntersectionObserver" in window)){loadManagerCatalogImages(catalog.filter(p=>box.querySelector('[data-manager-product-image="'+CSS.escape(String(p.id))+'"]')));return;}
+    if(!managerCatalogImageObserver)managerCatalogImageObserver=new IntersectionObserver(entries=>{
+      const visible=[];
+      entries.forEach(entry=>{if(entry.isIntersecting){managerCatalogImageObserver.unobserve(entry.target);const id=String(entry.target.dataset.managerProductImage||"");const product=catalog.find(p=>String(p.id)===id);if(product)visible.push(product);}});
+      if(visible.length)loadManagerCatalogImages(visible);
+    },{rootMargin:"250px 0px"});
+    box.querySelectorAll("[data-manager-product-image]").forEach(el=>managerCatalogImageObserver.observe(el));
+  }
   async function loadManagerCatalogImages(items){
     const pending=(items||[]).filter(p=>p&&!p.image&&!managerImageRequests.has(String(p.id)));
     if(!pending.length)return;
@@ -455,7 +466,7 @@
       nav.hidden=groups.length===0;
       const selectedGroup=groups.find(group=>group.name===selectedManagerCategory);
       $("managerCatalog").innerHTML=selectedGroup?'<section class="manager-category-block"><h3 class="manager-category-title">'+esc(selectedGroup.name)+'</h3><div class="product-list">'+selectedGroup.items.map(renderProduct).join("")+'</div></section>':'<p class="muted">No hay productos en esta categoría.</p>';
-      if(selectedGroup)loadManagerCatalogImages(selectedGroup.items);
+      if(selectedGroup)observeManagerCatalogImages($("managerCatalog"));
       nav.querySelectorAll("[data-category-name]").forEach(button=>button.addEventListener("click",()=>{
         selectedManagerCategory=button.dataset.categoryName||"";
         renderManagerCatalog();
