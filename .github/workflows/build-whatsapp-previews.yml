@@ -21,14 +21,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Convert SVG posters to JPEG
         run: |
-          python -m pip install --upgrade pip
           python -m pip install cairosvg pillow
           python - <<'PY'
+          import re
           import cairosvg
           from PIL import Image
           for name in ("administracion", "gestores"):
+              path = f"preview-{name}.svg"
+              svg = open(path, encoding="utf-8").read()
+              # Repair a duplicated clip-path attribute after the embedded logo JPEG.
+              svg = re.sub(r'("data:image/jpeg;base64,[^"]*")\\s+clip-path="url\\(#[^"]+\\)"', r'\\1', svg)
+              fixed = f"/tmp/preview-{name}.svg"
+              open(fixed, "w", encoding="utf-8").write(svg)
               png = f"/tmp/{name}.png"
-              cairosvg.svg2png(url=f"preview-{name}.svg", write_to=png, output_width=1200, output_height=630)
+              cairosvg.svg2png(url=fixed, write_to=png, output_width=1200, output_height=630)
               Image.open(png).convert("RGB").save(f"preview-{name}.jpg", "JPEG", quality=88, optimize=True)
           PY
       - name: Publish JPEG files
