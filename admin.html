@@ -1240,7 +1240,8 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 <h2>💱 Precios y tasa de cambio</h2>
 <p class="settings-help">Configura las tasas de conversión y el importe adicional de cada modalidad de pago. Los cambios se sincronizan con la tienda pública.</p>
 <div class="price-fields">
-<label>1 USD = <span><input id="usdToCup" type="number" min="0" step="0.01" placeholder="700"></span> CUP</label>
+<label>Electrodomésticos · 1 USD = <span><input id="usdToCupElectro" type="number" min="0" step="0.01" placeholder="700"></span> CUP</label>
+<label>Alimentos · 1 USD = <span><input id="usdToCupFood" type="number" min="0" step="0.01" placeholder="700"></span> CUP</label>
 <label>Recargo por transferencia (%)<input id="transferMarkup" type="number" min="0" step="0.01" placeholder="30"></label>
 <label>1 USD = <span><input id="usdToEur" type="number" min="0" step="0.0001" placeholder="0.92"></span> EUR</label>
 <label>1 USD = <span><input id="transferPrepagoRate" type="number" min="0.0001" step="0.01" placeholder="1.04"></span> transferencia prepago</label>
@@ -1549,7 +1550,7 @@ body.admin-page:has(#loginBox:not(.hidden)) #loginBox::before{
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=2"></script>
-<script src="admin.js?v=31"></script>
+<script src="admin.js?v=32"></script>
 <script src="admin-users-admin.js?v=2"></script>
   <script src="zelle-amount-accounts-admin.js?v=6"></script>
   <script src="delivery-zones-admin.js?v=1"></script>
