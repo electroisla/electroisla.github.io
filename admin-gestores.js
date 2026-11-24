@@ -2,7 +2,7 @@
  const panel=document.getElementById("gestoresAdminPanel");
  if(!panel || typeof supabaseClient==="undefined") return;
  const $=id=>document.getElementById(id), statusEl=$("gestoresAdminStatus"), listEl=$("gestoresAdminList"), summaryEl=$("gestoresAdminSummary");
- let loaded=false, profiles=[], electroRanges=[];
+ let loaded=false, profiles=[], electroRanges=[{min_price:0,max_price:null,commission_percent:5}];
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const money=n=>Number(n||0).toLocaleString("es-ES",{minimumFractionDigits:2,maximumFractionDigits:2});
  const invoke=async payload=>{
@@ -19,6 +19,7 @@
    <button type="button" class="btn range-remove" data-remove-range="${i}" ${electroRanges.length===1?"disabled":""} aria-label="Eliminar rango">✕</button>
   </div>`).join("");
  }
+ renderRanges();
  function render(){
   const active=profiles.filter(p=>p.status==="active").length;
   summaryEl.innerHTML=`<div class="gestor-kpi"><strong>${profiles.length}</strong><span>Registrados</span></div><div class="gestor-kpi"><strong>${active}</strong><span>Activos</span></div><div class="gestor-kpi"><strong>${profiles.length-active}</strong><span>Suspendidos</span></div>`;
@@ -42,7 +43,7 @@
  }
  $("gestoresRefresh").addEventListener("click",()=>{loaded=false;load();});
  $("gestoresFoodCommissionForm").addEventListener("submit",async e=>{
-  e.preventDefault();const value=Number($("gestoresFoodCommission").value);
+  e.preventDefault();if(!loaded){await load();if(!loaded)return;}const value=Number($("gestoresFoodCommission").value);
   if(!Number.isFinite(value)||value<0||value>100){statusEl.textContent="La comisión de Alimentos debe estar entre 0 y 100%.";return;}
   const b=$("gestoresSaveFoodCommission");b.disabled=true;statusEl.textContent="Guardando comisión de Alimentos…";
   try{const d=await invoke({action:"set_commission_rules",food_commission_percent:value,electro_commission_ranges:electroRanges});$("gestoresFoodCommission").value=d.food_commission_percent;statusEl.textContent="Comisión de Alimentos guardada.";}
