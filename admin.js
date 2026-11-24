@@ -9,7 +9,7 @@ const defaultProducts=[
 {id:"e4",name:"Cocina",category:"Electrodomésticos",price:180,currency:"USD",discountPrice:null,unit:"unidad",image:"",description:"Cocina doméstica.",available:true}
 ];
 let products=JSON.parse(localStorage.getItem("electroisla_products")||"null")||defaultProducts;
-let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5352017110"};
+let storeSettings={usd_to_cup:700,transfer_markup_percent:0,usd_to_eur:0,transfer_prepago_rate:1.04,whatsapp_order_phone:"5356459504"};
 let categories=[];
 const saveLocal=()=>{try{localStorage.setItem("electroisla_products",JSON.stringify(products.map(p=>({...p,image:""}))));}catch(err){console.warn("Catálogo no guardado localmente; se conserva en Supabase.",err);}};
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -371,7 +371,7 @@ async function loadSettings(){
  const {data,error}=await supabaseClient.from("store_settings").select("usd_to_cup,transfer_markup_percent,usd_to_eur,transfer_prepago_rate,whatsapp_order_phone").eq("id",1).maybeSingle();
  if(error) throw error;
  if(data){
-   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5352017110").replace(/\D/g,"")};
+   storeSettings={usd_to_cup:Number(data.usd_to_cup)||0,transfer_markup_percent:Number(data.transfer_markup_percent)||0,usd_to_eur:Number(data.usd_to_eur)||0,transfer_prepago_rate:Number(data.transfer_prepago_rate)||1.04,whatsapp_order_phone:String(data.whatsapp_order_phone||"5356459504").replace(/\D/g,"")};
  }
  const rate=document.getElementById("usdToCup"),markup=document.getElementById("transferMarkup"),eur=document.getElementById("usdToEur"),prepago=document.getElementById("transferPrepagoRate"),whatsapp=document.getElementById("whatsappOrderPhone");
  if(rate) rate.value=storeSettings.usd_to_cup;
