@@ -29,8 +29,7 @@ jobs:
           for name in ("administracion", "gestores"):
               path = f"preview-{name}.svg"
               svg = open(path, encoding="utf-8").read()
-              # Repair a duplicated clip-path attribute after the embedded logo JPEG.
-              svg = re.sub(r'("data:image/jpeg;base64,[^"]*")\\s+clip-path="url\\(#[^"]+\\)"', r'\\1', svg)
+              svg = re.sub(r'("data:image/jpeg;base64,[^"]*")\s+clip-path="url\(#[^"]+\)"', r'\1', svg)
               fixed = f"/tmp/preview-{name}.svg"
               open(fixed, "w", encoding="utf-8").write(svg)
               png = f"/tmp/{name}.png"
