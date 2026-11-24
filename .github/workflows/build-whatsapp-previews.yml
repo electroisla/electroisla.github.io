@@ -1,0 +1,38 @@
+name: Build WhatsApp preview images
+on:
+  push:
+    branches: [main]
+    paths:
+      - "preview-administracion.svg"
+      - "preview-gestores.svg"
+      - ".github/workflows/build-whatsapp-previews.yml"
+      - "admin.html"
+      - "gestores.html"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Convert SVG posters to JPEG
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin imagemagick
+          rsvg-convert -w 1200 -h 630 preview-administracion.svg > /tmp/admin.png
+          rsvg-convert -w 1200 -h 630 preview-gestores.svg > /tmp/gestores.png
+          magick /tmp/admin.png -background white -alpha remove -alpha off -quality 88 preview-administracion.jpg
+          magick /tmp/gestores.png -background white -alpha remove -alpha off -quality 88 preview-gestores.jpg
+      - name: Publish JPEG files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-administracion.jpg preview-gestores.jpg
+          if ! git diff --cached --quiet; then
+            git commit -m "Publicar imágenes JPEG para vistas previas de WhatsApp"
+            git push origin main
+          fi
